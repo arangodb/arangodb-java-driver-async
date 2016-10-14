@@ -223,7 +223,7 @@ public class ArangoDatabaseAsync
 	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
 	 * @return cursor of the results
 	 */
-	public <T> CompletableFuture<ArangoCursor<T>> query(
+	public <T> CompletableFuture<ArangoCursorAsync<T>> query(
 		final String query,
 		final Map<String, Object> bindVars,
 		final AqlQueryOptions options,
@@ -231,7 +231,7 @@ public class ArangoDatabaseAsync
 		final Request request = queryRequest(query, bindVars, options);
 		final CompletableFuture<CursorEntity> execution = executor.execute(request, CursorEntity.class);
 		return execution.thenApply(result -> {
-			return new ArangoCursor<>(this, new ArangoCursorExecute() {
+			return new ArangoCursorAsync<>(this, new ArangoCursorExecute() {
 				@Override
 				public CursorEntity next(final String id) {
 					final CompletableFuture<CursorEntity> result = executor.execute(queryNextRequest(id),
@@ -245,7 +245,11 @@ public class ArangoDatabaseAsync
 
 				@Override
 				public void close(final String id) {
-					executor.execute(queryCloseRequest(id), Void.class);
+					try {
+						executor.execute(queryCloseRequest(id), Void.class).get();
+					} catch (InterruptedException | ExecutionException e) {
+						throw new ArangoDBException(e);
+					}
 				}
 			}, type, result);
 		});

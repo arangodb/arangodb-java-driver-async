@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
-import com.arangodb.ArangoCursor;
+import com.arangodb.ArangoCursorAsync;
 import com.arangodb.ArangoDBException;
 
 /**
@@ -70,7 +70,7 @@ public class ShortestPathInAQLExample extends BaseGraphTest {
 	@Test
 	public void queryShortestPathFromAToD() throws ArangoDBException, InterruptedException, ExecutionException {
 		String queryString = "FOR v, e IN OUTBOUND SHORTEST_PATH 'circles/A' TO 'circles/D' GRAPH 'traversalGraph' RETURN {'vertex': v._key, 'edge': e._key}";
-		ArangoCursor<Pair> cursor = db.query(queryString, null, null, Pair.class).get();
+		ArangoCursorAsync<Pair> cursor = db.query(queryString, null, null, Pair.class).get();
 		final Collection<String> collection = toVertexCollection(cursor);
 		assertThat(collection.size(), is(4));
 		assertThat(collection, hasItems("A", "B", "C", "D"));
@@ -84,7 +84,7 @@ public class ShortestPathInAQLExample extends BaseGraphTest {
 	@Test
 	public void queryShortestPathByFilter() throws ArangoDBException, InterruptedException, ExecutionException {
 		String queryString = "FOR a IN circles FILTER a._key == 'A' FOR d IN circles FILTER d._key == 'D' FOR v, e IN OUTBOUND SHORTEST_PATH a TO d GRAPH 'traversalGraph' RETURN {'vertex':v._key, 'edge':e._key}";
-		ArangoCursor<Pair> cursor = db.query(queryString, null, null, Pair.class).get();
+		ArangoCursorAsync<Pair> cursor = db.query(queryString, null, null, Pair.class).get();
 		final Collection<String> collection = toVertexCollection(cursor);
 		assertThat(collection.size(), is(4));
 		assertThat(collection, hasItems("A", "B", "C", "D"));
@@ -95,7 +95,7 @@ public class ShortestPathInAQLExample extends BaseGraphTest {
 		assertThat(collection, hasItems("A", "B", "C", "D"));
 	}
 
-	protected Collection<String> toVertexCollection(final ArangoCursor<Pair> cursor) {
+	protected Collection<String> toVertexCollection(final ArangoCursorAsync<Pair> cursor) {
 		final List<String> result = new ArrayList<>();
 		for (; cursor.hasNext();) {
 			final Pair pair = cursor.next();

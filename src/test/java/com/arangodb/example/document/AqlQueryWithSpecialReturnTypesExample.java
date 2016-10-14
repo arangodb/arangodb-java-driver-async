@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.arangodb.ArangoCursor;
+import com.arangodb.ArangoCursorAsync;
 import com.arangodb.entity.BaseDocument;
 import com.arangodb.example.ExampleBase;
 import com.arangodb.util.MapBuilder;
@@ -70,11 +70,10 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 		final String query = "FOR t IN " + COLLECTION_NAME
 				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN t";
 		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
-		final CompletableFuture<ArangoCursor<VPackSlice>> f = db.query(query, bindVars, null, VPackSlice.class);
+		final CompletableFuture<ArangoCursorAsync<VPackSlice>> f = db.query(query, bindVars, null, VPackSlice.class);
 		f.whenComplete((cursor, ex) -> {
 			assertThat(cursor, is(notNullValue()));
-			for (; cursor.hasNext();) {
-				final VPackSlice vpack = cursor.next();
+			cursor.forEachRemaining(vpack -> {
 				try {
 					assertThat(vpack.get("name").getAsString(),
 						isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
@@ -82,7 +81,7 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 					assertThat(vpack.get("age").getAsInt(), isOneOf(21, 23, 25, 27, 29));
 				} catch (final VPackException e) {
 				}
-			}
+			});
 		});
 	}
 
@@ -91,17 +90,17 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 		final String query = "FOR t IN " + COLLECTION_NAME
 				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN [t.name, t.gender, t.age]";
 		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
-		final CompletableFuture<ArangoCursor<VPackSlice>> f = db.query(query, bindVars, null, VPackSlice.class);
+		final CompletableFuture<ArangoCursorAsync<VPackSlice>> f = db.query(query, bindVars, null, VPackSlice.class);
 		f.whenComplete((cursor, ex) -> {
 			assertThat(cursor, is(notNullValue()));
-			for (; cursor.hasNext();) {
-				final VPackSlice vpack = cursor.next();
+			cursor.forEachRemaining(vpack -> {
 				assertThat(vpack.get(0).getAsString(),
 					isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
 				assertThat(vpack.get(1).getAsString(), is(Gender.FEMALE.name()));
 				assertThat(vpack.get(2).getAsInt(), isOneOf(21, 23, 25, 27, 29));
-			}
+			});
 		});
+
 	}
 
 	@Test
@@ -110,11 +109,10 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 		final String query = "FOR t IN " + COLLECTION_NAME
 				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN t";
 		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
-		final CompletableFuture<ArangoCursor<Map>> f = db.query(query, bindVars, null, Map.class);
+		final CompletableFuture<ArangoCursorAsync<Map>> f = db.query(query, bindVars, null, Map.class);
 		f.whenComplete((cursor, ex) -> {
 			assertThat(cursor, is(notNullValue()));
-			for (; cursor.hasNext();) {
-				final Map map = cursor.next();
+			cursor.forEachRemaining(map -> {
 				assertThat(map.get("name"), is(notNullValue()));
 				assertThat(String.valueOf(map.get("name")),
 					isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
@@ -122,7 +120,7 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 				assertThat(String.valueOf(map.get("gender")), is(Gender.FEMALE.name()));
 				assertThat(map.get("age"), is(notNullValue()));
 				assertThat(Long.valueOf(map.get("age").toString()), isOneOf(21L, 23L, 25L, 27L, 29L));
-			}
+			});
 		});
 	}
 
@@ -132,19 +130,18 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 		final String query = "FOR t IN " + COLLECTION_NAME
 				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN [t.name, t.gender, t.age]";
 		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
-		final CompletableFuture<ArangoCursor<List>> f = db.query(query, bindVars, null, List.class);
+		final CompletableFuture<ArangoCursorAsync<List>> f = db.query(query, bindVars, null, List.class);
 		f.whenComplete((cursor, ex) -> {
 			assertThat(cursor, is(notNullValue()));
-			for (; cursor.hasNext();) {
-				final List vpack = cursor.next();
-				assertThat(vpack.get(0), is(notNullValue()));
-				assertThat(String.valueOf(vpack.get(0)),
+			cursor.forEachRemaining(list -> {
+				assertThat(list.get(0), is(notNullValue()));
+				assertThat(String.valueOf(list.get(0)),
 					isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
-				assertThat(vpack.get(1), is(notNullValue()));
-				assertThat(Gender.valueOf(String.valueOf(vpack.get(1))), is(Gender.FEMALE));
-				assertThat(vpack.get(2), is(notNullValue()));
-				assertThat(Long.valueOf(String.valueOf(vpack.get(2))), isOneOf(21L, 23L, 25L, 27L, 29L));
-			}
+				assertThat(list.get(1), is(notNullValue()));
+				assertThat(Gender.valueOf(String.valueOf(list.get(1))), is(Gender.FEMALE));
+				assertThat(list.get(2), is(notNullValue()));
+				assertThat(Long.valueOf(String.valueOf(list.get(2))), isOneOf(21L, 23L, 25L, 27L, 29L));
+			});
 		});
 	}
 }

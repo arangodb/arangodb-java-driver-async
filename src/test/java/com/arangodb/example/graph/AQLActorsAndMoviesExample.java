@@ -31,7 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.arangodb.ArangoCollectionAsync;
-import com.arangodb.ArangoCursor;
+import com.arangodb.ArangoCursorAsync;
 import com.arangodb.ArangoDBAsync;
 import com.arangodb.ArangoDatabaseAsync;
 import com.arangodb.entity.BaseDocument;
@@ -78,7 +78,7 @@ public class AQLActorsAndMoviesExample {
 	 */
 	@Test
 	public void allActorsActsInMovie1or2() {
-		final CompletableFuture<ArangoCursor<String>> f = db.query(
+		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"FOR x IN ANY 'movies/TheMatrix' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN x._id", null,
 			null, String.class);
 		f.whenComplete((cursor, ex) -> {
@@ -94,7 +94,7 @@ public class AQLActorsAndMoviesExample {
 	 */
 	@Test
 	public void allActorsActsInMovie1or2UnionDistinct() {
-		final CompletableFuture<ArangoCursor<String>> f = db.query(
+		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"FOR x IN UNION_DISTINCT ((FOR y IN ANY 'movies/TheMatrix' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id), (FOR y IN ANY 'movies/TheDevilsAdvocate' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id)) RETURN x",
 			null, null, String.class);
 		f.whenComplete((cursor, ex) -> {
@@ -110,7 +110,7 @@ public class AQLActorsAndMoviesExample {
 	 */
 	@Test
 	public void allActorsActsInMovie1and2() {
-		final CompletableFuture<ArangoCursor<String>> f = db.query(
+		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"FOR x IN INTERSECTION ((FOR y IN ANY 'movies/TheMatrix' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id), (FOR y IN ANY 'movies/TheDevilsAdvocate' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id)) RETURN x",
 			null, null, String.class);
 		f.whenComplete((cursor, ex) -> {
@@ -125,7 +125,7 @@ public class AQLActorsAndMoviesExample {
 	 */
 	@Test
 	public void allMoviesBetweenActor1andActor2() {
-		final CompletableFuture<ArangoCursor<String>> f = db.query(
+		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"FOR x IN INTERSECTION ((FOR y IN ANY 'actors/Hugo' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id), (FOR y IN ANY 'actors/Keanu' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id)) RETURN x",
 			null, null, String.class);
 		f.whenComplete((cursor, ex) -> {
@@ -141,7 +141,7 @@ public class AQLActorsAndMoviesExample {
 	 */
 	@Test
 	public void allActorsWhoActedIn3orMoreMovies() {
-		final CompletableFuture<ArangoCursor<Actor>> f = db.query(
+		final CompletableFuture<ArangoCursorAsync<Actor>> f = db.query(
 			"FOR x IN actsIn COLLECT actor = x._from WITH COUNT INTO counter FILTER counter >= 3 RETURN {actor: actor, movies: counter}",
 			null, null, Actor.class);
 		f.whenComplete((cursor, ex) -> {
@@ -159,7 +159,7 @@ public class AQLActorsAndMoviesExample {
 	 */
 	@Test
 	public void allMoviesWhereExactly6ActorsActedIn() {
-		final CompletableFuture<ArangoCursor<String>> f = db.query(
+		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"FOR x IN actsIn COLLECT movie = x._to WITH COUNT INTO counter FILTER counter == 6 RETURN movie", null,
 			null, String.class);
 		f.whenComplete((cursor, ex) -> {
@@ -175,7 +175,7 @@ public class AQLActorsAndMoviesExample {
 	 */
 	@Test
 	public void theNumberOfActorsByMovie() {
-		final CompletableFuture<ArangoCursor<Movie>> f = db.query(
+		final CompletableFuture<ArangoCursorAsync<Movie>> f = db.query(
 			"FOR x IN actsIn COLLECT movie = x._to WITH COUNT INTO counter RETURN {movie: movie, actors: counter}",
 			null, null, Movie.class);
 		f.whenComplete((cursor, ex) -> {
@@ -198,7 +198,7 @@ public class AQLActorsAndMoviesExample {
 	 */
 	@Test
 	public void theNumberOfMoviesByActor() {
-		final CompletableFuture<ArangoCursor<Actor>> f = db.query(
+		final CompletableFuture<ArangoCursorAsync<Actor>> f = db.query(
 			"FOR x IN actsIn COLLECT actor = x._from WITH COUNT INTO counter RETURN {actor: actor, movies: counter}",
 			null, null, Actor.class);
 		f.whenComplete((cursor, ex) -> {
@@ -232,7 +232,7 @@ public class AQLActorsAndMoviesExample {
 	 */
 	@Test
 	public void theNumberOfMoviesActedInBetween2005and2010byActor() {
-		final CompletableFuture<ArangoCursor<Actor>> f = db.query(
+		final CompletableFuture<ArangoCursorAsync<Actor>> f = db.query(
 			"FOR x IN actsIn FILTER x.year >= 1990 && x.year <= 1995 COLLECT actor = x._from WITH COUNT INTO counter RETURN {actor: actor, movies: counter}",
 			null, null, Actor.class);
 		f.whenComplete((cursor, ex) -> {

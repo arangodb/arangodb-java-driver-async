@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
-import com.arangodb.ArangoCursor;
+import com.arangodb.ArangoCursorAsync;
 import com.arangodb.ArangoDBException;
 
 /**
@@ -45,7 +45,7 @@ public class GraphTraversalsInAQLExample extends BaseGraphTest {
 	@Test
 	public void queryAllVertices() throws ArangoDBException, InterruptedException, ExecutionException {
 		String queryString = "FOR v IN 1..3 OUTBOUND 'circles/A' GRAPH 'traversalGraph' RETURN v._key";
-		ArangoCursor<String> cursor = db.query(queryString, null, null, String.class).get();
+		ArangoCursorAsync<String> cursor = db.query(queryString, null, null, String.class).get();
 		Collection<String> result = cursor.asListRemaining();
 		assertThat(result.size(), is(10));
 
@@ -58,7 +58,7 @@ public class GraphTraversalsInAQLExample extends BaseGraphTest {
 	@Test
 	public void queryDepthTwo() throws ArangoDBException, InterruptedException, ExecutionException {
 		String queryString = "FOR v IN 2..2 OUTBOUND 'circles/A' GRAPH 'traversalGraph' return v._key";
-		ArangoCursor<String> cursor = db.query(queryString, null, null, String.class).get();
+		ArangoCursorAsync<String> cursor = db.query(queryString, null, null, String.class).get();
 		Collection<String> result = cursor.asListRemaining();
 		assertThat(result.size(), is(4));
 		assertThat(result, hasItems("C", "E", "H", "J"));
@@ -73,7 +73,7 @@ public class GraphTraversalsInAQLExample extends BaseGraphTest {
 	@Test
 	public void queryWithFilter() throws ArangoDBException, InterruptedException, ExecutionException {
 		String queryString = "FOR v, e, p IN 1..3 OUTBOUND 'circles/A' GRAPH 'traversalGraph' FILTER p.vertices[1]._key != 'G' RETURN v._key";
-		ArangoCursor<String> cursor = db.query(queryString, null, null, String.class).get();
+		ArangoCursorAsync<String> cursor = db.query(queryString, null, null, String.class).get();
 		Collection<String> result = cursor.asListRemaining();
 		assertThat(result.size(), is(5));
 		assertThat(result, hasItems("B", "C", "D", "E", "F"));
@@ -101,7 +101,7 @@ public class GraphTraversalsInAQLExample extends BaseGraphTest {
 	@Test
 	public void queryOutboundInbound() throws ArangoDBException, InterruptedException, ExecutionException {
 		String queryString = "FOR v IN 1..3 OUTBOUND 'circles/E' GRAPH 'traversalGraph' return v._key";
-		ArangoCursor<String> cursor = db.query(queryString, null, null, String.class).get();
+		ArangoCursorAsync<String> cursor = db.query(queryString, null, null, String.class).get();
 		Collection<String> result = cursor.asListRemaining();
 		assertThat(result.size(), is(1));
 		assertThat(result, hasItems("F"));

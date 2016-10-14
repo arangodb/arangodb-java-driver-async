@@ -226,7 +226,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			for (int i = 0; i < 10; i++) {
 				db.collection(COLLECTION_NAME).insertDocument(new BaseDocument(), null).get();
 			}
-			final CompletableFuture<ArangoCursor<String>> f = db.query("for i in db_test return i._id", null, null,
+			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test return i._id", null, null,
 				String.class);
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((cursor, ex) -> {
@@ -248,15 +248,15 @@ public class ArangoDatabaseTest extends BaseTest {
 			for (int i = 0; i < 10; i++) {
 				db.collection(COLLECTION_NAME).insertDocument(new BaseDocument(), null).get();
 			}
-			final CompletableFuture<ArangoCursor<String>> f = db.query("for i in db_test return i._id", null, null,
+			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test return i._id", null, null,
 				String.class);
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((cursor, ex) -> {
 				assertThat(cursor, is(notNullValue()));
 				final AtomicInteger i = new AtomicInteger(0);
-				for (; cursor.hasNext(); cursor.next()) {
+				cursor.forEachRemaining(e -> {
 					i.incrementAndGet();
-				}
+				});
 				assertThat(i.get(), is(10));
 			});
 			f.get();
@@ -272,15 +272,15 @@ public class ArangoDatabaseTest extends BaseTest {
 			for (int i = 0; i < 10; i++) {
 				db.collection(COLLECTION_NAME).insertDocument(new BaseDocument(), null).get();
 			}
-			final CompletableFuture<ArangoCursor<String>> f = db.query("for i in db_test return i._id", null, null,
+			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test return i._id", null, null,
 				String.class);
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((cursor, ex) -> {
 				assertThat(cursor, is(notNullValue()));
 				final AtomicInteger i = new AtomicInteger(0);
-				for (; cursor.hasNext(); cursor.next()) {
+				cursor.forEachRemaining(e -> {
 					i.incrementAndGet();
-				}
+				});
 				assertThat(i.get(), is(10));
 			});
 			f.get();
@@ -297,8 +297,8 @@ public class ArangoDatabaseTest extends BaseTest {
 				db.collection(COLLECTION_NAME).insertDocument(new BaseDocument(), null).get();
 			}
 
-			final CompletableFuture<ArangoCursor<String>> f = db.query("for i in db_test Limit 6 return i._id", null,
-				new AqlQueryOptions().count(true), String.class);
+			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test Limit 6 return i._id",
+				null, new AqlQueryOptions().count(true), String.class);
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((cursor, ex) -> {
 				assertThat(cursor, is(notNullValue()));
@@ -321,8 +321,8 @@ public class ArangoDatabaseTest extends BaseTest {
 				db.collection(COLLECTION_NAME).insertDocument(new BaseDocument(), null).get();
 			}
 
-			final CompletableFuture<ArangoCursor<String>> f = db.query("for i in db_test Limit 5 return i._id", null,
-				new AqlQueryOptions().fullCount(true), String.class);
+			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test Limit 5 return i._id",
+				null, new AqlQueryOptions().fullCount(true), String.class);
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((cursor, ex) -> {
 				assertThat(cursor, is(notNullValue()));
@@ -345,7 +345,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			for (int i = 0; i < 10; i++) {
 				db.collection(COLLECTION_NAME).insertDocument(new BaseDocument(), null).get();
 			}
-			final ArangoCursor<String> cursor = db.query("for i in db_test return i._id", null,
+			final ArangoCursorAsync<String> cursor = db.query("for i in db_test return i._id", null,
 				new AqlQueryOptions().batchSize(5).count(true), String.class).get();
 			assertThat(cursor, is(notNullValue()));
 			for (int i = 0; i < 10; i++, cursor.next()) {
@@ -363,13 +363,13 @@ public class ArangoDatabaseTest extends BaseTest {
 			for (int i = 0; i < 10; i++) {
 				db.collection(COLLECTION_NAME).insertDocument(new BaseDocument(), null).get();
 			}
-			final ArangoCursor<String> cursor = db.query("for i in db_test return i._id", null,
+			final ArangoCursorAsync<String> cursor = db.query("for i in db_test return i._id", null,
 				new AqlQueryOptions().batchSize(5).count(true), String.class).get();
 			assertThat(cursor, is(notNullValue()));
 			final AtomicInteger i = new AtomicInteger(0);
-			for (; cursor.hasNext(); cursor.next()) {
+			cursor.streamRemaining().forEach(e -> {
 				i.incrementAndGet();
-			}
+			});
 			assertThat(i.get(), is(10));
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
@@ -392,7 +392,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			for (int i = 0; i < 10; i++) {
 				db.collection(COLLECTION_NAME).insertDocument(new BaseDocument(), null).get();
 			}
-			final ArangoCursor<String> cursor = db.query("for i in db_test return i._id", null,
+			final ArangoCursorAsync<String> cursor = db.query("for i in db_test return i._id", null,
 				new AqlQueryOptions().batchSize(5).ttl(ttl), String.class).get();
 			assertThat(cursor, is(notNullValue()));
 			for (int i = 0; i < 10; i++, cursor.next()) {
@@ -443,13 +443,15 @@ public class ArangoDatabaseTest extends BaseTest {
 			properties.setMode(CacheMode.on);
 			db.setQueryCacheProperties(properties).get();
 
-			final ArangoCursor<String> cursor = db.query("FOR t IN db_test FILTER t.age >= 10 SORT t.age RETURN t._id",
-				null, new AqlQueryOptions().cache(true), String.class).get();
+			final ArangoCursorAsync<String> cursor = db
+					.query("FOR t IN db_test FILTER t.age >= 10 SORT t.age RETURN t._id", null,
+						new AqlQueryOptions().cache(true), String.class)
+					.get();
 
 			assertThat(cursor, is(notNullValue()));
 			assertThat(cursor.isCached(), is(false));
 
-			final ArangoCursor<String> cachedCursor = db
+			final ArangoCursorAsync<String> cachedCursor = db
 					.query("FOR t IN db_test FILTER t.age >= 10 SORT t.age RETURN t._id", null,
 						new AqlQueryOptions().cache(true), String.class)
 					.get();
@@ -500,7 +502,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			final Map<String, Object> bindVars = new HashMap<>();
 			bindVars.put("@coll", COLLECTION_NAME);
 			bindVars.put("age", 25);
-			final CompletableFuture<ArangoCursor<String>> f = db.query(
+			final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 				"FOR t IN @@coll FILTER t.age >= @age SORT t.age RETURN t._id", bindVars, null, String.class);
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((cursor, ex) -> {
@@ -517,7 +519,7 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test
 	public void queryWithWarning() throws InterruptedException, ExecutionException {
-		final CompletableFuture<ArangoCursor<String>> f = arangoDB.db().query("return _users + 1", null, null,
+		final CompletableFuture<ArangoCursorAsync<String>> f = arangoDB.db().query("return _users + 1", null, null,
 			String.class);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((cursor, ex) -> {
@@ -530,7 +532,7 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test
 	public void queryClose() throws IOException, ArangoDBException, InterruptedException, ExecutionException {
-		final ArangoCursor<String> cursor = arangoDB.db()
+		final ArangoCursorAsync<String> cursor = arangoDB.db()
 				.query("for i in _apps return i._id", null, new AqlQueryOptions().batchSize(1), String.class).get();
 		cursor.close();
 		int count = 0;
@@ -617,6 +619,7 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
+	@Ignore
 	public void getAndClearSlowQueries() throws InterruptedException, ExecutionException {
 		final QueryTrackingPropertiesEntity properties = db.getQueryTrackingProperties().get();
 		final Long slowQueryThreshold = properties.getSlowQueryThreshold();

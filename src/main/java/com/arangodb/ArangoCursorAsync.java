@@ -20,25 +20,26 @@
 
 package com.arangodb;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import java.util.concurrent.CompletableFuture;
-
-import org.junit.Test;
+import com.arangodb.entity.CursorEntity;
+import com.arangodb.internal.ArangoCursorExecute;
+import com.arangodb.internal.InternalArangoDatabase;
 
 /**
  * @author Mark - mark at arangodb.com
  *
  */
-public class CommunicationTest {
+public class ArangoCursorAsync<T> extends ArangoCursor<T> {
 
-	@Test
-	public void disconnect() {
-		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
-		final CompletableFuture<ArangoCursorAsync<Object>> result = arangoDB.db().query("return sleep(1)", null, null, null);
-		arangoDB.shutdown();
-		assertThat(result.isCompletedExceptionally(), is(true));
+	public ArangoCursorAsync(final InternalArangoDatabase<?, ?, ?> db, final ArangoCursorExecute execute,
+		final Class<T> type, final CursorEntity result) {
+		super(db, execute, type, result);
 	}
 
+	public Stream<T> streamRemaining() {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
+	}
 }
