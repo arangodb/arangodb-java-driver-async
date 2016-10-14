@@ -25,7 +25,6 @@ import static org.junit.Assert.assertThat;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**

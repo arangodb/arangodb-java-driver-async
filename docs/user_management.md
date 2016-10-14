@@ -19,10 +19,11 @@ If you are using [authentication] (https://docs.arangodb.com/Manual/GettingStart
 
 ##list users
 ``` Java
-  Collection<UserResult> users = arangoDB.getUsers();
-  for(UserResult user : users) {
-    System.out.println(user.getUser())
-  }
+  arangoDB.getUsers().thenAccept(users -> {
+    for(UserResult user : users) {
+      System.out.println(user.getUser())
+    }
+  });
 ```
 
 ##delete user

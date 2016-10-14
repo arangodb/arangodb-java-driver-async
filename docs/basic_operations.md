@@ -98,28 +98,31 @@ E.g. in the previous example the object was stored as follows:
 
 ## read document by key (as JavaBean)
 ``` Java
-  MyObject document = arangoDB.db("myDatabase").collection("myCollection").getDocument(myObject.getKey, MyObject.class).get();
-  document.getName();
-  document.getAge();
+  arangoDB.db("myDatabase").collection("myCollection").getDocument(myObject.getKey, MyObject.class).thenAccept(document -> {
+    document.getName();
+    document.getAge();
+  });
+  
   
 ```
 
 ## read document (as VelocyPack)
 ``` Java
-  VPackSlice document = arangoDB.db("myDatabase").collection("myCollection").getDocument(myObject.getKey, VPackSlice.class).get();
-  document.get("name").getAsString();
-  document.get("age").getAsInt();
+  arangoDB.db("myDatabase").collection("myCollection").getDocument(myObject.getKey, VPackSlice.class).thenAccept(document -> {
+    document.get("name").getAsString();
+    document.get("age").getAsInt();
+  });
   
 ```
 
 ## read document (as Json)
 ``` Java
-  arangoDB.db("myDatabase").collection("myCollection").getDocument(myObject.getKey, String.class).get();
+  arangoDB.db("myDatabase").collection("myCollection").getDocument(myObject.getKey, String.class);
   
 ```
 
 ## read document by id
 ``` Java
-  arangoDB.db("myDatabase").getDocument("myCollection/myKey", MyObject.class).get();
+  arangoDB.db("myDatabase").getDocument("myCollection/myKey", MyObject.class);
   
 ```

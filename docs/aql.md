@@ -21,19 +21,20 @@ E.g. get all Simpsons aged 3 or older in ascending order:
   Map<String, Object> bindVars = new HashMap<>();
   bindVars.put("age", 3);
   
-  ArangoCursor<MyObject> cursor = db.query(query, bindVars, null, MyObject.class);
-  
-  cursor.forEachRemaining(obj -> {
-    System.out.println(obj.getName());
+  db.query(query, bindVars, null, MyObject.class).thenAccept(cursor -> {
+    cursor.forEachRemaining(obj -> {
+      System.out.println(obj.getName());
+    });
   });
+  
 ```
 
 or return the AQL result as VelocyPack:
 
 ``` Java
-  ArangoCursor<VPackSlice> cursor = db.query(query, bindVars, null, VPackSlice.class);
-  
-  cursor.forEachRemaining(obj -> {
-    System.out.println(obj.get("name").getAsString());
+  db.query(query, bindVars, null, VPackSlice.class).thenAccept(cursor -> {
+    cursor.forEachRemaining(obj -> {
+      System.out.println(obj.get("name").getAsString());
+    });  
   });
 ```

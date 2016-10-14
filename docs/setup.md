@@ -25,14 +25,14 @@ The driver is configured with some default values:
 To customize the configuration the parameters can be changed in the code...
 
 ``` Java
-  ArangoDB arangoDB = new ArangoDB.Builder().host("192.168.182.50").port(8888).build();
+  ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().host("192.168.182.50").port(8888).build();
   
 ```
 ... or with a custom properties file (my.properties)
 
 ``` Java
   InputStream in = MyClass.class.getResourceAsStream("my.properties");
-  ArangoDB arangoDB = new ArangoDB.Builder().loadProperties(in).build();
+  ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().loadProperties(in).build();
   
 ```
 
