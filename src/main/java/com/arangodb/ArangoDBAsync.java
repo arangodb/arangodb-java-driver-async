@@ -219,10 +219,22 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		executor.communication().disconnect();
 	}
 
+	/**
+	 * Returns a handler of the system database
+	 * 
+	 * @return database handler
+	 */
 	public ArangoDatabaseAsync db() {
 		return db(ArangoDBConstants.SYSTEM);
 	}
 
+	/**
+	 * Returns a handler of the database by the given name
+	 * 
+	 * @param name
+	 *            Name of the database
+	 * @return database handler
+	 */
 	public ArangoDatabaseAsync db(final String name) {
 		return new ArangoDatabaseAsync(this, name);
 	}
@@ -373,6 +385,14 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		return executor.execute(replaceUserRequest(db().name(), user, options), UserEntity.class);
 	}
 
+	/**
+	 * Generic Execute. Use this method to execute custom FOXX services.
+	 * 
+	 * @param request
+	 *            VelocyStream request
+	 * @return VelocyStream response
+	 * @throws ArangoDBException
+	 */
 	public CompletableFuture<Response> execute(final Request request) {
 		return executor.execute(request, response -> response);
 	}

@@ -84,6 +84,13 @@ public class ArangoDatabaseAsync
 		return executor;
 	}
 
+	/**
+	 * Returns a handler of the collection by the given name
+	 * 
+	 * @param name
+	 *            Name of the collection
+	 * @return collection handler
+	 */
 	public ArangoCollectionAsync collection(final String name) {
 		return new ArangoCollectionAsync(this, name);
 	}
@@ -459,6 +466,13 @@ public class ArangoDatabaseAsync
 		}.getType());
 	}
 
+	/**
+	 * Returns a handler of the graph by the given name
+	 * 
+	 * @param name
+	 *            Name of the graph
+	 * @return graph handler
+	 */
 	public ArangoGraphAsync graph(final String name) {
 		return new ArangoGraphAsync(this, name);
 	}

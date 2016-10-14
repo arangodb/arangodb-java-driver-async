@@ -90,10 +90,24 @@ public class ArangoGraphAsync
 		return executor.execute(addVertexCollectionRequest(name), addVertexCollectionResponseDeserializer());
 	}
 
+	/**
+	 * Returns a handler of the vertex collection by the given name
+	 * 
+	 * @param name
+	 *            Name of the vertex collection
+	 * @return collection handler
+	 */
 	public ArangoVertexCollectionAsync vertexCollection(final String name) {
 		return new ArangoVertexCollectionAsync(this, name);
 	}
 
+	/**
+	 * Returns a handler of the edge collection by the given name
+	 * 
+	 * @param name
+	 *            Name of the edge collection
+	 * @return collection handler
+	 */
 	public ArangoEdgeCollectionAsync edgeCollection(final String name) {
 		return new ArangoEdgeCollectionAsync(this, name);
 	}
