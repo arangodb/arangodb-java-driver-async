@@ -9,7 +9,7 @@ master: [![Build Status](https://secure.travis-ci.org/arangodb/arangodb-java-dri
 
 <table>
 <tr><th>arangodb-java-driver</th><th>ArangoDB</th><th>network protocol</th><th>Java version</th></tr>
-<tr><td>1.0.x</td><td>3.1.x</td><td>VelocyStream</td><td>1.8</td></tr>
+<tr><td>4.0.x</td><td>3.1.x</td><td>VelocyStream</td><td>1.8</td></tr>
 </table>
 
 ## Maven
@@ -23,13 +23,13 @@ ArangoDB 3.1.X
   <dependency>
     <groupId>com.arangodb</groupId>
     <artifactId>arangodb-java-driver-async</artifactId>
-    <version>1.0.0</version>
+    <version>4.0.0</version>
   </dependency>
 	....
 </dependencies>
 ```
 
-If you want to test with a snapshot version (e.g. 1.0.0-SNAPSHOT), add the staging repository of oss.sonatype.org to your pom.xml:
+If you want to test with a snapshot version (e.g. 4.0.0-SNAPSHOT), add the staging repository of oss.sonatype.org to your pom.xml:
 
 ```XML
 <repositories>
@@ -50,4 +50,4 @@ mvn clean install -DskipTests=true -Dgpg.skip=true -Dmaven.javadoc.skip=true -B
 * [ArangoDB](https://www.arangodb.com/)
 * [Documentation](docs/documentation.md)
 * [Examples](src/test/java/com/arangodb/example)
-* [JavaDoc](http://arangodb.github.io/arangodb-java-driver-async/javadoc-1_0/index.html)
+* [JavaDoc](http://arangodb.github.io/arangodb-java-driver-async/javadoc-4_0/index.html)
