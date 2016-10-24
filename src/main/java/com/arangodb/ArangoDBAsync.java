@@ -175,7 +175,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		}
 
 		public <T> Builder registerInstanceCreator(final Class<T> clazz, final VPackInstanceCreator<T> creator) {
-			vpackBuilder.regitserInstanceCreator(clazz, creator);
+			vpackBuilder.registerInstanceCreator(clazz, creator);
 			return this;
 		}
 
