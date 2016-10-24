@@ -43,6 +43,7 @@ import org.junit.Test;
 import com.arangodb.entity.ArangoDBVersion;
 import com.arangodb.entity.LogEntity;
 import com.arangodb.entity.LogLevel;
+import com.arangodb.entity.LogLevelEntity;
 import com.arangodb.entity.UserEntity;
 import com.arangodb.model.LogOptions;
 import com.arangodb.model.LogOptions.SortOrder;
@@ -468,4 +469,34 @@ public class ArangoDBTest {
 		f.get();
 	}
 
+	@Test
+	public void getLogLevel() throws InterruptedException, ExecutionException {
+		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
+		final CompletableFuture<LogLevelEntity> f = arangoDB.getLogLevel();
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((logLevel, ex) -> {
+			assertThat(logLevel, is(notNullValue()));
+			assertThat(logLevel.getAgency(), is(LogLevelEntity.LogLevel.INFO));
+		});
+		f.get();
+	}
+
+	@Test
+	public void setLogLevel() throws InterruptedException, ExecutionException {
+		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
+		final LogLevelEntity entity = new LogLevelEntity();
+		try {
+			entity.setAgency(LogLevelEntity.LogLevel.ERROR);
+			final CompletableFuture<LogLevelEntity> f = arangoDB.setLogLevel(entity);
+			assertThat(f, is(notNullValue()));
+			f.whenComplete((logLevel, ex) -> {
+				assertThat(logLevel, is(notNullValue()));
+				assertThat(logLevel.getAgency(), is(LogLevelEntity.LogLevel.ERROR));
+			});
+			f.get();
+		} finally {
+			entity.setAgency(LogLevelEntity.LogLevel.INFO);
+			arangoDB.setLogLevel(entity);
+		}
+	}
 }

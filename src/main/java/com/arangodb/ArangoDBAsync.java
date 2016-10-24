@@ -30,6 +30,7 @@ import javax.net.ssl.SSLContext;
 
 import com.arangodb.entity.ArangoDBVersion;
 import com.arangodb.entity.LogEntity;
+import com.arangodb.entity.LogLevelEntity;
 import com.arangodb.entity.UserEntity;
 import com.arangodb.internal.ArangoDBConstants;
 import com.arangodb.internal.ArangoExecutorAsync;
@@ -411,4 +412,25 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		return executor.execute(getLogsRequest(options), LogEntity.class);
 	}
 
+	/**
+	 * Returns the server's current loglevel settings.
+	 * 
+	 * @return the server's current loglevel settings
+	 * @throws ArangoDBException
+	 */
+	public CompletableFuture<LogLevelEntity> getLogLevel() {
+		return executor.execute(getLogLevelRequest(), LogLevelEntity.class);
+	}
+
+	/**
+	 * Modifies and returns the server's current loglevel settings.
+	 * 
+	 * @param entity
+	 *            loglevel settings
+	 * @return the server's current loglevel settings
+	 * @throws ArangoDBException
+	 */
+	public CompletableFuture<LogLevelEntity> setLogLevel(final LogLevelEntity entity) {
+		return executor.execute(setLogLevelRequest(entity), LogLevelEntity.class);
+	}
 }
