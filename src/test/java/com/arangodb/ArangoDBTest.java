@@ -130,8 +130,8 @@ public class ArangoDBTest {
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((dbs, ex) -> {
 			assertThat(dbs, is(notNullValue()));
-			assertThat(dbs.size(), is(1));
-			assertThat(dbs.iterator().next(), is("_system"));
+			assertThat(dbs.size(), greaterThan(0));
+			assertThat(dbs, hasItem("_system"));
 		});
 		f.get();
 	}
@@ -196,8 +196,7 @@ public class ArangoDBTest {
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((users, ex) -> {
 			assertThat(users, is(notNullValue()));
-			assertThat(users.size(), is(1));
-			assertThat(users.iterator().next().getUser(), is(ROOT));
+			assertThat(users.size(), greaterThan(0));
 		});
 		f.get();
 	}
