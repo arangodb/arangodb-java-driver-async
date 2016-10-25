@@ -39,6 +39,7 @@ import com.arangodb.internal.CollectionCache.DBAccess;
 import com.arangodb.internal.DocumentCache;
 import com.arangodb.internal.InternalArangoDB;
 import com.arangodb.internal.velocypack.VPackConfigure;
+import com.arangodb.internal.velocypack.VPackConfigureAsync;
 import com.arangodb.internal.velocystream.Communication;
 import com.arangodb.internal.velocystream.CommunicationAsync;
 import com.arangodb.internal.velocystream.CommunicationSync;
@@ -90,6 +91,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 			collectionCache = new CollectionCache();
 			vpackParser = new VPackParser();
 			VPackConfigure.configure(vpackBuilder, vpackParser, collectionCache);
+			VPackConfigureAsync.configure(vpackBuilder);
 			loadProperties(ArangoDBAsync.class.getResourceAsStream(DEFAULT_PROPERTY_FILE));
 		}
 
