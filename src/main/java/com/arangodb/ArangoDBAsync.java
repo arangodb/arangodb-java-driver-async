@@ -243,7 +243,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	}
 
 	/**
-	 * creates a new database
+	 * Creates a new database
 	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#create-database">API
 	 *      Documentation</a>
@@ -256,6 +256,8 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	}
 
 	/**
+	 * Retrieves a list of all existing databases
+	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#list-of-databases">API
 	 *      Documentation</a>
 	 * @return a list of all existing databases
@@ -265,6 +267,8 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	}
 
 	/**
+	 * Retrieves a list of all databases the current user can access
+	 * 
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#list-of-accessible-databases">API
 	 *      Documentation</a>
@@ -272,6 +276,22 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	 */
 	public CompletableFuture<Collection<String>> getAccessibleDatabases() {
 		return executor.execute(getAccessibleDatabasesRequest(db().name()), getDatabaseResponseDeserializer());
+	}
+
+	/**
+	 * List available database to the specified user
+	 * 
+	 * @see <a href=
+	 *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#list-the-databases-available-to-a-user">API
+	 *      Documentation</a>
+	 * @param user
+	 *            The name of the user for which you want to query the databases
+	 * @return
+	 * @throws ArangoDBException
+	 */
+	public CompletableFuture<Collection<String>> getAccessibleDatabasesFor(final String user) {
+		return executor.execute(getAccessibleDatabasesForRequest(db().name(), user),
+			getAccessibleDatabasesForResponseDeserializer());
 	}
 
 	/**

@@ -20,7 +20,6 @@
 
 package com.arangodb;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
@@ -29,6 +28,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -129,6 +129,20 @@ public class ArangoDBTest {
 		final CompletableFuture<Collection<String>> f = arangoDB.getAccessibleDatabases();
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((dbs, ex) -> {
+			assertThat(dbs, is(notNullValue()));
+			assertThat(dbs.size(), greaterThan(0));
+			assertThat(dbs, hasItem("_system"));
+		});
+		f.get();
+	}
+
+	@Test
+	public void getAccessibleDatabasesFor() throws InterruptedException, ExecutionException {
+		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
+		final CompletableFuture<Collection<String>> f = arangoDB.getAccessibleDatabasesFor("root");
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((dbs, ex) -> {
+			assertThat(dbs, is(notNullValue()));
 			assertThat(dbs, is(notNullValue()));
 			assertThat(dbs.size(), greaterThan(0));
 			assertThat(dbs, hasItem("_system"));
