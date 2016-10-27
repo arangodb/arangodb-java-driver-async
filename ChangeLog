@@ -2,3 +2,4 @@ v4.1.0 (2016-10-xx)
 ---------------------------
 * changed VelocyStream communication (send protocol header)
 * added VeloyPack serialization support for java.time.Instant, LocalDate, LocalDateTime
+* added ArangoUtil for manually de-/serialization
