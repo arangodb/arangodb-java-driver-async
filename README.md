@@ -9,27 +9,9 @@ master: [![Build Status](https://secure.travis-ci.org/arangodb/arangodb-java-dri
 
 <table>
 <tr><th>arangodb-java-driver</th><th>ArangoDB</th><th>network protocol</th><th>Java version</th></tr>
-<tr><td>4.0.x</td><td>3.1.x</td><td>VelocyStream</td><td>1.8</td></tr>
+<tr><td>4.1.x</td><td>3.1.x</td><td>VelocyStream</td><td>1.8</td></tr>
+<tr><td>4.0.0</td><td>3.1.0-RC1 to 3.1.0-RC3</td><td>VelocyStream</td><td>1.8</td></tr>
 </table>
-
-##Server Configuration
-
-To use the driver version 4.0.0 and above, you need to run ArangoDB server with an endpoint using VelocyStream protocol. (see [documentation](https://docs.arangodb.com/current/Manual/Administration/Configuration/Endpoint.html#server-endpoints))
-
-```
-unix> ./arangod --server.endpoint vpp+tcp://127.0.0.1:8529
-                --server.endpoint vpp+ssl://127.0.0.1:8530
-                --ssl.keyfile server.pem /tmp/vocbase
-```
-
-Note: The web interface needs only endpoint tcp. If you want to use both, the driver and the web interface you have to use both endpoints.
-
-```
-unix> ./arangod --server.endpoint vpp+tcp://127.0.0.1:8529
-                --server.endpoint vpp+ssl://127.0.0.1:8530
-                --server.endpoint tcp://127.0.0.1:8531
-                --ssl.keyfile server.pem /tmp/vocbase
-```
 
 ## Maven
 
@@ -42,7 +24,7 @@ ArangoDB 3.1.X
   <dependency>
     <groupId>com.arangodb</groupId>
     <artifactId>arangodb-java-driver-async</artifactId>
-    <version>4.0.0</version>
+    <version>4.1.0</version>
   </dependency>
 	....
 </dependencies>
