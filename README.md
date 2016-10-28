@@ -3,6 +3,7 @@
 
 # arangodb-java-driver-async
 
+4.1: [![Build Status](https://secure.travis-ci.org/arangodb/arangodb-java-driver-async.svg?branch=4.1)](https://travis-ci.org/arangodb/arangodb-java-driver-async)
 master: [![Build Status](https://secure.travis-ci.org/arangodb/arangodb-java-driver-async.svg?branch=master)](https://travis-ci.org/arangodb/arangodb-java-driver-async)
 
 ## Supported versions
