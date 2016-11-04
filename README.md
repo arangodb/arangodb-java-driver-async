@@ -5,4 +5,5 @@
 
 # JavaDoc
 
+* [JavaDoc 4.1](http://arangodb.github.io/arangodb-java-driver-async/javadoc-4_1/index.html)
 * [JavaDoc 4.0](http://arangodb.github.io/arangodb-java-driver-async/javadoc-4_0/index.html)
