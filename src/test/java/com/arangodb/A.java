@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.arangodb.entity.BaseDocument;
@@ -65,6 +66,7 @@ public class A {
 	private final int nameIdOffset = 5;
 
 	@Test
+	@Ignore
 	public void a() {
 		check("init", initArangoDB());
 
