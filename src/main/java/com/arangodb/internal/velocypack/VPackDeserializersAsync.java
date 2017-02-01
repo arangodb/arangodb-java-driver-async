@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import com.arangodb.velocypack.VPackDeserializer;
+import com.arangodb.velocypack.internal.VPackDeserializers;
 
 /**
  * @author Mark - mark at arangodb.com
@@ -34,13 +35,13 @@ import com.arangodb.velocypack.VPackDeserializer;
 public class VPackDeserializersAsync {
 
 	public static VPackDeserializer<Instant> INSTANT = (parent, vpack, context) -> {
-		return vpack.getAsDate().toInstant();
+		return VPackDeserializers.DATE.deserialize(parent, vpack, context).toInstant();
 	};
 	public static VPackDeserializer<LocalDate> LOCAL_DATE = (parent, vpack, context) -> {
-		return vpack.getAsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		return INSTANT.deserialize(parent, vpack, context).atZone(ZoneId.systemDefault()).toLocalDate();
 	};
 	public static VPackDeserializer<LocalDateTime> LOCAL_DATE_TIME = (parent, vpack, context) -> {
-		return vpack.getAsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+		return INSTANT.deserialize(parent, vpack, context).atZone(ZoneId.systemDefault()).toLocalDateTime();
 	};
 
 }
