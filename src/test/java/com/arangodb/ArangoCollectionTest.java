@@ -1508,7 +1508,7 @@ public class ArangoCollectionTest extends BaseTest {
 	}
 
 	@Test
-	public void deleteDocuments() throws InterruptedException, ExecutionException {
+	public void deleteDocumentsByKey() throws InterruptedException, ExecutionException {
 		final Collection<BaseDocument> values = new ArrayList<>();
 		{
 			final BaseDocument e = new BaseDocument();
@@ -1539,7 +1539,35 @@ public class ArangoCollectionTest extends BaseTest {
 	}
 
 	@Test
-	public void deleteDocumentsOne() throws InterruptedException, ExecutionException {
+	public void deleteDocumentsByDocuments() throws InterruptedException, ExecutionException {
+		final Collection<BaseDocument> values = new ArrayList<>();
+		{
+			final BaseDocument e = new BaseDocument();
+			e.setKey("1");
+			values.add(e);
+		}
+		{
+			final BaseDocument e = new BaseDocument();
+			e.setKey("2");
+			values.add(e);
+		}
+		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
+				.deleteDocuments(values, null, null);
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((deleteResult, ex) -> {
+			assertThat(deleteResult, is(notNullValue()));
+			assertThat(deleteResult.getDocuments().size(), is(2));
+			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+				assertThat(i.getKey(), anyOf(is("1"), is("2")));
+			}
+			assertThat(deleteResult.getErrors().size(), is(0));
+		});
+		f.get();
+	}
+
+	@Test
+	public void deleteDocumentsByKeyOne() throws InterruptedException, ExecutionException {
 		final Collection<BaseDocument> values = new ArrayList<>();
 		{
 			final BaseDocument e = new BaseDocument();
@@ -1551,6 +1579,29 @@ public class ArangoCollectionTest extends BaseTest {
 		keys.add("1");
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(keys, null, null);
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((deleteResult, ex) -> {
+			assertThat(deleteResult, is(notNullValue()));
+			assertThat(deleteResult.getDocuments().size(), is(1));
+			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+				assertThat(i.getKey(), is("1"));
+			}
+			assertThat(deleteResult.getErrors().size(), is(0));
+		});
+		f.get();
+	}
+
+	@Test
+	public void deleteDocumentsByDocumentOne() throws InterruptedException, ExecutionException {
+		final Collection<BaseDocument> values = new ArrayList<>();
+		{
+			final BaseDocument e = new BaseDocument();
+			e.setKey("1");
+			values.add(e);
+		}
+		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
+				.deleteDocuments(values, null, null);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((deleteResult, ex) -> {
 			assertThat(deleteResult, is(notNullValue()));
@@ -1580,7 +1631,7 @@ public class ArangoCollectionTest extends BaseTest {
 	}
 
 	@Test
-	public void deleteDocumentsNotExisting() throws InterruptedException, ExecutionException {
+	public void deleteDocumentsByKeyNotExisting() throws InterruptedException, ExecutionException {
 		final Collection<BaseDocument> values = new ArrayList<>();
 		db.collection(COLLECTION_NAME).insertDocuments(values, null);
 		final Collection<String> keys = new ArrayList<>();
@@ -1588,6 +1639,30 @@ public class ArangoCollectionTest extends BaseTest {
 		keys.add("2");
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(keys, null, null);
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((deleteResult, ex) -> {
+			assertThat(deleteResult, is(notNullValue()));
+			assertThat(deleteResult.getDocuments().size(), is(0));
+			assertThat(deleteResult.getErrors().size(), is(2));
+		});
+		f.get();
+	}
+
+	@Test
+	public void deleteDocumentsByDocumentsNotExisting() throws InterruptedException, ExecutionException {
+		final Collection<BaseDocument> values = new ArrayList<>();
+		{
+			final BaseDocument e = new BaseDocument();
+			e.setKey("1");
+			values.add(e);
+		}
+		{
+			final BaseDocument e = new BaseDocument();
+			e.setKey("2");
+			values.add(e);
+		}
+		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
+				.deleteDocuments(values, null, null);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((deleteResult, ex) -> {
 			assertThat(deleteResult, is(notNullValue()));

@@ -440,16 +440,16 @@ public class ArangoCollectionAsync
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/HTTP/Document/WorkingWithDocuments.html#removes-multiple-documents">API
 	 *      Documentation</a>
-	 * @param keys
-	 *            The keys of the documents
+	 * @param values
+	 *            The keys of the documents or the documents themselves
 	 * @param type
 	 *            The type of the documents (POJO class, VPackSlice or String for Json). Only necessary if
 	 *            options.returnOld is set to true, otherwise can be null.
 	 * @return information about the documents
 	 */
 	public CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Void>>> deleteDocuments(
-		final Collection<String> keys) {
-		return executor.execute(deleteDocumentsRequest(keys, new DocumentDeleteOptions()),
+		final Collection<?> values) {
+		return executor.execute(deleteDocumentsRequest(values, new DocumentDeleteOptions()),
 			deleteDocumentsResponseDeserializer(Void.class));
 	}
 
@@ -459,8 +459,8 @@ public class ArangoCollectionAsync
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/HTTP/Document/WorkingWithDocuments.html#removes-multiple-documents">API
 	 *      Documentation</a>
-	 * @param keys
-	 *            The keys of the documents
+	 * @param values
+	 *            The keys of the documents or the documents themselves
 	 * @param type
 	 *            The type of the documents (POJO class, VPackSlice or String for Json). Only necessary if
 	 *            options.returnOld is set to true, otherwise can be null.
@@ -469,10 +469,10 @@ public class ArangoCollectionAsync
 	 * @return information about the documents
 	 */
 	public <T> CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<T>>> deleteDocuments(
-		final Collection<String> keys,
+		final Collection<?> values,
 		final Class<T> type,
 		final DocumentDeleteOptions options) {
-		return executor.execute(deleteDocumentsRequest(keys, options), deleteDocumentsResponseDeserializer(type));
+		return executor.execute(deleteDocumentsRequest(values, options), deleteDocumentsResponseDeserializer(type));
 	}
 
 	/**
