@@ -115,7 +115,7 @@ public class ArangoDatabaseTest extends BaseTest {
 		try {
 			db.collection(name).getInfo().get();
 			fail();
-		} catch (final ArangoDBException e) {
+		} catch (final Exception e) {
 		}
 	}
 
@@ -126,13 +126,13 @@ public class ArangoDatabaseTest extends BaseTest {
 		try {
 			db.collection(name).drop().get();
 			fail();
-		} catch (final ArangoDBException e) {
+		} catch (final Exception e) {
 		}
 		db.collection(name).drop(true).get();
 		try {
 			db.collection(name).getInfo().get();
 			fail();
-		} catch (final ArangoDBException e) {
+		} catch (final Exception e) {
 		}
 	}
 
