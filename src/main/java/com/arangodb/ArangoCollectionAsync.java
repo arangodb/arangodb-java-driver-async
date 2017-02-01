@@ -651,7 +651,21 @@ public class ArangoCollectionAsync
 	 * @return void
 	 */
 	public CompletableFuture<Void> drop() {
-		return executor.execute(dropRequest(), Void.class);
+		return executor.execute(dropRequest(null), Void.class);
+	}
+
+	/**
+	 * Drops the collection
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#drops-collection">API
+	 *      Documentation</a>
+	 * @param isSystem
+	 *            Whether or not the collection to drop is a system collection. This parameter must be set to true in
+	 *            order to drop a system collection.
+	 * @return void
+	 */
+	public CompletableFuture<Void> drop(final boolean isSystem) {
+		return executor.execute(dropRequest(isSystem), Void.class);
 	}
 
 	/**
