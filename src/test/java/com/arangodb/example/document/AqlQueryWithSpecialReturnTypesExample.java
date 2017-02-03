@@ -66,7 +66,7 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 	}
 
 	@Test
-	public void aqlWithLimitQueryAsVPackObject() {
+	public void aqlWithLimitQueryAsVPackObject() throws InterruptedException, ExecutionException {
 		final String query = "FOR t IN " + COLLECTION_NAME
 				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN t";
 		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
@@ -83,10 +83,11 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 				}
 			});
 		});
+		f.get();
 	}
 
 	@Test
-	public void aqlWithLimitQueryAsVPackArray() {
+	public void aqlWithLimitQueryAsVPackArray() throws InterruptedException, ExecutionException {
 		final String query = "FOR t IN " + COLLECTION_NAME
 				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN [t.name, t.gender, t.age]";
 		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
@@ -100,12 +101,12 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 				assertThat(vpack.get(2).getAsInt(), isOneOf(21, 23, 25, 27, 29));
 			});
 		});
-
+		f.get();
 	}
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void aqlWithLimitQueryAsMap() {
+	public void aqlWithLimitQueryAsMap() throws InterruptedException, ExecutionException {
 		final String query = "FOR t IN " + COLLECTION_NAME
 				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN t";
 		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
@@ -122,11 +123,12 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 				assertThat(Long.valueOf(map.get("age").toString()), isOneOf(21L, 23L, 25L, 27L, 29L));
 			});
 		});
+		f.get();
 	}
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void aqlWithLimitQueryAsList() {
+	public void aqlWithLimitQueryAsList() throws InterruptedException, ExecutionException {
 		final String query = "FOR t IN " + COLLECTION_NAME
 				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN [t.name, t.gender, t.age]";
 		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
@@ -143,5 +145,6 @@ public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 				assertThat(Long.valueOf(String.valueOf(list.get(2))), isOneOf(21L, 23L, 25L, 27L, 29L));
 			});
 		});
+		f.get();
 	}
 }

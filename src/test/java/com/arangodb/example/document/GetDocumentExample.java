@@ -53,42 +53,46 @@ public class GetDocumentExample extends ExampleBase {
 	}
 
 	@Test
-	public void getAsBean() {
+	public void getAsBean() throws InterruptedException, ExecutionException {
 		final CompletableFuture<TestEntity> f = collection.getDocument(key, TestEntity.class);
 		f.whenComplete((doc, ex) -> {
 			assertThat(doc, is(notNullValue()));
 			assertThat(doc.getFoo(), is("bar"));
 		});
+		f.get();
 	}
 
 	@Test
-	public void getAsBaseDocument() {
+	public void getAsBaseDocument() throws InterruptedException, ExecutionException {
 		final CompletableFuture<BaseDocument> f = collection.getDocument(key, BaseDocument.class);
 		f.whenComplete((doc, ex) -> {
 			assertThat(doc, is(notNullValue()));
 			assertThat(doc.getAttribute("foo"), is(notNullValue()));
 			assertThat(String.valueOf(doc.getAttribute("foo")), is("bar"));
 		});
+		f.get();
 	}
 
 	@Test
-	public void getAsVPack() {
+	public void getAsVPack() throws InterruptedException, ExecutionException {
 		final CompletableFuture<VPackSlice> f = collection.getDocument(key, VPackSlice.class);
 		f.whenComplete((doc, ex) -> {
 			assertThat(doc, is(notNullValue()));
 			assertThat(doc.get("foo").isString(), is(true));
 			assertThat(doc.get("foo").getAsString(), is("bar"));
 		});
+		f.get();
 	}
 
 	@Test
-	public void getAsJson() throws ParseException {
+	public void getAsJson() throws ParseException, InterruptedException, ExecutionException {
 		final CompletableFuture<String> f = collection.getDocument(key, String.class);
 		f.whenComplete((doc, ex) -> {
 			assertThat(doc, is(notNullValue()));
 			assertThat(doc.contains("foo"), is(true));
 			assertThat(doc.contains("bar"), is(true));
 		});
+		f.get();
 	}
 
 }
