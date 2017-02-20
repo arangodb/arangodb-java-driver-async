@@ -48,8 +48,8 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 	private static final Logger LOGGER = LoggerFactory.getLogger(CommunicationAsync.class);
 
 	public static class Builder {
-		private String host;
-		private Integer port;
+
+		private final HostHandler hostHandler;
 		private Integer timeout;
 		private String user;
 		private String password;
@@ -57,18 +57,9 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 		private SSLContext sslContext;
 		private Integer chunksize;
 
-		public Builder() {
+		public Builder(final HostHandler hostHandler) {
 			super();
-		}
-
-		public Builder host(final String host) {
-			this.host = host;
-			return this;
-		}
-
-		public Builder port(final Integer port) {
-			this.port = port;
-			return this;
+			this.hostHandler = hostHandler;
 		}
 
 		public Builder timeout(final Integer timeout) {
@@ -104,16 +95,16 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 		public Communication<CompletableFuture<Response>, ConnectionAsync> build(
 			final VPack vpack,
 			final CollectionCache collectionCache) {
-			return new CommunicationAsync(host, port, timeout, user, password, useSsl, sslContext, vpack,
+			return new CommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, vpack,
 					collectionCache, chunksize);
 		}
 	}
 
-	private CommunicationAsync(final String host, final Integer port, final Integer timeout, final String user,
+	private CommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
 		final String password, final Boolean useSsl, final SSLContext sslContext, final VPack vpack,
 		final CollectionCache collectionCache, final Integer chunksize) {
-		super(host, port, timeout, user, password, useSsl, sslContext, vpack, collectionCache, chunksize,
-				new ConnectionAsync.Builder(new MessageStore()).host(host).port(port).timeout(timeout).useSsl(useSsl)
+		super(timeout, user, password, useSsl, sslContext, vpack, collectionCache, chunksize,
+				new ConnectionAsync.Builder(hostHandler, new MessageStore()).timeout(timeout).useSsl(useSsl)
 						.sslContext(sslContext).build());
 	}
 

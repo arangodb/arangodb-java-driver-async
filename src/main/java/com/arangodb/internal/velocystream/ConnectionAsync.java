@@ -20,12 +20,10 @@
 
 package com.arangodb.internal.velocystream;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import javax.net.ssl.SSLContext;
 
@@ -35,31 +33,18 @@ import javax.net.ssl.SSLContext;
  */
 public class ConnectionAsync extends Connection {
 
-	private ExecutorService executor;
-	private final MessageStore messageStore;
-
 	public static class Builder {
 
+		private final HostHandler hostHandler;
 		private final MessageStore messageStore;
-		private String host;
-		private Integer port;
 		private Integer timeout;
 		private Boolean useSsl;
 		private SSLContext sslContext;
 
-		public Builder(final MessageStore messageStore) {
+		public Builder(final HostHandler hostHandler, final MessageStore messageStore) {
 			super();
+			this.hostHandler = hostHandler;
 			this.messageStore = messageStore;
-		}
-
-		public Builder host(final String host) {
-			this.host = host;
-			return this;
-		}
-
-		public Builder port(final Integer port) {
-			this.port = port;
-			return this;
 		}
 
 		public Builder timeout(final Integer timeout) {
@@ -78,61 +63,29 @@ public class ConnectionAsync extends Connection {
 		}
 
 		public ConnectionAsync build() {
-			return new ConnectionAsync(host, port, timeout, useSsl, sslContext, messageStore);
+			return new ConnectionAsync(hostHandler, timeout, useSsl, sslContext, messageStore);
 		}
 	}
 
-	private ConnectionAsync(final String host, final Integer port, final Integer timeout, final Boolean useSsl,
+	private ConnectionAsync(final HostHandler hostHandler, final Integer timeout, final Boolean useSsl,
 		final SSLContext sslContext, final MessageStore messageStore) {
-		super(host, port, timeout, useSsl, sslContext);
-		this.messageStore = messageStore;
-	}
-
-	@Override
-	public synchronized void open() throws IOException {
-		if (isOpen()) {
-			return;
-		}
-		super.open();
-		executor = Executors.newSingleThreadExecutor();
-		executor.submit(() -> {
-			final ChunkStore chunkStore = new ChunkStore(messageStore);
-			while (true) {
-				if (!isOpen()) {
-					messageStore.clear(new IOException("The socket is closed."));
-					close();
-					break;
-				}
-				try {
-					final Chunk chunk = readChunk();
-					final ByteBuffer chunkBuffer = chunkStore.storeChunk(chunk);
-					if (chunkBuffer != null) {
-						final byte[] buf = new byte[chunk.getContentLength()];
-						readBytesIntoBuffer(buf, 0, buf.length);
-						chunkBuffer.put(buf);
-						chunkStore.checkCompleteness(chunk.getMessageId());
-					}
-				} catch (final Exception e) {
-					messageStore.clear(e);
-					close();
-					break;
-				}
-			}
-		});
-	}
-
-	@Override
-	public synchronized void close() {
-		messageStore.clear();
-		if (executor != null && !executor.isShutdown()) {
-			executor.shutdown();
-		}
-		super.close();
+		super(hostHandler, timeout, useSsl, sslContext, messageStore);
 	}
 
 	public synchronized CompletableFuture<Message> write(final Message message, final Collection<Chunk> chunks) {
 		final CompletableFuture<Message> future = new CompletableFuture<>();
-		messageStore.storeMessage(message.getId(), future);
+		final FutureTask<Message> task = new FutureTask<>(new Callable<Message>() {
+			@Override
+			public Message call() throws Exception {
+				try {
+					future.complete(messageStore.get(message.getId()));
+				} catch (final Exception e) {
+					future.completeExceptionally(e);
+				}
+				return null;
+			}
+		});
+		messageStore.storeMessage(message.getId(), task);
 		super.writeIntern(message, chunks);
 		return future;
 	}
