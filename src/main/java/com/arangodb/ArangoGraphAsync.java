@@ -34,15 +34,11 @@ import com.arangodb.velocystream.Response;
  * @author Mark - mark at arangodb.com
  *
  */
-public class ArangoGraphAsync
-		extends InternalArangoGraph<ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync> {
+public class ArangoGraphAsync extends
+		InternalArangoGraph<ArangoDBAsync, ArangoDatabaseAsync, ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync> {
 
 	protected ArangoGraphAsync(final ArangoDatabaseAsync db, final String name) {
-		super(db.executor(), db.name(), name);
-	}
-
-	protected ArangoExecutorAsync executor() {
-		return executor;
+		super(db, name);
 	}
 
 	/**

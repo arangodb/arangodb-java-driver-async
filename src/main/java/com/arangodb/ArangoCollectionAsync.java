@@ -55,18 +55,11 @@ import com.arangodb.velocystream.Response;
  * @author Mark - mark at arangodb.com
  *
  */
-public class ArangoCollectionAsync
-		extends InternalArangoCollection<ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync> {
-
-	private final ArangoDatabaseAsync db;
+public class ArangoCollectionAsync extends
+		InternalArangoCollection<ArangoDBAsync, ArangoDatabaseAsync, ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync> {
 
 	protected ArangoCollectionAsync(final ArangoDatabaseAsync db, final String name) {
-		super(db.executor(), db.name(), name);
-		this.db = db;
-	}
-
-	protected ArangoDatabaseAsync db() {
-		return db;
+		super(db, name);
 	}
 
 	/**

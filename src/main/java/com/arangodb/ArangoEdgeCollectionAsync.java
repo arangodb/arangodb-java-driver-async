@@ -38,11 +38,11 @@ import com.arangodb.velocystream.Response;
  * @author Mark - mark at arangodb.com
  *
  */
-public class ArangoEdgeCollectionAsync
-		extends InternalArangoEdgeCollection<ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync> {
+public class ArangoEdgeCollectionAsync extends
+		InternalArangoEdgeCollection<ArangoDBAsync, ArangoDatabaseAsync, ArangoGraphAsync, ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync> {
 
 	protected ArangoEdgeCollectionAsync(final ArangoGraphAsync graph, final String name) {
-		super(graph.executor(), graph.db(), graph.name(), name);
+		super(graph, name);
 	}
 
 	/**
