@@ -20,6 +20,7 @@ The driver is configured with some default values:
 <tr><td>arangodb.password</td><td>Basic Authentication Password</td><td></td></tr>
 <tr><td>arangodb.useSsl</td><td>use SSL connection</td><td>false</td></tr>
 <tr><td>harangodb.chunksize</td><td>VelocyStream Chunk content-size(bytes)</td><td>30000</td></tr>
+<tr><td>arangodb.connections.max</td><td>max number of connections</td><td>1</td></tr>
 </table>
 
 To customize the configuration the parameters can be changed in the code...
@@ -51,6 +52,16 @@ To use SSL, you have to set the configuration `useSsl` to `true` and set a `SSLC
 
 ``` Java
   
-  ArangoDB arangoDB = new ArangoDB.Builder().useSsl(true).sslContext(sc).build();
+  ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().useSsl(true).sslContext(sc).build();
   
+```
+
+## Connection Pooling
+
+The driver supports connection pooling with a default of 1 maximum connections. To change this value use the method `maxConnections(Integer)` in `ArangoDBAsync.Builder`.
+
+``` Java
+
+  ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().maxConnections(8).build();
+
 ```
