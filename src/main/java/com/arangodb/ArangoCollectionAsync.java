@@ -518,6 +518,30 @@ public class ArangoCollectionAsync extends
 	}
 
 	/**
+	 * Returns an index
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/WorkingWith.html#read-index">API Documentation</a>
+	 * @param id
+	 *            The index-handle
+	 * @return information about the index
+	 */
+	public CompletableFuture<IndexEntity> getIndex(final String id) {
+		return executor.execute(getIndexRequest(id), IndexEntity.class);
+	}
+
+	/**
+	 * Deletes an index
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/WorkingWith.html#delete-index">API Documentation</a>
+	 * @param id
+	 *            The index-handle
+	 * @return the id of the index
+	 */
+	public CompletableFuture<String> deleteIndex(final String id) {
+		return executor.execute(deleteIndexRequest(id), deleteIndexResponseDeserializer());
+	}
+
+	/**
 	 * Creates a hash index for the collection, if it does not already exist.
 	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/Hash.html#create-hash-index">API Documentation</a>

@@ -157,7 +157,9 @@ public class ArangoDatabaseAsync extends
 	 * @return information about the index
 	 */
 	public CompletableFuture<IndexEntity> getIndex(final String id) {
-		return executor.execute(getIndexRequest(id), IndexEntity.class);
+		executor.validateIndexId(id);
+		final String[] split = id.split("/");
+		return collection(split[0]).getIndex(split[1]);
 	}
 
 	/**
@@ -169,7 +171,9 @@ public class ArangoDatabaseAsync extends
 	 * @return the id of the index
 	 */
 	public CompletableFuture<String> deleteIndex(final String id) {
-		return executor.execute(deleteIndexRequest(id), deleteIndexResponseDeserializer());
+		executor.validateIndexId(id);
+		final String[] split = id.split("/");
+		return collection(split[0]).deleteIndex(split[1]);
 	}
 
 	/**

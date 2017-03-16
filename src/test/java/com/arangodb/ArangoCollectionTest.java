@@ -20,6 +20,7 @@
 
 package com.arangodb;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -27,7 +28,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
@@ -731,6 +731,72 @@ public class ArangoCollectionTest extends BaseTest {
 			fail();
 		} catch (final Exception e) {
 		}
+	}
+
+	@Test
+	public void getIndex() throws InterruptedException, ExecutionException {
+		final Collection<String> fields = new ArrayList<>();
+		fields.add("a");
+		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).getIndex(createResult.getId());
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((readResult, ex) -> {
+			assertThat(readResult.getId(), is(createResult.getId()));
+			assertThat(readResult.getType(), is(createResult.getType()));
+		});
+		f.get();
+	}
+
+	@Test
+	public void getIndexByKey() throws InterruptedException, ExecutionException {
+		final Collection<String> fields = new ArrayList<>();
+		fields.add("a");
+		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME)
+				.getIndex(createResult.getId().split("/")[1]);
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((readResult, ex) -> {
+			assertThat(readResult.getId(), is(createResult.getId()));
+			assertThat(readResult.getType(), is(createResult.getType()));
+		});
+		f.get();
+	}
+
+	@Test
+	public void deleteIndex() throws InterruptedException, ExecutionException {
+		final Collection<String> fields = new ArrayList<>();
+		fields.add("a");
+		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+		final CompletableFuture<String> f = db.collection(COLLECTION_NAME).deleteIndex(createResult.getId());
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((id, ex) -> {
+			assertThat(id, is(createResult.getId()));
+			try {
+				db.getIndex(id);
+				fail();
+			} catch (final ArangoDBException e) {
+			}
+		});
+		f.get();
+	}
+
+	@Test
+	public void deleteIndexByKey() throws InterruptedException, ExecutionException {
+		final Collection<String> fields = new ArrayList<>();
+		fields.add("a");
+		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+		final CompletableFuture<String> f = db.collection(COLLECTION_NAME)
+				.deleteIndex(createResult.getId().split("/")[1]);
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((id, ex) -> {
+			assertThat(id, is(createResult.getId()));
+			try {
+				db.getIndex(id);
+				fail();
+			} catch (final ArangoDBException e) {
+			}
+		});
+		f.get();
 	}
 
 	@Test
