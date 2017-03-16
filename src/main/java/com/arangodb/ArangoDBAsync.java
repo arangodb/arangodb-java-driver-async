@@ -83,6 +83,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		private Boolean useSsl;
 		private SSLContext sslContext;
 		private Integer chunksize;
+		private Integer maxConnections;
 		private final VPack.Builder vpackBuilder;
 		private final CollectionCache collectionCache;
 		private final VPackParser vpackParser;
@@ -113,6 +114,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 					password = loadPassword(properties, password);
 					useSsl = loadUseSsl(properties, useSsl);
 					chunksize = loadChunkSize(properties, chunksize);
+					maxConnections = loadMaxConnections(properties, maxConnections);
 				} catch (final IOException e) {
 					throw new ArangoDBException(e);
 				}
@@ -185,6 +187,11 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 
 		public Builder chunksize(final Integer chunksize) {
 			this.chunksize = chunksize;
+			return this;
+		}
+
+		public Builder maxConnections(final Integer maxConnections) {
+			this.maxConnections = maxConnections;
 			return this;
 		}
 
@@ -269,12 +276,12 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 
 		private CommunicationAsync.Builder asyncBuilder(final HostHandler hostHandler) {
 			return new CommunicationAsync.Builder(hostHandler).timeout(timeout).user(user).password(password)
-					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize);
+					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections);
 		}
 
 		private CommunicationSync.Builder syncBuilder(final HostHandler hostHandler) {
 			return new CommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)
-					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize);
+					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections);
 		}
 
 	}
@@ -294,6 +301,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		});
 	}
 
+	@Override
 	protected ArangoExecutorAsync executor() {
 		return executor;
 	}

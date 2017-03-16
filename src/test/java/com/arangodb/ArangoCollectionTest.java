@@ -227,7 +227,7 @@ public class ArangoCollectionTest extends BaseTest {
 
 	@Test
 	public void getDocumentAsJson() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"docRaw\",\"a\":\"test\"}", null);
+		db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"docRaw\",\"a\":\"test\"}", null).get();
 		final CompletableFuture<String> f = db.collection(COLLECTION_NAME).getDocument("docRaw", String.class, null);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((readResult, ex) -> {
@@ -1357,7 +1357,7 @@ public class ArangoCollectionTest extends BaseTest {
 
 	@Test
 	public void importDocumentsFromToPrefix() throws InterruptedException, ExecutionException {
-		db.createCollection(COLLECTION_NAME + "_edge", new CollectionCreateOptions().type(CollectionType.EDGES));
+		db.createCollection(COLLECTION_NAME + "_edge", new CollectionCreateOptions().type(CollectionType.EDGES)).get();
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME + "_edge");
 		try {
 			final Collection<BaseEdgeDocument> values = new ArrayList<>();
@@ -1547,7 +1547,7 @@ public class ArangoCollectionTest extends BaseTest {
 
 	@Test
 	public void importDocumentsJsonFromToPrefix() throws InterruptedException, ExecutionException {
-		db.createCollection(COLLECTION_NAME + "_edge", new CollectionCreateOptions().type(CollectionType.EDGES));
+		db.createCollection(COLLECTION_NAME + "_edge", new CollectionCreateOptions().type(CollectionType.EDGES)).get();
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME + "_edge");
 		try {
 			final String[] keys = { "1", "2" };
@@ -1586,7 +1586,7 @@ public class ArangoCollectionTest extends BaseTest {
 			e.setKey("2");
 			values.add(e);
 		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final Collection<String> keys = new ArrayList<>();
 		keys.add("1");
 		keys.add("2");
@@ -1617,7 +1617,7 @@ public class ArangoCollectionTest extends BaseTest {
 			e.setKey("2");
 			values.add(e);
 		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(values, null, null);
 		assertThat(f, is(notNullValue()));
@@ -1640,7 +1640,7 @@ public class ArangoCollectionTest extends BaseTest {
 			e.setKey("1");
 			values.add(e);
 		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final Collection<String> keys = new ArrayList<>();
 		keys.add("1");
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
@@ -1665,7 +1665,7 @@ public class ArangoCollectionTest extends BaseTest {
 			e.setKey("1");
 			values.add(e);
 		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(values, null, null);
 		assertThat(f, is(notNullValue()));
@@ -1683,7 +1683,7 @@ public class ArangoCollectionTest extends BaseTest {
 	@Test
 	public void deleteDocumentsEmpty() throws InterruptedException, ExecutionException {
 		final Collection<BaseDocument> values = new ArrayList<>();
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final Collection<String> keys = new ArrayList<>();
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(keys, null, null);
@@ -1699,7 +1699,7 @@ public class ArangoCollectionTest extends BaseTest {
 	@Test
 	public void deleteDocumentsByKeyNotExisting() throws InterruptedException, ExecutionException {
 		final Collection<BaseDocument> values = new ArrayList<>();
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final Collection<String> keys = new ArrayList<>();
 		keys.add("1");
 		keys.add("2");
@@ -1775,7 +1775,7 @@ public class ArangoCollectionTest extends BaseTest {
 			e.setKey("1");
 			values.add(e);
 		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final Collection<BaseDocument> updatedValues = new ArrayList<>();
 		final BaseDocument first = values.iterator().next();
 		first.addAttribute("a", "test");
@@ -1809,7 +1809,7 @@ public class ArangoCollectionTest extends BaseTest {
 		{
 			values.add(new BaseDocument("1"));
 		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final Collection<BaseDocument> updatedValues = new ArrayList<>();
 		for (final BaseDocument i : values) {
 			i.addAttribute("a", "test");
@@ -1833,7 +1833,7 @@ public class ArangoCollectionTest extends BaseTest {
 			values.add(new BaseDocument("1"));
 			values.add(new BaseDocument("2"));
 		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final Collection<BaseDocument> updatedValues = new ArrayList<>();
 		for (final BaseDocument i : values) {
 			i.addAttribute("a", "test");
@@ -1857,7 +1857,7 @@ public class ArangoCollectionTest extends BaseTest {
 			e.setKey("1");
 			values.add(e);
 		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final Collection<BaseDocument> updatedValues = new ArrayList<>();
 		final BaseDocument first = values.iterator().next();
 		first.addAttribute("a", "test");
@@ -1891,7 +1891,7 @@ public class ArangoCollectionTest extends BaseTest {
 		{
 			values.add(new BaseDocument("1"));
 		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
+		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
 		final Collection<BaseDocument> updatedValues = new ArrayList<>();
 		for (final BaseDocument i : values) {
 			i.addAttribute("a", "test");
@@ -1985,7 +1985,7 @@ public class ArangoCollectionTest extends BaseTest {
 			} catch (final Exception e) {
 			}
 		} finally {
-			db.collection(COLLECTION_NAME + "1").rename(COLLECTION_NAME);
+			db.collection(COLLECTION_NAME + "1").rename(COLLECTION_NAME).get();
 		}
 	}
 

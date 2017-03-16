@@ -114,7 +114,7 @@ public class ArangoDBTest {
 			assertThat(dbs.size(), is(greaterThan(0)));
 			final int dbCount = dbs.size();
 			assertThat(dbs.iterator().next(), is("_system"));
-			arangoDB.createDatabase(BaseTest.TEST_DB);
+			arangoDB.createDatabase(BaseTest.TEST_DB).get();
 			dbs = arangoDB.getDatabases().get();
 			assertThat(dbs.size(), is(greaterThan(dbCount)));
 			assertThat(dbs, hasItem("_system"));

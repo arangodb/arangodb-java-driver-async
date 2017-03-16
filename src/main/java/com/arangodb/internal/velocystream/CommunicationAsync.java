@@ -56,6 +56,7 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 		private Boolean useSsl;
 		private SSLContext sslContext;
 		private Integer chunksize;
+		private Integer maxConnections;
 
 		public Builder(final HostHandler hostHandler) {
 			super();
@@ -92,29 +93,41 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 			return this;
 		}
 
+		public Builder maxConnections(final Integer maxConnections) {
+			this.maxConnections = maxConnections;
+			return this;
+		}
+
 		public Communication<CompletableFuture<Response>, ConnectionAsync> build(
 			final VPack vpack,
 			final CollectionCache collectionCache) {
 			return new CommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, vpack,
-					collectionCache, chunksize);
+					collectionCache, chunksize, maxConnections);
 		}
 	}
 
 	private CommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
 		final String password, final Boolean useSsl, final SSLContext sslContext, final VPack vpack,
-		final CollectionCache collectionCache, final Integer chunksize) {
+		final CollectionCache collectionCache, final Integer chunksize, final Integer maxConnections) {
 		super(timeout, user, password, useSsl, sslContext, vpack, collectionCache, chunksize,
-				new ConnectionAsync.Builder(hostHandler, new MessageStore()).timeout(timeout).useSsl(useSsl)
-						.sslContext(sslContext).build());
+				new ConnectionPool<ConnectionAsync>(maxConnections) {
+					private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder(hostHandler,
+							new MessageStore()).timeout(timeout).useSsl(useSsl).sslContext(sslContext);
+
+					@Override
+					public ConnectionAsync createConnection() {
+						return builder.build();
+					}
+				});
 	}
 
 	@Override
-	public CompletableFuture<Response> execute(final Request request) {
+	public CompletableFuture<Response> execute(final Request request, final ConnectionAsync connection) {
 		connect(connection);
 		final CompletableFuture<Response> rfuture = new CompletableFuture<>();
 		try {
 			final Message message = createMessage(request);
-			send(message).whenComplete((m, ex) -> {
+			send(message, connection).whenComplete((m, ex) -> {
 				if (m != null) {
 					try {
 						collectionCache.setDb(request.getDatabase());
@@ -151,7 +164,8 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 		return rfuture;
 	}
 
-	private CompletableFuture<Message> send(final Message message) throws IOException {
+	private CompletableFuture<Message> send(final Message message, final ConnectionAsync connection)
+			throws IOException {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug(String.format("Send Message (id=%s, head=%s, body=%s)", message.getId(), message.getHead(),
 				message.getBody() != null ? message.getBody() : "{}"));
@@ -160,12 +174,12 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 	}
 
 	@Override
-	protected void authenticate() {
+	protected void authenticate(final ConnectionAsync connection) {
 		Response response = null;
 		try {
 			response = execute(
-				new AuthenticationRequest(user, password != null ? password : "", ArangoDBConstants.ENCRYPTION_PLAIN))
-						.get();
+				new AuthenticationRequest(user, password != null ? password : "", ArangoDBConstants.ENCRYPTION_PLAIN),
+				connection).get();
 		} catch (final InterruptedException e) {
 			throw new ArangoDBException(e);
 		} catch (final ExecutionException e) {

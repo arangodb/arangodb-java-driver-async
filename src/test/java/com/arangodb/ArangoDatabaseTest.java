@@ -139,7 +139,7 @@ public class ArangoDatabaseTest extends BaseTest {
 	@Test
 	public void getIndex() throws InterruptedException, ExecutionException {
 		try {
-			db.createCollection(COLLECTION_NAME, null);
+			db.createCollection(COLLECTION_NAME, null).get();
 			final Collection<String> fields = new ArrayList<>();
 			fields.add("a");
 			final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
@@ -158,7 +158,7 @@ public class ArangoDatabaseTest extends BaseTest {
 	@Test
 	public void deleteIndex() throws InterruptedException, ExecutionException {
 		try {
-			db.createCollection(COLLECTION_NAME, null);
+			db.createCollection(COLLECTION_NAME, null).get();
 			final Collection<String> fields = new ArrayList<>();
 			fields.add("a");
 			final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
