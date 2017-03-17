@@ -26,8 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import com.arangodb.ArangoDBException;
 import com.arangodb.internal.velocystream.Communication;
 import com.arangodb.internal.velocystream.ConnectionAsync;
-import com.arangodb.velocypack.VPack;
-import com.arangodb.velocypack.VPackParser;
+import com.arangodb.util.ArangoUtil;
 import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.Request;
 import com.arangodb.velocystream.Response;
@@ -39,9 +38,8 @@ import com.arangodb.velocystream.Response;
 public class ArangoExecutorAsync extends ArangoExecutor<CompletableFuture<Response>, ConnectionAsync> {
 
 	public ArangoExecutorAsync(final Communication<CompletableFuture<Response>, ConnectionAsync> communication,
-		final VPack vpacker, final VPack vpackerNull, final VPackParser vpackParser, final DocumentCache documentCache,
-		final CollectionCache collectionCache) {
-		super(communication, vpacker, vpackerNull, vpackParser, documentCache, collectionCache);
+		final ArangoUtil util, final DocumentCache documentCache, final CollectionCache collectionCache) {
+		super(communication, util, documentCache, collectionCache);
 	}
 
 	public <T> CompletableFuture<T> execute(final Request request, final Type type) {

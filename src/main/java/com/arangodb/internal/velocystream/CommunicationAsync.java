@@ -33,7 +33,7 @@ import com.arangodb.ArangoDBException;
 import com.arangodb.entity.ErrorEntity;
 import com.arangodb.internal.ArangoDBConstants;
 import com.arangodb.internal.CollectionCache;
-import com.arangodb.velocypack.VPack;
+import com.arangodb.util.ArangoUtil;
 import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocypack.exception.VPackParserException;
 import com.arangodb.velocystream.Request;
@@ -99,17 +99,17 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 		}
 
 		public Communication<CompletableFuture<Response>, ConnectionAsync> build(
-			final VPack vpack,
+			final ArangoUtil util,
 			final CollectionCache collectionCache) {
-			return new CommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, vpack,
+			return new CommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, util,
 					collectionCache, chunksize, maxConnections);
 		}
 	}
 
 	private CommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
-		final String password, final Boolean useSsl, final SSLContext sslContext, final VPack vpack,
+		final String password, final Boolean useSsl, final SSLContext sslContext, final ArangoUtil util,
 		final CollectionCache collectionCache, final Integer chunksize, final Integer maxConnections) {
-		super(timeout, user, password, useSsl, sslContext, vpack, collectionCache, chunksize,
+		super(timeout, user, password, useSsl, sslContext, util, collectionCache, chunksize,
 				new ConnectionPool<ConnectionAsync>(maxConnections) {
 					private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder(hostHandler,
 							new MessageStore()).timeout(timeout).useSsl(useSsl).sslContext(sslContext);
@@ -134,8 +134,7 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 						final Response response = createResponse(m);
 						if (response.getResponseCode() >= 300) {
 							if (response.getBody() != null) {
-								final ErrorEntity errorEntity = vpack.deserialize(response.getBody(),
-									ErrorEntity.class);
+								final ErrorEntity errorEntity = util.deserialize(response.getBody(), ErrorEntity.class);
 								final String errorMessage = String.format("Response: %s, Error: %s - %s",
 									errorEntity.getCode(), errorEntity.getErrorNum(), errorEntity.getErrorMessage());
 								rfuture.completeExceptionally(new ArangoDBException(errorMessage));
