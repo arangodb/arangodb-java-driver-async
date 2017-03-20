@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import com.arangodb.entity.AqlExecutionExplainEntity;
 import com.arangodb.entity.AqlFunctionEntity;
 import com.arangodb.entity.AqlParseEntity;
+import com.arangodb.entity.ArangoDBVersion;
 import com.arangodb.entity.CollectionEntity;
 import com.arangodb.entity.CursorEntity;
 import com.arangodb.entity.DatabaseEntity;
@@ -75,6 +76,29 @@ public class ArangoDatabaseAsync extends
 	protected ArangoDatabaseAsync(final CommunicationAsync communication, final ArangoUtil util,
 		final DocumentCache documentCache, final CollectionCache collectionCache, final String name) {
 		super(null, new ArangoExecutorAsync(communication, util, documentCache, collectionCache), name);
+	}
+
+	/**
+	 * Returns the server name and version number.
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/MiscellaneousFunctions/index.html#return-server-version">API
+	 *      Documentation</a>
+	 * @return the server version, number
+	 */
+	public CompletableFuture<ArangoDBVersion> getVersion() {
+		return executor.execute(getVersionRequest(), ArangoDBVersion.class);
+	}
+
+	/**
+	 * Retrieves a list of all databases the current user can access
+	 * 
+	 * @see <a href=
+	 *      "https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#list-of-accessible-databases">API
+	 *      Documentation</a>
+	 * @return a list of all databases the current user can access
+	 */
+	public CompletableFuture<Collection<String>> getAccessibleDatabases() {
+		return executor.execute(getAccessibleDatabasesRequest(), getDatabaseResponseDeserializer());
 	}
 
 	/**

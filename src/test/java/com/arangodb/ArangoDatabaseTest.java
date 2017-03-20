@@ -24,6 +24,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
@@ -48,6 +49,7 @@ import com.arangodb.entity.AqlExecutionExplainEntity.ExecutionPlan;
 import com.arangodb.entity.AqlFunctionEntity;
 import com.arangodb.entity.AqlParseEntity;
 import com.arangodb.entity.AqlParseEntity.AstNode;
+import com.arangodb.entity.ArangoDBVersion;
 import com.arangodb.entity.BaseDocument;
 import com.arangodb.entity.BaseEdgeDocument;
 import com.arangodb.entity.CollectionEntity;
@@ -80,6 +82,30 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	private static final String COLLECTION_NAME = "db_test";
 	private static final String GRAPH_NAME = "graph_test";
+
+	@Test
+	public void getVersion() throws InterruptedException, ExecutionException {
+		final CompletableFuture<ArangoDBVersion> f = db.getVersion();
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((version, ex) -> {
+			assertThat(version, is(notNullValue()));
+			assertThat(version.getServer(), is(notNullValue()));
+			assertThat(version.getVersion(), is(notNullValue()));
+		});
+		f.get();
+	}
+
+	@Test
+	public void getAccessibleDatabases() throws InterruptedException, ExecutionException {
+		final CompletableFuture<Collection<String>> f = db.getAccessibleDatabases();
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((dbs, ex) -> {
+			assertThat(dbs, is(notNullValue()));
+			assertThat(dbs.size(), greaterThan(0));
+			assertThat(dbs, hasItem("_system"));
+		});
+		f.get();
+	}
 
 	@Test
 	public void createCollection() throws InterruptedException, ExecutionException {
@@ -203,8 +229,8 @@ public class ArangoDatabaseTest extends BaseTest {
 			final CollectionsReadOptions options = new CollectionsReadOptions().excludeSystem(true);
 			final Collection<CollectionEntity> systemCollections = db.getCollections(options).get();
 			assertThat(systemCollections.size(), is(0));
-			db.createCollection(COLLECTION_NAME + "1", null);
-			db.createCollection(COLLECTION_NAME + "2", null);
+			db.createCollection(COLLECTION_NAME + "1", null).get();
+			db.createCollection(COLLECTION_NAME + "2", null).get();
 			final CompletableFuture<Collection<CollectionEntity>> f = db.getCollections(options);
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((collections, ex) -> {

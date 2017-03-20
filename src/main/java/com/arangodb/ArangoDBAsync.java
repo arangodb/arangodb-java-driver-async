@@ -399,7 +399,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	 * @return a list of all databases the current user can access
 	 */
 	public CompletableFuture<Collection<String>> getAccessibleDatabases() {
-		return executor.execute(getAccessibleDatabasesRequest(db().name()), getDatabaseResponseDeserializer());
+		return db().getAccessibleDatabases();
 	}
 
 	/**
@@ -426,7 +426,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	 * @return the server version, number
 	 */
 	public CompletableFuture<ArangoDBVersion> getVersion() {
-		return executor.execute(getVersionRequest(), ArangoDBVersion.class);
+		return db().getVersion();
 	}
 
 	/**

@@ -395,11 +395,11 @@ public class AQLActorsAndMoviesExample {
 	}
 
 	private static void createData() throws InterruptedException, ExecutionException {
-		db.createCollection("actors");
+		db.createCollection("actors").get();
 		final ArangoCollectionAsync actors = db.collection("actors");
-		db.createCollection("movies");
+		db.createCollection("movies").get();
 		final ArangoCollectionAsync movies = db.collection("movies");
-		db.createCollection("actsIn", new CollectionCreateOptions().type(CollectionType.EDGES));
+		db.createCollection("actsIn", new CollectionCreateOptions().type(CollectionType.EDGES)).get();
 		final ArangoCollectionAsync actsIn = db.collection("actsIn");
 
 		final String theMatrix = saveMovie(movies, "TheMatrix", "The Matrix", 1999, "Welcome to the Real World")
