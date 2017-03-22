@@ -26,7 +26,7 @@
 		<hamcrest-all.version>1.3</hamcrest-all.version>
 		<junit.version>4.12</junit.version>
 		<arangodb-java-driver.version>${project.version}</arangodb-java-driver.version>
-		<arangodb.velocypack.module.jdk8.version>1.0.0</arangodb.velocypack.module.jdk8.version>
+		<arangodb.velocypack.module.jdk8.version>1.0.1</arangodb.velocypack.module.jdk8.version>
 	</properties>
 
 	<developers>
