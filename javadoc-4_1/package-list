@@ -1,4 +1,3 @@
 com.arangodb
 com.arangodb.internal
-com.arangodb.internal.velocypack
 com.arangodb.internal.velocystream
