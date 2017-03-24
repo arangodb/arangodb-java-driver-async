@@ -81,3 +81,4 @@ ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().registerModule(new VPackJod
 * [Documentation](docs/documentation.md)
 * [Examples](src/test/java/com/arangodb/example)
 * [JavaDoc](http://arangodb.github.io/arangodb-java-driver-async/javadoc-4_1/index.html)
+* [JavaDoc VelocyPack](http://arangodb.github.io/java-velocypack/javadoc-1_0/index.html)
