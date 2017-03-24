@@ -1,10 +1,10 @@
-v4.1.11 (2017-03-xx)
+v4.1.11 (2017-03-24)
 ---------------------------
+* fixed exception handling in Connection
+* extracted VelocyPack implementation to https://github.com/arangodb/java-velocypack
 * added convenience methods (ArangoDatabase.arango(), ArangoCollection.db(), ArangoGraph.db())
 * added convenience methods (ArangoCollection.getIndex(String), .deleteIndex(key))
-* fixed exception handling in Connection (issue #110)
-* added connection pooling (issue #103)
-* extracted VelocyPack implementation to https://github.com/arangodb/java-velocypack
+* added connection pooling
 * added extension point for VelocyPack serialization (ArangoDBAsync.registerModule())
 * added dependency java-velocypack-module-jdk8
 * added support for replacing build-in VelocyPack serializer/deserializer
