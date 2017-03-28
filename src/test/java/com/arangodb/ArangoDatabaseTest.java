@@ -827,6 +827,26 @@ public class ArangoDatabaseTest extends BaseTest {
 		}
 	}
 
+	protected static class TransactionTestEntity {
+		private String value;
+
+		public TransactionTestEntity() {
+			super();
+		}
+	}
+
+	@Test
+	public void transactionPojoReturn() {
+		final String action = "function() { return {'value':'hello world'}; }";
+		final CompletableFuture<TransactionTestEntity> f = db.transaction(action, TransactionTestEntity.class,
+			new TransactionOptions());
+		assertThat(f, is(notNullValue()));
+		f.whenComplete((res, ex) -> {
+			assertThat(res, is(notNullValue()));
+			assertThat(res.value, is("hello world"));
+		});
+	}
+
 	@Test
 	public void getInfo() throws InterruptedException, ExecutionException {
 		final CompletableFuture<DatabaseEntity> f = db.getInfo();
