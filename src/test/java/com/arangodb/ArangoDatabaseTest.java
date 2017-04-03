@@ -523,6 +523,34 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
+	public void queryCursor() throws ArangoDBException, InterruptedException, ExecutionException {
+		try {
+			db.createCollection(COLLECTION_NAME, null).get();
+			final int numbDocs = 10;
+			for (int i = 0; i < numbDocs; i++) {
+				db.collection(COLLECTION_NAME).insertDocument(new BaseDocument(), null).get();
+			}
+
+			final int batchSize = 5;
+			final ArangoCursorAsync<String> cursor = db.query("for i in db_test return i._id", null,
+				new AqlQueryOptions().batchSize(batchSize).count(true), String.class).get();
+			assertThat(cursor, is(notNullValue()));
+			assertThat(cursor.getCount(), is(numbDocs));
+
+			final ArangoCursorAsync<String> cursor2 = db.cursor(cursor.getId(), String.class).get();
+			assertThat(cursor2, is(notNullValue()));
+			assertThat(cursor2.getCount(), is(numbDocs));
+			assertThat(cursor2.hasNext(), is(true));
+
+			for (int i = 0; i < batchSize; i++, cursor.next()) {
+				assertThat(cursor.hasNext(), is(i != batchSize));
+			}
+		} finally {
+			db.collection(COLLECTION_NAME).drop().get();
+		}
+	}
+
+	@Test
 	public void changeQueryTrackingProperties() throws InterruptedException, ExecutionException {
 		try {
 			QueryTrackingPropertiesEntity properties = db.getQueryTrackingProperties().get();

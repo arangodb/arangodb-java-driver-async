@@ -1,3 +1,7 @@
+v4.1.12 (2017-04-xx)
+---------------------------
+* added ArangoDatabaseAsync.cursor()
+
 v4.1.11 (2017-03-24)
 ---------------------------
 * fixed exception handling in Connection

@@ -250,6 +250,7 @@ public class ArangoDatabaseAsync extends
 	 * @param type
 	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
 	 * @return cursor of the results
+	 * @throws ArangoDBException
 	 */
 	public <T> CompletableFuture<ArangoCursorAsync<T>> query(
 		final String query,
@@ -259,28 +260,54 @@ public class ArangoDatabaseAsync extends
 		final Request request = queryRequest(query, bindVars, options);
 		final CompletableFuture<CursorEntity> execution = executor.execute(request, CursorEntity.class);
 		return execution.thenApply(result -> {
-			return new ArangoCursorAsync<>(this, new ArangoCursorExecute() {
-				@Override
-				public CursorEntity next(final String id) {
-					final CompletableFuture<CursorEntity> result = executor.execute(queryNextRequest(id),
-						CursorEntity.class);
-					try {
-						return result.get();
-					} catch (InterruptedException | ExecutionException e) {
-						throw new ArangoDBException(e);
-					}
-				}
-
-				@Override
-				public void close(final String id) {
-					try {
-						executor.execute(queryCloseRequest(id), Void.class).get();
-					} catch (InterruptedException | ExecutionException e) {
-						throw new ArangoDBException(e);
-					}
-				}
-			}, type, result);
+			return createCursor(result, type);
 		});
+	}
+
+	/**
+	 * Return an cursor from the given cursor-ID if still existing
+	 * 
+	 * @see <a href=
+	 *      "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#read-next-batch-from-cursor">API
+	 *      Documentation</a>
+	 * @param cursorId
+	 *            The ID of the cursor
+	 * @param type
+	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
+	 * @return cursor of the results
+	 * @throws ArangoDBException
+	 */
+	public <T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type)
+			throws ArangoDBException {
+		final CompletableFuture<CursorEntity> execution = executor.execute(queryNextRequest(cursorId),
+			CursorEntity.class);
+		return execution.thenApply(result -> {
+			return createCursor(result, type);
+		});
+	}
+
+	private <T> ArangoCursorAsync<T> createCursor(final CursorEntity result, final Class<T> type) {
+		return new ArangoCursorAsync<>(this, new ArangoCursorExecute() {
+			@Override
+			public CursorEntity next(final String id) {
+				final CompletableFuture<CursorEntity> result = executor.execute(queryNextRequest(id),
+					CursorEntity.class);
+				try {
+					return result.get();
+				} catch (InterruptedException | ExecutionException e) {
+					throw new ArangoDBException(e);
+				}
+			}
+
+			@Override
+			public void close(final String id) {
+				try {
+					executor.execute(queryCloseRequest(id), Void.class).get();
+				} catch (InterruptedException | ExecutionException e) {
+					throw new ArangoDBException(e);
+				}
+			}
+		}, type, result);
 	}
 
 	/**
