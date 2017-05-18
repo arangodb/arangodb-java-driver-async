@@ -91,15 +91,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentCreateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.insertDocument(new BaseDocument(), null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(ex, is(nullValue()));
-			assertThat(doc.getId(), is(notNullValue()));
-			assertThat(doc.getKey(), is(notNullValue()));
-			assertThat(doc.getRev(), is(notNullValue()));
-			assertThat(doc.getNew(), is(nullValue()));
-			assertThat(doc.getId(), is(COLLECTION_NAME + "/" + doc.getKey()));
-		});
-		f.get();
+		final DocumentCreateEntity<BaseDocument> doc = f.get();
+		assertThat(doc, is(notNullValue()));
+		assertThat(doc.getId(), is(notNullValue()));
+		assertThat(doc.getKey(), is(notNullValue()));
+		assertThat(doc.getRev(), is(notNullValue()));
+		assertThat(doc.getNew(), is(nullValue()));
+		assertThat(doc.getId(), is(COLLECTION_NAME + "/" + doc.getKey()));
 	}
 
 	@Test
@@ -108,14 +106,12 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentCreateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.insertDocument(new BaseDocument(), options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.getId(), is(notNullValue()));
-			assertThat(doc.getKey(), is(notNullValue()));
-			assertThat(doc.getRev(), is(notNullValue()));
-			assertThat(doc.getNew(), is(notNullValue()));
-		});
-		f.get();
+		final DocumentCreateEntity<BaseDocument> doc = f.get();
+		assertThat(doc, is(notNullValue()));
+		assertThat(doc.getId(), is(notNullValue()));
+		assertThat(doc.getKey(), is(notNullValue()));
+		assertThat(doc.getRev(), is(notNullValue()));
+		assertThat(doc.getNew(), is(notNullValue()));
 	}
 
 	@Test
@@ -124,14 +120,12 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentCreateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.insertDocument(new BaseDocument(), options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.getId(), is(notNullValue()));
-			assertThat(doc.getKey(), is(notNullValue()));
-			assertThat(doc.getRev(), is(notNullValue()));
-			assertThat(doc.getNew(), is(nullValue()));
-		});
-		f.get();
+		final DocumentCreateEntity<BaseDocument> doc = f.get();
+		assertThat(doc, is(notNullValue()));
+		assertThat(doc.getId(), is(notNullValue()));
+		assertThat(doc.getKey(), is(notNullValue()));
+		assertThat(doc.getRev(), is(notNullValue()));
+		assertThat(doc.getNew(), is(nullValue()));
 	}
 
 	@Test
@@ -139,13 +133,11 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentCreateEntity<String>> f = db.collection(COLLECTION_NAME)
 				.insertDocument("{\"_key\":\"docRaw\",\"a\":\"test\"}", null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.getId(), is(notNullValue()));
-			assertThat(doc.getKey(), is(notNullValue()));
-			assertThat(doc.getRev(), is(notNullValue()));
-		});
-		f.get();
+		final DocumentCreateEntity<String> doc = f.get();
+		assertThat(doc, is(notNullValue()));
+		assertThat(doc.getId(), is(notNullValue()));
+		assertThat(doc.getKey(), is(notNullValue()));
+		assertThat(doc.getRev(), is(notNullValue()));
 	}
 
 	@Test
@@ -156,11 +148,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
 			BaseDocument.class, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getKey(), is(createResult.getKey()));
-			assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
-		});
-		f.get();
+		final BaseDocument readResult = f.get();
+		assertThat(readResult.getKey(), is(createResult.getKey()));
+		assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
 	}
 
 	@Test
@@ -172,11 +162,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
 			BaseDocument.class, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getKey(), is(createResult.getKey()));
-			assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
-		});
-		f.get();
+		final BaseDocument readResult = f.get();
+		assertThat(readResult.getKey(), is(createResult.getKey()));
+		assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
 	}
 
 	@Test
@@ -188,10 +176,8 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
 			BaseDocument.class, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(nullValue()));
-		});
-		f.get();
+		final BaseDocument doc = f.get();
+		assertThat(doc, is(nullValue()));
 	}
 
 	@Test
@@ -203,11 +189,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
 			BaseDocument.class, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getKey(), is(createResult.getKey()));
-			assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
-		});
-		f.get();
+		final BaseDocument readResult = f.get();
+		assertThat(readResult.getKey(), is(createResult.getKey()));
+		assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
 	}
 
 	@Test
@@ -219,10 +203,8 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
 			BaseDocument.class, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(nullValue()));
-		});
-		f.get();
+		final BaseDocument doc = f.get();
+		assertThat(doc, is(nullValue()));
 	}
 
 	@Test
@@ -230,21 +212,17 @@ public class ArangoCollectionTest extends BaseTest {
 		db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"docRaw\",\"a\":\"test\"}", null).get();
 		final CompletableFuture<String> f = db.collection(COLLECTION_NAME).getDocument("docRaw", String.class, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.contains("\"_key\":\"docRaw\""), is(true));
-			assertThat(readResult.contains("\"_id\":\"db_collection_test\\/docRaw\""), is(true));
-		});
-		f.get();
+		final String readResult = f.get();
+		assertThat(readResult.contains("\"_key\":\"docRaw\""), is(true));
+		assertThat(readResult.contains("\"_id\":\"db_collection_test\\/docRaw\""), is(true));
 	}
 
 	@Test
 	public void getDocumentNotFound() throws InterruptedException, ExecutionException {
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument("no", BaseDocument.class);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(nullValue()));
-		});
-		f.get();
+		final BaseDocument doc = f.get();
+		assertThat(doc, is(nullValue()));
 	}
 
 	@Test(expected = ArangoDBException.class)
@@ -265,15 +243,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.updateDocument(createResult.getKey(), doc, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getNew(), is(nullValue()));
-			assertThat(updateResult.getOld(), is(nullValue()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
 		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+		assertThat(updateResult, is(notNullValue()));
+		assertThat(updateResult.getId(), is(createResult.getId()));
+		assertThat(updateResult.getNew(), is(nullValue()));
+		assertThat(updateResult.getOld(), is(nullValue()));
+		assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+		assertThat(updateResult.getOldRev(), is(createResult.getRev()));
 
 		final BaseDocument readResult = db.collection(COLLECTION_NAME)
 				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
@@ -300,13 +276,11 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.updateDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
 		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+		assertThat(updateResult, is(notNullValue()));
+		assertThat(updateResult.getId(), is(createResult.getId()));
+		assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+		assertThat(updateResult.getOldRev(), is(createResult.getRev()));
 
 		final BaseDocument readResult = db.collection(COLLECTION_NAME)
 				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
@@ -349,19 +323,17 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.updateDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-			assertThat(updateResult.getNew(), is(notNullValue()));
-			assertThat(updateResult.getNew().getKey(), is(createResult.getKey()));
-			assertThat(updateResult.getNew().getRevision(), is(not(createResult.getRev())));
-			assertThat(updateResult.getNew().getAttribute("a"), is(notNullValue()));
-			assertThat(String.valueOf(updateResult.getNew().getAttribute("a")), is("test1"));
-			assertThat(updateResult.getNew().getAttribute("b"), is(notNullValue()));
-			assertThat(String.valueOf(updateResult.getNew().getAttribute("b")), is("test"));
-		});
-		f.get();
+		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+		assertThat(updateResult, is(notNullValue()));
+		assertThat(updateResult.getId(), is(createResult.getId()));
+		assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+		assertThat(updateResult.getNew(), is(notNullValue()));
+		assertThat(updateResult.getNew().getKey(), is(createResult.getKey()));
+		assertThat(updateResult.getNew().getRevision(), is(not(createResult.getRev())));
+		assertThat(updateResult.getNew().getAttribute("a"), is(notNullValue()));
+		assertThat(String.valueOf(updateResult.getNew().getAttribute("a")), is("test1"));
+		assertThat(updateResult.getNew().getAttribute("b"), is(notNullValue()));
+		assertThat(String.valueOf(updateResult.getNew().getAttribute("b")), is("test"));
 	}
 
 	@Test
@@ -376,18 +348,16 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.updateDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-			assertThat(updateResult.getOld(), is(notNullValue()));
-			assertThat(updateResult.getOld().getKey(), is(createResult.getKey()));
-			assertThat(updateResult.getOld().getRevision(), is(createResult.getRev()));
-			assertThat(updateResult.getOld().getAttribute("a"), is(notNullValue()));
-			assertThat(String.valueOf(updateResult.getOld().getAttribute("a")), is("test"));
-			assertThat(updateResult.getOld().getProperties().keySet(), not(hasItem("b")));
-		});
-		f.get();
+		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+		assertThat(updateResult, is(notNullValue()));
+		assertThat(updateResult.getId(), is(createResult.getId()));
+		assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+		assertThat(updateResult.getOld(), is(notNullValue()));
+		assertThat(updateResult.getOld().getKey(), is(createResult.getKey()));
+		assertThat(updateResult.getOld().getRevision(), is(createResult.getRev()));
+		assertThat(updateResult.getOld().getAttribute("a"), is(notNullValue()));
+		assertThat(String.valueOf(updateResult.getOld().getAttribute("a")), is("test"));
+		assertThat(updateResult.getOld().getProperties().keySet(), not(hasItem("b")));
 	}
 
 	@Test
@@ -401,13 +371,11 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.updateDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		f.get();
+		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+		assertThat(updateResult, is(notNullValue()));
+		assertThat(updateResult.getId(), is(createResult.getId()));
+		assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+		assertThat(updateResult.getOldRev(), is(createResult.getRev()));
 
 		final BaseDocument readResult = db.collection(COLLECTION_NAME)
 				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
@@ -426,13 +394,11 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.updateDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		f.get();
+		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+		assertThat(updateResult, is(notNullValue()));
+		assertThat(updateResult.getId(), is(createResult.getId()));
+		assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+		assertThat(updateResult.getOldRev(), is(createResult.getRev()));
 
 		final BaseDocument readResult = db.collection(COLLECTION_NAME)
 				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
@@ -458,13 +424,11 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.updateDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		f.get();
+		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+		assertThat(updateResult, is(notNullValue()));
+		assertThat(updateResult.getId(), is(createResult.getId()));
+		assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+		assertThat(updateResult.getOldRev(), is(createResult.getRev()));
 
 		final BaseDocument readResult = db.collection(COLLECTION_NAME)
 				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
@@ -492,13 +456,11 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.updateDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		f.get();
+		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+		assertThat(updateResult, is(notNullValue()));
+		assertThat(updateResult.getId(), is(createResult.getId()));
+		assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+		assertThat(updateResult.getOldRev(), is(createResult.getRev()));
 
 		final BaseDocument readResult = db.collection(COLLECTION_NAME)
 				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
@@ -537,15 +499,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.replaceDocument(createResult.getKey(), doc, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((replaceResult, ex) -> {
-			assertThat(replaceResult, is(notNullValue()));
-			assertThat(replaceResult.getId(), is(createResult.getId()));
-			assertThat(replaceResult.getNew(), is(nullValue()));
-			assertThat(replaceResult.getOld(), is(nullValue()));
-			assertThat(replaceResult.getRev(), is(not(replaceResult.getOldRev())));
-			assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
-		});
 		final DocumentUpdateEntity<BaseDocument> replaceResult = f.get();
+		assertThat(replaceResult, is(notNullValue()));
+		assertThat(replaceResult.getId(), is(createResult.getId()));
+		assertThat(replaceResult.getNew(), is(nullValue()));
+		assertThat(replaceResult.getOld(), is(nullValue()));
+		assertThat(replaceResult.getRev(), is(not(replaceResult.getOldRev())));
+		assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
 
 		final BaseDocument readResult = db.collection(COLLECTION_NAME)
 				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
@@ -568,13 +528,11 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.replaceDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((replaceResult, ex) -> {
-			assertThat(replaceResult, is(notNullValue()));
-			assertThat(replaceResult.getId(), is(createResult.getId()));
-			assertThat(replaceResult.getRev(), is(not(replaceResult.getOldRev())));
-			assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
-		});
 		final DocumentUpdateEntity<BaseDocument> replaceResult = f.get();
+		assertThat(replaceResult, is(notNullValue()));
+		assertThat(replaceResult.getId(), is(createResult.getId()));
+		assertThat(replaceResult.getRev(), is(not(replaceResult.getOldRev())));
+		assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
 
 		final BaseDocument readResult = db.collection(COLLECTION_NAME)
 				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
@@ -630,18 +588,16 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.replaceDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((replaceResult, ex) -> {
-			assertThat(replaceResult, is(notNullValue()));
-			assertThat(replaceResult.getId(), is(createResult.getId()));
-			assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
-			assertThat(replaceResult.getNew(), is(notNullValue()));
-			assertThat(replaceResult.getNew().getKey(), is(createResult.getKey()));
-			assertThat(replaceResult.getNew().getRevision(), is(not(createResult.getRev())));
-			assertThat(replaceResult.getNew().getProperties().keySet(), not(hasItem("a")));
-			assertThat(replaceResult.getNew().getAttribute("b"), is(notNullValue()));
-			assertThat(String.valueOf(replaceResult.getNew().getAttribute("b")), is("test"));
-		});
-		f.get();
+		final DocumentUpdateEntity<BaseDocument> replaceResult = f.get();
+		assertThat(replaceResult, is(notNullValue()));
+		assertThat(replaceResult.getId(), is(createResult.getId()));
+		assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
+		assertThat(replaceResult.getNew(), is(notNullValue()));
+		assertThat(replaceResult.getNew().getKey(), is(createResult.getKey()));
+		assertThat(replaceResult.getNew().getRevision(), is(not(createResult.getRev())));
+		assertThat(replaceResult.getNew().getProperties().keySet(), not(hasItem("a")));
+		assertThat(replaceResult.getNew().getAttribute("b"), is(notNullValue()));
+		assertThat(String.valueOf(replaceResult.getNew().getAttribute("b")), is("test"));
 	}
 
 	@Test
@@ -656,18 +612,16 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.replaceDocument(createResult.getKey(), doc, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((replaceResult, ex) -> {
-			assertThat(replaceResult, is(notNullValue()));
-			assertThat(replaceResult.getId(), is(createResult.getId()));
-			assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
-			assertThat(replaceResult.getOld(), is(notNullValue()));
-			assertThat(replaceResult.getOld().getKey(), is(createResult.getKey()));
-			assertThat(replaceResult.getOld().getRevision(), is(createResult.getRev()));
-			assertThat(replaceResult.getOld().getAttribute("a"), is(notNullValue()));
-			assertThat(String.valueOf(replaceResult.getOld().getAttribute("a")), is("test"));
-			assertThat(replaceResult.getOld().getProperties().keySet(), not(hasItem("b")));
-		});
-		f.get();
+		final DocumentUpdateEntity<BaseDocument> replaceResult = f.get();
+		assertThat(replaceResult, is(notNullValue()));
+		assertThat(replaceResult.getId(), is(createResult.getId()));
+		assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
+		assertThat(replaceResult.getOld(), is(notNullValue()));
+		assertThat(replaceResult.getOld().getKey(), is(createResult.getKey()));
+		assertThat(replaceResult.getOld().getRevision(), is(createResult.getRev()));
+		assertThat(replaceResult.getOld().getAttribute("a"), is(notNullValue()));
+		assertThat(String.valueOf(replaceResult.getOld().getAttribute("a")), is("test"));
+		assertThat(replaceResult.getOld().getProperties().keySet(), not(hasItem("b")));
 	}
 
 	@Test
@@ -679,10 +633,8 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
 			BaseDocument.class, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((document, ex) -> {
-			assertThat(document, is(nullValue()));
-		});
-		f.get();
+		final BaseDocument document = f.get();
+		assertThat(document, is(nullValue()));
 	}
 
 	@Test
@@ -695,13 +647,11 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentDeleteEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.deleteDocument(createResult.getKey(), BaseDocument.class, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult.getOld(), is(notNullValue()));
-			assertThat(deleteResult.getOld(), instanceOf(BaseDocument.class));
-			assertThat(deleteResult.getOld().getAttribute("a"), is(notNullValue()));
-			assertThat(String.valueOf(deleteResult.getOld().getAttribute("a")), is("test"));
-		});
-		f.get();
+		final DocumentDeleteEntity<BaseDocument> deleteResult = f.get();
+		assertThat(deleteResult.getOld(), is(notNullValue()));
+		assertThat(deleteResult.getOld(), instanceOf(BaseDocument.class));
+		assertThat(deleteResult.getOld().getAttribute("a"), is(notNullValue()));
+		assertThat(String.valueOf(deleteResult.getOld().getAttribute("a")), is("test"));
 	}
 
 	@Test
@@ -714,10 +664,8 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
 			BaseDocument.class, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((document, ex) -> {
-			assertThat(document, is(nullValue()));
-		});
-		f.get();
+		final BaseDocument document = f.get();
+		assertThat(document, is(nullValue()));
 	}
 
 	@Test
@@ -740,11 +688,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).getIndex(createResult.getId());
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getId(), is(createResult.getId()));
-			assertThat(readResult.getType(), is(createResult.getType()));
-		});
-		f.get();
+		final IndexEntity readResult = f.get();
+		assertThat(readResult.getId(), is(createResult.getId()));
+		assertThat(readResult.getType(), is(createResult.getType()));
 	}
 
 	@Test
@@ -755,11 +701,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME)
 				.getIndex(createResult.getId().split("/")[1]);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getId(), is(createResult.getId()));
-			assertThat(readResult.getType(), is(createResult.getType()));
-		});
-		f.get();
+		final IndexEntity readResult = f.get();
+		assertThat(readResult.getId(), is(createResult.getId()));
+		assertThat(readResult.getType(), is(createResult.getType()));
 	}
 
 	@Test
@@ -769,15 +713,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
 		final CompletableFuture<String> f = db.collection(COLLECTION_NAME).deleteIndex(createResult.getId());
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((id, ex) -> {
-			assertThat(id, is(createResult.getId()));
-			try {
-				db.getIndex(id);
-				fail();
-			} catch (final ArangoDBException e) {
-			}
-		});
-		f.get();
+		final String id = f.get();
+		assertThat(id, is(createResult.getId()));
+		try {
+			db.getIndex(id).get();
+			fail();
+		} catch (final Exception e) {
+		}
 	}
 
 	@Test
@@ -788,15 +730,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<String> f = db.collection(COLLECTION_NAME)
 				.deleteIndex(createResult.getId().split("/")[1]);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((id, ex) -> {
-			assertThat(id, is(createResult.getId()));
-			try {
-				db.getIndex(id);
-				fail();
-			} catch (final ArangoDBException e) {
-			}
-		});
-		f.get();
+		final String id = f.get();
+		assertThat(id, is(createResult.getId()));
+		try {
+			db.getIndex(id).get();
+			fail();
+		} catch (final Exception e) {
+		}
 	}
 
 	@Test
@@ -806,21 +746,19 @@ public class ArangoCollectionTest extends BaseTest {
 		fields.add("b");
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createHashIndex(fields, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(nullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getFields(), hasItem("b"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			assertThat(indexResult.getSelectivityEstimate(), is(1));
-			assertThat(indexResult.getSparse(), is(false));
-			assertThat(indexResult.getType(), is(IndexType.hash));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
+		final IndexEntity indexResult = f.get();
+		assertThat(indexResult, is(notNullValue()));
+		assertThat(indexResult.getConstraint(), is(nullValue()));
+		assertThat(indexResult.getFields(), hasItem("a"));
+		assertThat(indexResult.getFields(), hasItem("b"));
+		assertThat(indexResult.getGeoJson(), is(nullValue()));
+		assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+		assertThat(indexResult.getIsNewlyCreated(), is(true));
+		assertThat(indexResult.getMinLength(), is(nullValue()));
+		assertThat(indexResult.getSelectivityEstimate(), is(1));
+		assertThat(indexResult.getSparse(), is(false));
+		assertThat(indexResult.getType(), is(IndexType.hash));
+		assertThat(indexResult.getUnique(), is(false));
 	}
 
 	@Test
@@ -829,20 +767,18 @@ public class ArangoCollectionTest extends BaseTest {
 		fields.add("a");
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createGeoIndex(fields, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(false));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getGeoJson(), is(false));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(true));
-			assertThat(indexResult.getType(), is(IndexType.geo1));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
+		final IndexEntity indexResult = f.get();
+		assertThat(indexResult, is(notNullValue()));
+		assertThat(indexResult.getConstraint(), is(false));
+		assertThat(indexResult.getFields(), hasItem("a"));
+		assertThat(indexResult.getGeoJson(), is(false));
+		assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+		assertThat(indexResult.getIsNewlyCreated(), is(true));
+		assertThat(indexResult.getMinLength(), is(nullValue()));
+		assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
+		assertThat(indexResult.getSparse(), is(true));
+		assertThat(indexResult.getType(), is(IndexType.geo1));
+		assertThat(indexResult.getUnique(), is(false));
 	}
 
 	@Test
@@ -852,21 +788,19 @@ public class ArangoCollectionTest extends BaseTest {
 		fields.add("b");
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createGeoIndex(fields, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(false));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getFields(), hasItem("b"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(true));
-			assertThat(indexResult.getType(), is(IndexType.geo2));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
+		final IndexEntity indexResult = f.get();
+		assertThat(indexResult, is(notNullValue()));
+		assertThat(indexResult.getConstraint(), is(false));
+		assertThat(indexResult.getFields(), hasItem("a"));
+		assertThat(indexResult.getFields(), hasItem("b"));
+		assertThat(indexResult.getGeoJson(), is(nullValue()));
+		assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+		assertThat(indexResult.getIsNewlyCreated(), is(true));
+		assertThat(indexResult.getMinLength(), is(nullValue()));
+		assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
+		assertThat(indexResult.getSparse(), is(true));
+		assertThat(indexResult.getType(), is(IndexType.geo2));
+		assertThat(indexResult.getUnique(), is(false));
 	}
 
 	@Test
@@ -876,21 +810,18 @@ public class ArangoCollectionTest extends BaseTest {
 		fields.add("b");
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createSkiplistIndex(fields, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(nullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getFields(), hasItem("b"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(false));
-			assertThat(indexResult.getType(), is(IndexType.skiplist));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
+		final IndexEntity indexResult = f.get();
+		assertThat(indexResult, is(notNullValue()));
+		assertThat(indexResult.getConstraint(), is(nullValue()));
+		assertThat(indexResult.getFields(), hasItem("a"));
+		assertThat(indexResult.getFields(), hasItem("b"));
+		assertThat(indexResult.getGeoJson(), is(nullValue()));
+		assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+		assertThat(indexResult.getIsNewlyCreated(), is(true));
+		assertThat(indexResult.getMinLength(), is(nullValue()));
+		assertThat(indexResult.getSparse(), is(false));
+		assertThat(indexResult.getType(), is(IndexType.skiplist));
+		assertThat(indexResult.getUnique(), is(false));
 	}
 
 	@Test
@@ -900,21 +831,18 @@ public class ArangoCollectionTest extends BaseTest {
 		fields.add("b");
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createPersistentIndex(fields, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(nullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getFields(), hasItem("b"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(false));
-			assertThat(indexResult.getType(), is(IndexType.persistent));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
+		final IndexEntity indexResult = f.get();
+		assertThat(indexResult, is(notNullValue()));
+		assertThat(indexResult.getConstraint(), is(nullValue()));
+		assertThat(indexResult.getFields(), hasItem("a"));
+		assertThat(indexResult.getFields(), hasItem("b"));
+		assertThat(indexResult.getGeoJson(), is(nullValue()));
+		assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+		assertThat(indexResult.getIsNewlyCreated(), is(true));
+		assertThat(indexResult.getMinLength(), is(nullValue()));
+		assertThat(indexResult.getSparse(), is(false));
+		assertThat(indexResult.getType(), is(IndexType.persistent));
+		assertThat(indexResult.getUnique(), is(false));
 	}
 
 	@Test
@@ -923,19 +851,17 @@ public class ArangoCollectionTest extends BaseTest {
 		fields.add("a");
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createFulltextIndex(fields, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(nullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(true));
-			assertThat(indexResult.getType(), is(IndexType.fulltext));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
+		final IndexEntity indexResult = f.get();
+		assertThat(indexResult, is(notNullValue()));
+		assertThat(indexResult.getConstraint(), is(nullValue()));
+		assertThat(indexResult.getFields(), hasItem("a"));
+		assertThat(indexResult.getGeoJson(), is(nullValue()));
+		assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+		assertThat(indexResult.getIsNewlyCreated(), is(true));
+		assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
+		assertThat(indexResult.getSparse(), is(true));
+		assertThat(indexResult.getType(), is(IndexType.fulltext));
+		assertThat(indexResult.getUnique(), is(false));
 	}
 
 	@Test
@@ -945,18 +871,16 @@ public class ArangoCollectionTest extends BaseTest {
 		db.collection(COLLECTION_NAME).createHashIndex(fields, null);
 		final CompletableFuture<Collection<IndexEntity>> f = db.collection(COLLECTION_NAME).getIndexes();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexes, ex) -> {
-			assertThat(indexes, is(notNullValue()));
-			assertThat(indexes.size(), is(2));
-			for (final IndexEntity i : indexes) {
-				assertThat(i.getType(), anyOf(is(IndexType.primary), is(IndexType.hash)));
-				if (i.getType() == IndexType.hash) {
-					assertThat(i.getFields().size(), is(1));
-					assertThat(i.getFields(), hasItem("a"));
-				}
+		final Collection<IndexEntity> indexes = f.get();
+		assertThat(indexes, is(notNullValue()));
+		assertThat(indexes.size(), is(2));
+		for (final IndexEntity i : indexes) {
+			assertThat(i.getType(), anyOf(is(IndexType.primary), is(IndexType.hash)));
+			if (i.getType() == IndexType.hash) {
+				assertThat(i.getFields().size(), is(1));
+				assertThat(i.getFields(), hasItem("a"));
 			}
-		});
-		f.get();
+		}
 	}
 
 	@Test
@@ -968,11 +892,9 @@ public class ArangoCollectionTest extends BaseTest {
 		assertThat(readResult.getKey(), is(doc.getKey()));
 		final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).truncate();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((truncateResult, ex) -> {
-			assertThat(truncateResult, is(notNullValue()));
-			assertThat(truncateResult.getId(), is(notNullValue()));
-		});
-		f.get();
+		final CollectionEntity truncateResult = f.get();
+		assertThat(truncateResult, is(notNullValue()));
+		assertThat(truncateResult.getId(), is(notNullValue()));
 		final BaseDocument document = db.collection(COLLECTION_NAME).getDocument(doc.getKey(), BaseDocument.class, null)
 				.get();
 		assertThat(document, is(nullValue()));
@@ -983,20 +905,16 @@ public class ArangoCollectionTest extends BaseTest {
 		{
 			final CompletableFuture<CollectionPropertiesEntity> f = db.collection(COLLECTION_NAME).count();
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((countEmpty, ex) -> {
-				assertThat(countEmpty, is(notNullValue()));
-				assertThat(countEmpty.getCount(), is(0L));
-			});
-			f.get();
+			final CollectionPropertiesEntity countEmpty = f.get();
+			assertThat(countEmpty, is(notNullValue()));
+			assertThat(countEmpty.getCount(), is(0L));
 		}
 		db.collection(COLLECTION_NAME).insertDocument("{}", null).get();
 		{
 			final CompletableFuture<CollectionPropertiesEntity> f = db.collection(COLLECTION_NAME).count();
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((count, ex) -> {
-				assertThat(count.getCount(), is(1L));
-			});
-			f.get();
+			final CollectionPropertiesEntity count = f.get();
+			assertThat(count.getCount(), is(1L));
 
 		}
 	}
@@ -1006,19 +924,15 @@ public class ArangoCollectionTest extends BaseTest {
 		{
 			final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("no", null);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((existsNot, ex) -> {
-				assertThat(existsNot, is(false));
-			});
-			f.get();
+			final Boolean existsNot = f.get();
+			assertThat(existsNot, is(false));
 		}
 		db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"abc\"}", null).get();
 		{
 			final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", null);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((exists, ex) -> {
-				assertThat(exists, is(true));
-			});
-			f.get();
+			final Boolean exists = f.get();
+			assertThat(exists, is(true));
 		}
 	}
 
@@ -1029,10 +943,8 @@ public class ArangoCollectionTest extends BaseTest {
 		final DocumentExistsOptions options = new DocumentExistsOptions().ifMatch(createResult.getRev());
 		final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((exists, ex) -> {
-			assertThat(exists, is(true));
-		});
-		f.get();
+		final Boolean exists = f.get();
+		assertThat(exists, is(true));
 	}
 
 	@Test
@@ -1041,10 +953,8 @@ public class ArangoCollectionTest extends BaseTest {
 		final DocumentExistsOptions options = new DocumentExistsOptions().ifMatch("no");
 		final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((exists, ex) -> {
-			assertThat(exists, is(false));
-		});
-		f.get();
+		final Boolean exists = f.get();
+		assertThat(exists, is(false));
 	}
 
 	@Test
@@ -1053,10 +963,8 @@ public class ArangoCollectionTest extends BaseTest {
 		final DocumentExistsOptions options = new DocumentExistsOptions().ifNoneMatch("no");
 		final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((exists, ex) -> {
-			assertThat(exists, is(true));
-		});
-		f.get();
+		final Boolean exists = f.get();
+		assertThat(exists, is(true));
 	}
 
 	@Test
@@ -1066,10 +974,8 @@ public class ArangoCollectionTest extends BaseTest {
 		final DocumentExistsOptions options = new DocumentExistsOptions().ifNoneMatch(createResult.getRev());
 		final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((exists, ex) -> {
-			assertThat(exists, is(false));
-		});
-		f.get();
+		final Boolean exists = f.get();
+		assertThat(exists, is(false));
 	}
 
 	@Test
@@ -1081,14 +987,12 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).insertDocuments(values, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(3));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentCreateEntity<BaseDocument>> docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getDocuments(), is(notNullValue()));
+		assertThat(docs.getDocuments().size(), is(3));
+		assertThat(docs.getErrors(), is(notNullValue()));
+		assertThat(docs.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1098,14 +1002,12 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).insertDocuments(values, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(1));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentCreateEntity<BaseDocument>> docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getDocuments(), is(notNullValue()));
+		assertThat(docs.getDocuments().size(), is(1));
+		assertThat(docs.getErrors(), is(notNullValue()));
+		assertThat(docs.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1114,14 +1016,12 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).insertDocuments(values, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(0));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentCreateEntity<BaseDocument>> docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getDocuments(), is(notNullValue()));
+		assertThat(docs.getDocuments().size(), is(0));
+		assertThat(docs.getErrors(), is(notNullValue()));
+		assertThat(docs.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1134,19 +1034,17 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).insertDocuments(values, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(3));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(0));
-			for (final DocumentCreateEntity<BaseDocument> doc : docs.getDocuments()) {
-				assertThat(doc.getNew(), is(notNullValue()));
-				final BaseDocument baseDocument = doc.getNew();
-				assertThat(baseDocument.getKey(), is(notNullValue()));
-			}
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentCreateEntity<BaseDocument>> docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getDocuments(), is(notNullValue()));
+		assertThat(docs.getDocuments().size(), is(3));
+		assertThat(docs.getErrors(), is(notNullValue()));
+		assertThat(docs.getErrors().size(), is(0));
+		for (final DocumentCreateEntity<BaseDocument> doc : docs.getDocuments()) {
+			assertThat(doc.getNew(), is(notNullValue()));
+			final BaseDocument baseDocument = doc.getNew();
+			assertThat(baseDocument.getKey(), is(notNullValue()));
+		}
 	}
 
 	@Test
@@ -1158,15 +1056,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).insertDocuments(values);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(2));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(1));
-			assertThat(docs.getErrors().iterator().next().getErrorNum(), is(1210));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentCreateEntity<BaseDocument>> docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getDocuments(), is(notNullValue()));
+		assertThat(docs.getDocuments().size(), is(2));
+		assertThat(docs.getErrors(), is(notNullValue()));
+		assertThat(docs.getErrors().size(), is(1));
+		assertThat(docs.getErrors().iterator().next().getErrorNum(), is(1210));
 	}
 
 	@Test
@@ -1177,16 +1073,14 @@ public class ArangoCollectionTest extends BaseTest {
 		values.add(new BaseDocument());
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(values.size()));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(values.size()));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(0));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1197,16 +1091,14 @@ public class ArangoCollectionTest extends BaseTest {
 		values.add(new BaseDocument("2"));
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(1));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1218,16 +1110,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().onDuplicate(OnDuplicate.error));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(1));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1239,16 +1129,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().onDuplicate(OnDuplicate.ignore));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(1));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(0));
+		assertThat(docs.getIgnored(), is(1));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1260,16 +1148,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().onDuplicate(OnDuplicate.replace));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(1));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(0));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(1));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1281,16 +1167,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().onDuplicate(OnDuplicate.update));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(1));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(0));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(1));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1316,42 +1200,40 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().details(true));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails().size(), is(1));
-			assertThat(docs.getDetails().iterator().next(), containsString("unique constraint violated"));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(1));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails().size(), is(1));
+		assertThat(docs.getDetails().iterator().next(), containsString("unique constraint violated"));
 	}
 
 	@Test
 	public void importDocumentsOverwriteFalse() throws InterruptedException, ExecutionException {
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument());
+		collection.insertDocument(new BaseDocument()).get();
 		assertThat(collection.count().get().getCount(), is(1L));
 
 		final Collection<BaseDocument> values = new ArrayList<>();
 		values.add(new BaseDocument());
 		values.add(new BaseDocument());
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(false));
+		collection.importDocuments(values, new DocumentImportOptions().overwrite(false)).get();
 		assertThat(collection.count().get().getCount(), is(3L));
 	}
 
 	@Test
 	public void importDocumentsOverwriteTrue() throws InterruptedException, ExecutionException {
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument());
+		collection.insertDocument(new BaseDocument()).get();
 		assertThat(collection.count().get().getCount(), is(1L));
 
 		final Collection<BaseDocument> values = new ArrayList<>();
 		values.add(new BaseDocument());
 		values.add(new BaseDocument());
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(true));
+		collection.importDocuments(values, new DocumentImportOptions().overwrite(true)).get();
 		assertThat(collection.count().get().getCount(), is(2L));
 	}
 
@@ -1392,16 +1274,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(0));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1409,16 +1289,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(1));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1427,16 +1305,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().onDuplicate(OnDuplicate.error));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(1));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1445,16 +1321,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().onDuplicate(OnDuplicate.ignore));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(1));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(0));
+		assertThat(docs.getIgnored(), is(1));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1463,16 +1337,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().onDuplicate(OnDuplicate.replace));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(1));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(0));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(1));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1481,16 +1353,14 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().onDuplicate(OnDuplicate.update));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(1));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(0));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(1));
+		assertThat(docs.getDetails(), is(empty()));
 	}
 
 	@Test
@@ -1510,38 +1380,36 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
 			new DocumentImportOptions().details(true));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails().size(), is(1));
-			assertThat(docs.getDetails().iterator().next(), containsString("unique constraint violated"));
-		});
-		f.get();
+		final DocumentImportEntity docs = f.get();
+		assertThat(docs, is(notNullValue()));
+		assertThat(docs.getCreated(), is(2));
+		assertThat(docs.getEmpty(), is(0));
+		assertThat(docs.getErrors(), is(1));
+		assertThat(docs.getIgnored(), is(0));
+		assertThat(docs.getUpdated(), is(0));
+		assertThat(docs.getDetails().size(), is(1));
+		assertThat(docs.getDetails().iterator().next(), containsString("unique constraint violated"));
 	}
 
 	@Test
 	public void importDocumentsJsonOverwriteFalse() throws InterruptedException, ExecutionException {
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument());
+		collection.insertDocument(new BaseDocument()).get();
 		assertThat(collection.count().get().getCount(), is(1L));
 
 		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(false));
+		collection.importDocuments(values, new DocumentImportOptions().overwrite(false)).get();
 		assertThat(collection.count().get().getCount(), is(3L));
 	}
 
 	@Test
 	public void importDocumentsJsonOverwriteTrue() throws InterruptedException, ExecutionException {
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument());
+		collection.insertDocument(new BaseDocument()).get();
 		assertThat(collection.count().get().getCount(), is(1L));
 
 		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(true));
+		collection.importDocuments(values, new DocumentImportOptions().overwrite(true)).get();
 		assertThat(collection.count().get().getCount(), is(2L));
 	}
 
@@ -1593,15 +1461,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(keys, null, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(2));
-			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
-				assertThat(i.getKey(), anyOf(is("1"), is("2")));
-			}
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentDeleteEntity<Object>> deleteResult = f.get();
+		assertThat(deleteResult, is(notNullValue()));
+		assertThat(deleteResult.getDocuments().size(), is(2));
+		for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+			assertThat(i.getKey(), anyOf(is("1"), is("2")));
+		}
+		assertThat(deleteResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1621,15 +1487,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(values, null, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(2));
-			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
-				assertThat(i.getKey(), anyOf(is("1"), is("2")));
-			}
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentDeleteEntity<Object>> deleteResult = f.get();
+		assertThat(deleteResult, is(notNullValue()));
+		assertThat(deleteResult.getDocuments().size(), is(2));
+		for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+			assertThat(i.getKey(), anyOf(is("1"), is("2")));
+		}
+		assertThat(deleteResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1646,15 +1510,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(keys, null, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(1));
-			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
-				assertThat(i.getKey(), is("1"));
-			}
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentDeleteEntity<Object>> deleteResult = f.get();
+		assertThat(deleteResult, is(notNullValue()));
+		assertThat(deleteResult.getDocuments().size(), is(1));
+		for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+			assertThat(i.getKey(), is("1"));
+		}
+		assertThat(deleteResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1669,15 +1531,13 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(values, null, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(1));
-			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
-				assertThat(i.getKey(), is("1"));
-			}
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentDeleteEntity<Object>> deleteResult = f.get();
+		assertThat(deleteResult, is(notNullValue()));
+		assertThat(deleteResult.getDocuments().size(), is(1));
+		for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+			assertThat(i.getKey(), is("1"));
+		}
+		assertThat(deleteResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1688,12 +1548,10 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(keys, null, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(0));
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentDeleteEntity<Object>> deleteResult = f.get();
+		assertThat(deleteResult, is(notNullValue()));
+		assertThat(deleteResult.getDocuments().size(), is(0));
+		assertThat(deleteResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1706,12 +1564,10 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(keys, null, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(0));
-			assertThat(deleteResult.getErrors().size(), is(2));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentDeleteEntity<Object>> deleteResult = f.get();
+		assertThat(deleteResult, is(notNullValue()));
+		assertThat(deleteResult.getDocuments().size(), is(0));
+		assertThat(deleteResult.getErrors().size(), is(2));
 	}
 
 	@Test
@@ -1730,12 +1586,10 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
 				.deleteDocuments(values, null, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(0));
-			assertThat(deleteResult.getErrors().size(), is(2));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentDeleteEntity<Object>> deleteResult = f.get();
+		assertThat(deleteResult, is(notNullValue()));
+		assertThat(deleteResult.getDocuments().size(), is(0));
+		assertThat(deleteResult.getErrors().size(), is(2));
 	}
 
 	@Test
@@ -1760,11 +1614,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(2));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>> updateResult = f.get();
+		assertThat(updateResult.getDocuments().size(), is(2));
+		assertThat(updateResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1783,11 +1635,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(1));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>> updateResult = f.get();
+		assertThat(updateResult.getDocuments().size(), is(1));
+		assertThat(updateResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1796,11 +1646,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).updateDocuments(values, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(0));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>> updateResult = f.get();
+		assertThat(updateResult.getDocuments().size(), is(0));
+		assertThat(updateResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1819,11 +1667,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(1));
-			assertThat(updateResult.getErrors().size(), is(1));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>> updateResult = f.get();
+		assertThat(updateResult.getDocuments().size(), is(1));
+		assertThat(updateResult.getErrors().size(), is(1));
 	}
 
 	@Test
@@ -1842,11 +1688,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).replaceDocuments(updatedValues, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(2));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>> updateResult = f.get();
+		assertThat(updateResult.getDocuments().size(), is(2));
+		assertThat(updateResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1865,11 +1709,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(1));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>> updateResult = f.get();
+		assertThat(updateResult.getDocuments().size(), is(1));
+		assertThat(updateResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1878,11 +1720,9 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).updateDocuments(values, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(0));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>> updateResult = f.get();
+		assertThat(updateResult.getDocuments().size(), is(0));
+		assertThat(updateResult.getErrors().size(), is(0));
 	}
 
 	@Test
@@ -1901,52 +1741,42 @@ public class ArangoCollectionTest extends BaseTest {
 		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
 				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(1));
-			assertThat(updateResult.getErrors().size(), is(1));
-		});
-		f.get();
+		final MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>> updateResult = f.get();
+		assertThat(updateResult.getDocuments().size(), is(1));
+		assertThat(updateResult.getErrors().size(), is(1));
 	}
 
 	@Test
 	public void load() throws InterruptedException, ExecutionException {
 		final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).load();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result.getName(), is(COLLECTION_NAME));
-		});
-		f.get();
+		final CollectionEntity result = f.get();
+		assertThat(result.getName(), is(COLLECTION_NAME));
 	}
 
 	@Test
 	public void unload() throws InterruptedException, ExecutionException {
 		final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).unload();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result.getName(), is(COLLECTION_NAME));
-		});
-		f.get();
+		final CollectionEntity result = f.get();
+		assertThat(result.getName(), is(COLLECTION_NAME));
 	}
 
 	@Test
 	public void getInfo() throws InterruptedException, ExecutionException {
 		final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).getInfo();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result.getName(), is(COLLECTION_NAME));
-		});
-		f.get();
+		final CollectionEntity result = f.get();
+		assertThat(result.getName(), is(COLLECTION_NAME));
 	}
 
 	@Test
 	public void getPropeties() throws InterruptedException, ExecutionException {
 		final CompletableFuture<CollectionPropertiesEntity> f = db.collection(COLLECTION_NAME).getProperties();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result.getName(), is(COLLECTION_NAME));
-			assertThat(result.getCount(), is(nullValue()));
-		});
-		f.get();
+		final CollectionPropertiesEntity result = f.get();
+		assertThat(result.getName(), is(COLLECTION_NAME));
+		assertThat(result.getCount(), is(nullValue()));
 	}
 
 	@Test
@@ -1955,16 +1785,12 @@ public class ArangoCollectionTest extends BaseTest {
 		assertThat(properties.getWaitForSync(), is(notNullValue()));
 		final CollectionPropertiesOptions options = new CollectionPropertiesOptions();
 		options.waitForSync(!properties.getWaitForSync());
-		options.journalSize(2000000L);
 		final CompletableFuture<CollectionPropertiesEntity> f = db.collection(COLLECTION_NAME)
 				.changeProperties(options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((changedProperties, ex) -> {
-			assertThat(changedProperties.getWaitForSync(), is(notNullValue()));
-			assertThat(changedProperties.getWaitForSync(), is(not(properties.getWaitForSync())));
-			assertThat(changedProperties.getJournalSize(), is(options.getJournalSize()));
-		});
-		f.get();
+		final CollectionPropertiesEntity changedProperties = f.get();
+		assertThat(changedProperties.getWaitForSync(), is(notNullValue()));
+		assertThat(changedProperties.getWaitForSync(), is(not(properties.getWaitForSync())));
 	}
 
 	@Test
@@ -1972,11 +1798,9 @@ public class ArangoCollectionTest extends BaseTest {
 		try {
 			final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).rename(COLLECTION_NAME + "1");
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((result, ex) -> {
-				assertThat(result, is(notNullValue()));
-				assertThat(result.getName(), is(COLLECTION_NAME + "1"));
-			});
-			f.get();
+			final CollectionEntity result = f.get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getName(), is(COLLECTION_NAME + "1"));
 			final CollectionEntity info = db.collection(COLLECTION_NAME + "1").getInfo().get();
 			assertThat(info.getName(), is(COLLECTION_NAME + "1"));
 			try {
@@ -1993,12 +1817,10 @@ public class ArangoCollectionTest extends BaseTest {
 	public void getRevision() throws InterruptedException, ExecutionException {
 		final CompletableFuture<CollectionRevisionEntity> f = db.collection(COLLECTION_NAME).getRevision();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result, is(notNullValue()));
-			assertThat(result.getName(), is(COLLECTION_NAME));
-			assertThat(result.getRevision(), is(notNullValue()));
-		});
-		f.get();
+		final CollectionRevisionEntity result = f.get();
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getName(), is(COLLECTION_NAME));
+		assertThat(result.getRevision(), is(notNullValue()));
 	}
 
 }

@@ -69,12 +69,10 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<ArangoDBVersion> f = arangoDB.getVersion();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((version, ex) -> {
-			assertThat(version, is(notNullValue()));
-			assertThat(version.getServer(), is(notNullValue()));
-			assertThat(version.getVersion(), is(notNullValue()));
-		});
-		f.get();
+		final ArangoDBVersion version = f.get();
+		assertThat(version, is(notNullValue()));
+		assertThat(version.getServer(), is(notNullValue()));
+		assertThat(version.getVersion(), is(notNullValue()));
 	}
 
 	@Test
@@ -82,10 +80,8 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<Boolean> f = arangoDB.createDatabase(BaseTest.TEST_DB);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result, is(true));
-		});
-		f.get();
+		final Boolean result = f.get();
+		assertThat(result, is(true));
 		try {
 			arangoDB.db(BaseTest.TEST_DB).drop().get();
 		} catch (final ArangoDBException e) {
@@ -99,10 +95,8 @@ public class ArangoDBTest {
 		assertThat(resultCreate, is(true));
 		final CompletableFuture<Boolean> f = arangoDB.db(BaseTest.TEST_DB).drop();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((resultDelete, ex) -> {
-			assertThat(resultDelete, is(true));
-		});
-		f.get();
+		final Boolean resultDelete = f.get();
+		assertThat(resultDelete, is(true));
 	}
 
 	@Test
@@ -129,12 +123,10 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<Collection<String>> f = arangoDB.getAccessibleDatabases();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((dbs, ex) -> {
-			assertThat(dbs, is(notNullValue()));
-			assertThat(dbs.size(), greaterThan(0));
-			assertThat(dbs, hasItem("_system"));
-		});
-		f.get();
+		final Collection<String> dbs = f.get();
+		assertThat(dbs, is(notNullValue()));
+		assertThat(dbs.size(), greaterThan(0));
+		assertThat(dbs, hasItem("_system"));
 	}
 
 	@Test
@@ -142,13 +134,11 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<Collection<String>> f = arangoDB.getAccessibleDatabasesFor("root");
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((dbs, ex) -> {
-			assertThat(dbs, is(notNullValue()));
-			assertThat(dbs, is(notNullValue()));
-			assertThat(dbs.size(), greaterThan(0));
-			assertThat(dbs, hasItem("_system"));
-		});
-		f.get();
+		final Collection<String> dbs = f.get();
+		assertThat(dbs, is(notNullValue()));
+		assertThat(dbs, is(notNullValue()));
+		assertThat(dbs.size(), greaterThan(0));
+		assertThat(dbs, hasItem("_system"));
 	}
 
 	@Test
@@ -157,12 +147,10 @@ public class ArangoDBTest {
 		try {
 			final CompletableFuture<UserEntity> f = arangoDB.createUser(USER, PW, null);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((result, ex) -> {
-				assertThat(result, is(notNullValue()));
-				assertThat(result.getUser(), is(USER));
-				assertThat(result.getChangePassword(), is(false));
-			});
-			f.get();
+			final UserEntity result = f.get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getUser(), is(USER));
+			assertThat(result.getChangePassword(), is(false));
 		} finally {
 			arangoDB.deleteUser(USER);
 		}
@@ -180,11 +168,9 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<UserEntity> f = arangoDB.getUser(ROOT);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((user, ex) -> {
-			assertThat(user, is(notNullValue()));
-			assertThat(user.getUser(), is(ROOT));
-		});
-		f.get();
+		final UserEntity user = f.get();
+		assertThat(user, is(notNullValue()));
+		assertThat(user.getUser(), is(ROOT));
 	}
 
 	@Test
@@ -194,10 +180,8 @@ public class ArangoDBTest {
 			arangoDB.createUser(USER, PW, null).get();
 			final CompletableFuture<UserEntity> f = arangoDB.getUser(USER);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((user, ex) -> {
-				assertThat(user.getUser(), is(USER));
-			});
-			f.get();
+			final UserEntity user = f.get();
+			assertThat(user.getUser(), is(USER));
 		} finally {
 			arangoDB.deleteUser(USER).get();
 		}
@@ -209,11 +193,9 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<Collection<UserEntity>> f = arangoDB.getUsers();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((users, ex) -> {
-			assertThat(users, is(notNullValue()));
-			assertThat(users.size(), greaterThan(0));
-		});
-		f.get();
+		final Collection<UserEntity> users = f.get();
+		assertThat(users, is(notNullValue()));
+		assertThat(users.size(), greaterThan(0));
 	}
 
 	@Test
@@ -223,14 +205,12 @@ public class ArangoDBTest {
 			arangoDB.createUser(USER, PW, null).get();
 			final CompletableFuture<Collection<UserEntity>> f = arangoDB.getUsers();
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((users, ex) -> {
-				assertThat(users, is(notNullValue()));
-				assertThat(users.size(), is(2));
-				for (final UserEntity user : users) {
-					assertThat(user.getUser(), anyOf(is(ROOT), is(USER)));
-				}
-			});
-			f.get();
+			final Collection<UserEntity> users = f.get();
+			assertThat(users, is(notNullValue()));
+			assertThat(users.size(), is(2));
+			for (final UserEntity user : users) {
+				assertThat(user.getUser(), anyOf(is(ROOT), is(USER)));
+			}
 		} finally {
 			arangoDB.deleteUser(USER).get();
 		}
@@ -259,22 +239,18 @@ public class ArangoDBTest {
 			{
 				final CompletableFuture<UserEntity> f = arangoDB.updateUser(USER, new UserUpdateOptions().extra(extra));
 				assertThat(f, is(notNullValue()));
-				f.whenComplete((user, ex) -> {
-					assertThat(user, is(notNullValue()));
-					assertThat(user.getExtra().size(), is(2));
-					assertThat(user.getExtra().get("hund"), is(notNullValue()));
-					assertThat(Boolean.valueOf(String.valueOf(user.getExtra().get("hund"))), is(true));
-				});
-				f.get();
+				final UserEntity user = f.get();
+				assertThat(user, is(notNullValue()));
+				assertThat(user.getExtra().size(), is(2));
+				assertThat(user.getExtra().get("hund"), is(notNullValue()));
+				assertThat(Boolean.valueOf(String.valueOf(user.getExtra().get("hund"))), is(true));
 			}
 			final CompletableFuture<UserEntity> f = arangoDB.getUser(USER);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((user2, ex) -> {
-				assertThat(user2.getExtra().size(), is(2));
-				assertThat(user2.getExtra().get("hund"), is(notNullValue()));
-				assertThat(Boolean.valueOf(String.valueOf(user2.getExtra().get("hund"))), is(true));
-			});
-			f.get();
+			final UserEntity user2 = f.get();
+			assertThat(user2.getExtra().size(), is(2));
+			assertThat(user2.getExtra().get("hund"), is(notNullValue()));
+			assertThat(Boolean.valueOf(String.valueOf(user2.getExtra().get("hund"))), is(true));
 		} finally {
 			arangoDB.deleteUser(USER).get();
 		}
@@ -293,23 +269,19 @@ public class ArangoDBTest {
 				final CompletableFuture<UserEntity> f = arangoDB.replaceUser(USER,
 					new UserUpdateOptions().extra(extra));
 				assertThat(f, is(notNullValue()));
-				f.whenComplete((user, ex) -> {
-					assertThat(user, is(notNullValue()));
-					assertThat(user.getExtra().size(), is(1));
-					assertThat(user.getExtra().get("mund"), is(notNullValue()));
-					assertThat(Boolean.valueOf(String.valueOf(user.getExtra().get("mund"))), is(true));
-				});
-				f.get();
+				final UserEntity user = f.get();
+				assertThat(user, is(notNullValue()));
+				assertThat(user.getExtra().size(), is(1));
+				assertThat(user.getExtra().get("mund"), is(notNullValue()));
+				assertThat(Boolean.valueOf(String.valueOf(user.getExtra().get("mund"))), is(true));
 			}
 			{
 				final CompletableFuture<UserEntity> f = arangoDB.getUser(USER);
 				assertThat(f, is(notNullValue()));
-				f.whenComplete((user2, ex) -> {
-					assertThat(user2.getExtra().size(), is(1));
-					assertThat(user2.getExtra().get("mund"), is(notNullValue()));
-					assertThat(Boolean.valueOf(String.valueOf(user2.getExtra().get("mund"))), is(true));
-				});
-				f.get();
+				final UserEntity user2 = f.get();
+				assertThat(user2.getExtra().size(), is(1));
+				assertThat(user2.getExtra().get("mund"), is(notNullValue()));
+				assertThat(Boolean.valueOf(String.valueOf(user2.getExtra().get("mund"))), is(true));
 			}
 		} finally {
 			arangoDB.deleteUser(USER).get();
@@ -344,11 +316,9 @@ public class ArangoDBTest {
 		final CompletableFuture<Response> f = arangoDB
 				.execute(new Request("_system", RequestType.GET, "/_api/version"));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((response, ex) -> {
-			assertThat(response.getBody(), is(notNullValue()));
-			assertThat(response.getBody().get("version").isString(), is(true));
-		});
-		f.get();
+		final Response response = f.get();
+		assertThat(response.getBody(), is(notNullValue()));
+		assertThat(response.getBody().get("version").isString(), is(true));
 	}
 
 	@Test
@@ -356,15 +326,13 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<LogEntity> f = arangoDB.getLogs(null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logs, ex) -> {
-			assertThat(logs, is(notNullValue()));
-			assertThat(logs.getTotalAmount(), greaterThan(0L));
-			assertThat((long) logs.getLid().size(), is(logs.getTotalAmount()));
-			assertThat((long) logs.getLevel().size(), is(logs.getTotalAmount()));
-			assertThat((long) logs.getTimestamp().size(), is(logs.getTotalAmount()));
-			assertThat((long) logs.getText().size(), is(logs.getTotalAmount()));
-		});
-		f.get();
+		final LogEntity logs = f.get();
+		assertThat(logs, is(notNullValue()));
+		assertThat(logs.getTotalAmount(), greaterThan(0L));
+		assertThat((long) logs.getLid().size(), is(logs.getTotalAmount()));
+		assertThat((long) logs.getLevel().size(), is(logs.getTotalAmount()));
+		assertThat((long) logs.getTimestamp().size(), is(logs.getTotalAmount()));
+		assertThat((long) logs.getText().size(), is(logs.getTotalAmount()));
 	}
 
 	@Test
@@ -373,12 +341,10 @@ public class ArangoDBTest {
 		final LogEntity logs = arangoDB.getLogs(null).get();
 		final CompletableFuture<LogEntity> f = arangoDB.getLogs(new LogOptions().upto(LogLevel.WARNING));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logsUpto, ex) -> {
-			assertThat(logsUpto, is(notNullValue()));
-			assertThat(logs.getTotalAmount() >= logsUpto.getTotalAmount(), is(true));
-			assertThat(logsUpto.getLevel(), not(contains(LogLevel.INFO)));
-		});
-		f.get();
+		final LogEntity logsUpto = f.get();
+		assertThat(logsUpto, is(notNullValue()));
+		assertThat(logs.getTotalAmount() >= logsUpto.getTotalAmount(), is(true));
+		assertThat(logsUpto.getLevel(), not(contains(LogLevel.INFO)));
 	}
 
 	@Test
@@ -387,12 +353,10 @@ public class ArangoDBTest {
 		final LogEntity logs = arangoDB.getLogs(null).get();
 		final CompletableFuture<LogEntity> f = arangoDB.getLogs(new LogOptions().level(LogLevel.INFO));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logsInfo, ex) -> {
-			assertThat(logsInfo, is(notNullValue()));
-			assertThat(logs.getTotalAmount() >= logsInfo.getTotalAmount(), is(true));
-			assertThat(logsInfo.getLevel(), everyItem(is(LogLevel.INFO)));
-		});
-		f.get();
+		final LogEntity logsInfo = f.get();
+		assertThat(logsInfo, is(notNullValue()));
+		assertThat(logs.getTotalAmount() >= logsInfo.getTotalAmount(), is(true));
+		assertThat(logsInfo.getLevel(), everyItem(is(LogLevel.INFO)));
 	}
 
 	@Test
@@ -402,11 +366,9 @@ public class ArangoDBTest {
 		assertThat(logs.getLid(), not(empty()));
 		final CompletableFuture<LogEntity> f = arangoDB.getLogs(new LogOptions().start(logs.getLid().get(0) + 1));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logsStart, ex) -> {
-			assertThat(logsStart, is(notNullValue()));
-			assertThat(logsStart.getLid(), not(contains(logs.getLid().get(0))));
-		});
-		f.get();
+		final LogEntity logsStart = f.get();
+		assertThat(logsStart, is(notNullValue()));
+		assertThat(logsStart.getLid(), not(contains(logs.getLid().get(0))));
 	}
 
 	@Test
@@ -416,11 +378,9 @@ public class ArangoDBTest {
 		assertThat(logs.getLid().size(), greaterThan(0));
 		final CompletableFuture<LogEntity> f = arangoDB.getLogs(new LogOptions().size(logs.getLid().size() - 1));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logsSize, ex) -> {
-			assertThat(logsSize, is(notNullValue()));
-			assertThat(logsSize.getLid().size(), is(logs.getLid().size() - 1));
-		});
-		f.get();
+		final LogEntity logsSize = f.get();
+		assertThat(logsSize, is(notNullValue()));
+		assertThat(logsSize.getLid().size(), is(logs.getLid().size() - 1));
 	}
 
 	@Test
@@ -431,11 +391,9 @@ public class ArangoDBTest {
 		final CompletableFuture<LogEntity> f = arangoDB
 				.getLogs(new LogOptions().offset((int) (logs.getTotalAmount() - 1)));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logsOffset, ex) -> {
-			assertThat(logsOffset, is(notNullValue()));
-			assertThat(logsOffset.getLid().size(), is(1));
-		});
-		f.get();
+		final LogEntity logsOffset = f.get();
+		assertThat(logsOffset, is(notNullValue()));
+		assertThat(logsOffset.getLid().size(), is(1));
 	}
 
 	@Test
@@ -444,11 +402,9 @@ public class ArangoDBTest {
 		final LogEntity logs = arangoDB.getLogs(null).get();
 		final CompletableFuture<LogEntity> f = arangoDB.getLogs(new LogOptions().search(BaseTest.TEST_DB));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logsSearch, ex) -> {
-			assertThat(logsSearch, is(notNullValue()));
-			assertThat(logs.getTotalAmount(), greaterThan(logsSearch.getTotalAmount()));
-		});
-		f.get();
+		final LogEntity logsSearch = f.get();
+		assertThat(logsSearch, is(notNullValue()));
+		assertThat(logs.getTotalAmount(), greaterThan(logsSearch.getTotalAmount()));
 	}
 
 	@Test
@@ -456,15 +412,13 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<LogEntity> f = arangoDB.getLogs(new LogOptions().sort(SortOrder.asc));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logs, ex) -> {
-			assertThat(logs, is(notNullValue()));
-			long lastId = -1;
-			for (final Long id : logs.getLid()) {
-				assertThat(id, greaterThan(lastId));
-				lastId = id;
-			}
-		});
-		f.get();
+		final LogEntity logs = f.get();
+		assertThat(logs, is(notNullValue()));
+		long lastId = -1;
+		for (final Long id : logs.getLid()) {
+			assertThat(id, greaterThan(lastId));
+			lastId = id;
+		}
 	}
 
 	@Test
@@ -472,15 +426,13 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<LogEntity> f = arangoDB.getLogs(new LogOptions().sort(SortOrder.desc));
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logs, ex) -> {
-			assertThat(logs, is(notNullValue()));
-			long lastId = Long.MAX_VALUE;
-			for (final Long id : logs.getLid()) {
-				assertThat(lastId, greaterThan(id));
-				lastId = id;
-			}
-		});
-		f.get();
+		final LogEntity logs = f.get();
+		assertThat(logs, is(notNullValue()));
+		long lastId = Long.MAX_VALUE;
+		for (final Long id : logs.getLid()) {
+			assertThat(lastId, greaterThan(id));
+			lastId = id;
+		}
 	}
 
 	@Test
@@ -488,11 +440,9 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		final CompletableFuture<LogLevelEntity> f = arangoDB.getLogLevel();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((logLevel, ex) -> {
-			assertThat(logLevel, is(notNullValue()));
-			assertThat(logLevel.getAgency(), is(LogLevelEntity.LogLevel.INFO));
-		});
-		f.get();
+		final LogLevelEntity logLevel = f.get();
+		assertThat(logLevel, is(notNullValue()));
+		assertThat(logLevel.getAgency(), is(LogLevelEntity.LogLevel.INFO));
 	}
 
 	@Test
@@ -503,11 +453,9 @@ public class ArangoDBTest {
 			entity.setAgency(LogLevelEntity.LogLevel.ERROR);
 			final CompletableFuture<LogLevelEntity> f = arangoDB.setLogLevel(entity);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((logLevel, ex) -> {
-				assertThat(logLevel, is(notNullValue()));
-				assertThat(logLevel.getAgency(), is(LogLevelEntity.LogLevel.ERROR));
-			});
-			f.get();
+			final LogLevelEntity logLevel = f.get();
+			assertThat(logLevel, is(notNullValue()));
+			assertThat(logLevel.getAgency(), is(LogLevelEntity.LogLevel.ERROR));
 		} finally {
 			entity.setAgency(LogLevelEntity.LogLevel.INFO);
 			arangoDB.setLogLevel(entity);

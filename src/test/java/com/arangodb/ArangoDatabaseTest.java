@@ -87,24 +87,20 @@ public class ArangoDatabaseTest extends BaseTest {
 	public void getVersion() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoDBVersion> f = db.getVersion();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((version, ex) -> {
-			assertThat(version, is(notNullValue()));
-			assertThat(version.getServer(), is(notNullValue()));
-			assertThat(version.getVersion(), is(notNullValue()));
-		});
-		f.get();
+		final ArangoDBVersion version = f.get();
+		assertThat(version, is(notNullValue()));
+		assertThat(version.getServer(), is(notNullValue()));
+		assertThat(version.getVersion(), is(notNullValue()));
 	}
 
 	@Test
 	public void getAccessibleDatabases() throws InterruptedException, ExecutionException {
 		final CompletableFuture<Collection<String>> f = db.getAccessibleDatabases();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((dbs, ex) -> {
-			assertThat(dbs, is(notNullValue()));
-			assertThat(dbs.size(), greaterThan(0));
-			assertThat(dbs, hasItem("_system"));
-		});
-		f.get();
+		final Collection<String> dbs = f.get();
+		assertThat(dbs, is(notNullValue()));
+		assertThat(dbs.size(), greaterThan(0));
+		assertThat(dbs, hasItem("_system"));
 	}
 
 	@Test
@@ -112,11 +108,9 @@ public class ArangoDatabaseTest extends BaseTest {
 		try {
 			final CompletableFuture<CollectionEntity> f = db.createCollection(COLLECTION_NAME, null);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((result, ex) -> {
-				assertThat(result, is(notNullValue()));
-				assertThat(result.getId(), is(notNullValue()));
-			});
-			f.get();
+			final CollectionEntity result = f.get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getId(), is(notNullValue()));
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
@@ -171,11 +165,9 @@ public class ArangoDatabaseTest extends BaseTest {
 			final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
 			final CompletableFuture<IndexEntity> f = db.getIndex(createResult.getId());
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((readResult, ex) -> {
-				assertThat(readResult.getId(), is(createResult.getId()));
-				assertThat(readResult.getType(), is(createResult.getType()));
-			});
-			f.get();
+			final IndexEntity readResult = f.get();
+			assertThat(readResult.getId(), is(createResult.getId()));
+			assertThat(readResult.getType(), is(createResult.getType()));
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
@@ -190,15 +182,13 @@ public class ArangoDatabaseTest extends BaseTest {
 			final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
 			final CompletableFuture<String> f = db.deleteIndex(createResult.getId());
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((id, ex) -> {
-				assertThat(id, is(createResult.getId()));
-				try {
-					db.getIndex(id);
-					fail();
-				} catch (final ArangoDBException e) {
-				}
-			});
-			f.get();
+			final String id = f.get();
+			assertThat(id, is(createResult.getId()));
+			try {
+				db.getIndex(id).get();
+				fail();
+			} catch (final Exception e) {
+			}
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
@@ -212,11 +202,9 @@ public class ArangoDatabaseTest extends BaseTest {
 			db.createCollection(COLLECTION_NAME + "2", null);
 			final CompletableFuture<Collection<CollectionEntity>> f = db.getCollections(null);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((collections, ex) -> {
-				assertThat(collections.size(), is(2 + systemCollections.size()));
-				assertThat(collections, is(notNullValue()));
-			});
-			f.get();
+			final Collection<CollectionEntity> collections = f.get();
+			assertThat(collections.size(), is(2 + systemCollections.size()));
+			assertThat(collections, is(notNullValue()));
 		} finally {
 			db.collection(COLLECTION_NAME + "1").drop().get();
 			db.collection(COLLECTION_NAME + "2").drop().get();
@@ -233,11 +221,9 @@ public class ArangoDatabaseTest extends BaseTest {
 			db.createCollection(COLLECTION_NAME + "2", null).get();
 			final CompletableFuture<Collection<CollectionEntity>> f = db.getCollections(options);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((collections, ex) -> {
-				assertThat(collections.size(), is(2));
-				assertThat(collections, is(notNullValue()));
-			});
-			f.get();
+			final Collection<CollectionEntity> collections = f.get();
+			assertThat(collections.size(), is(2));
+			assertThat(collections, is(notNullValue()));
 		} finally {
 			db.collection(COLLECTION_NAME + "1").drop().get();
 			db.collection(COLLECTION_NAME + "2").drop().get();
@@ -284,13 +270,11 @@ public class ArangoDatabaseTest extends BaseTest {
 			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test return i._id", null, null,
 				String.class);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((cursor, ex) -> {
-				assertThat(cursor, is(notNullValue()));
-				for (int i = 0; i < 10; i++, cursor.next()) {
-					assertThat(cursor.hasNext(), is(i != 10));
-				}
-			});
-			f.get();
+			final ArangoCursorAsync<String> cursor = f.get();
+			assertThat(cursor, is(notNullValue()));
+			for (int i = 0; i < 10; i++, cursor.next()) {
+				assertThat(cursor.hasNext(), is(i != 10));
+			}
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
@@ -306,15 +290,13 @@ public class ArangoDatabaseTest extends BaseTest {
 			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test return i._id", null, null,
 				String.class);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((cursor, ex) -> {
-				assertThat(cursor, is(notNullValue()));
-				final AtomicInteger i = new AtomicInteger(0);
-				cursor.forEachRemaining(e -> {
-					i.incrementAndGet();
-				});
-				assertThat(i.get(), is(10));
+			final ArangoCursorAsync<String> cursor = f.get();
+			assertThat(cursor, is(notNullValue()));
+			final AtomicInteger i = new AtomicInteger(0);
+			cursor.forEachRemaining(e -> {
+				i.incrementAndGet();
 			});
-			f.get();
+			assertThat(i.get(), is(10));
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
@@ -330,15 +312,13 @@ public class ArangoDatabaseTest extends BaseTest {
 			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test return i._id", null, null,
 				String.class);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((cursor, ex) -> {
-				assertThat(cursor, is(notNullValue()));
-				final AtomicInteger i = new AtomicInteger(0);
-				cursor.forEachRemaining(e -> {
-					i.incrementAndGet();
-				});
-				assertThat(i.get(), is(10));
+			final ArangoCursorAsync<String> cursor = f.get();
+			assertThat(cursor, is(notNullValue()));
+			final AtomicInteger i = new AtomicInteger(0);
+			cursor.forEachRemaining(e -> {
+				i.incrementAndGet();
 			});
-			f.get();
+			assertThat(i.get(), is(10));
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
@@ -355,14 +335,12 @@ public class ArangoDatabaseTest extends BaseTest {
 			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test Limit 6 return i._id",
 				null, new AqlQueryOptions().count(true), String.class);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((cursor, ex) -> {
-				assertThat(cursor, is(notNullValue()));
-				for (int i = 0; i < 6; i++, cursor.next()) {
-					assertThat(cursor.hasNext(), is(i != 6));
-				}
-				assertThat(cursor.getCount(), is(6));
-			});
-			f.get();
+			final ArangoCursorAsync<String> cursor = f.get();
+			assertThat(cursor, is(notNullValue()));
+			for (int i = 0; i < 6; i++, cursor.next()) {
+				assertThat(cursor.hasNext(), is(i != 6));
+			}
+			assertThat(cursor.getCount(), is(6));
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
@@ -379,15 +357,13 @@ public class ArangoDatabaseTest extends BaseTest {
 			final CompletableFuture<ArangoCursorAsync<String>> f = db.query("for i in db_test Limit 5 return i._id",
 				null, new AqlQueryOptions().fullCount(true), String.class);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((cursor, ex) -> {
-				assertThat(cursor, is(notNullValue()));
-				for (int i = 0; i < 5; i++, cursor.next()) {
-					assertThat(cursor.hasNext(), is(i != 5));
-				}
-				assertThat(cursor.getStats(), is(notNullValue()));
-				assertThat(cursor.getStats().getFullCount(), is(10L));
-			});
-			f.get();
+			final ArangoCursorAsync<String> cursor = f.get();
+			assertThat(cursor, is(notNullValue()));
+			for (int i = 0; i < 5; i++, cursor.next()) {
+				assertThat(cursor.hasNext(), is(i != 5));
+			}
+			assertThat(cursor.getStats(), is(notNullValue()));
+			assertThat(cursor.getStats().getFullCount(), is(10L));
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
@@ -588,13 +564,11 @@ public class ArangoDatabaseTest extends BaseTest {
 			final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 				"FOR t IN @@coll FILTER t.age >= @age SORT t.age RETURN t._id", bindVars, null, String.class);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((cursor, ex) -> {
-				assertThat(cursor, is(notNullValue()));
-				for (int i = 0; i < 5; i++, cursor.next()) {
-					assertThat(cursor.hasNext(), is(i != 5));
-				}
-			});
-			f.get();
+			final ArangoCursorAsync<String> cursor = f.get();
+			assertThat(cursor, is(notNullValue()));
+			for (int i = 0; i < 5; i++, cursor.next()) {
+				assertThat(cursor.hasNext(), is(i != 5));
+			}
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
@@ -605,12 +579,10 @@ public class ArangoDatabaseTest extends BaseTest {
 		final CompletableFuture<ArangoCursorAsync<String>> f = arangoDB.db().query("return _users + 1", null, null,
 			String.class);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((cursor, ex) -> {
-			assertThat(cursor, is(notNullValue()));
-			assertThat(cursor.getWarnings(), is(notNullValue()));
-			assertThat(cursor.getWarnings(), is(not(empty())));
-		});
-		f.get();
+		final ArangoCursorAsync<String> cursor = f.get();
+		assertThat(cursor, is(notNullValue()));
+		assertThat(cursor.getWarnings(), is(notNullValue()));
+		assertThat(cursor.getWarnings(), is(not(empty())));
 	}
 
 	@Test
@@ -634,71 +606,67 @@ public class ArangoDatabaseTest extends BaseTest {
 		final CompletableFuture<AqlExecutionExplainEntity> f = arangoDB.db().explainQuery("for i in _apps return i",
 			null, null);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((explain, ex) -> {
-			assertThat(explain, is(notNullValue()));
-			assertThat(explain.getPlan(), is(notNullValue()));
-			assertThat(explain.getPlans(), is(nullValue()));
-			final ExecutionPlan plan = explain.getPlan();
-			assertThat(plan.getCollections().size(), is(1));
-			assertThat(plan.getCollections().iterator().next().getName(), is("_apps"));
-			assertThat(plan.getCollections().iterator().next().getType(), is("read"));
-			assertThat(plan.getEstimatedCost(), greaterThan(0));
-			assertThat(plan.getEstimatedNrItems(), greaterThan(0));
-			assertThat(plan.getVariables().size(), is(1));
-			assertThat(plan.getVariables().iterator().next().getName(), is("i"));
-			assertThat(plan.getNodes().size(), is(3));
-			final Iterator<ExecutionNode> iterator = plan.getNodes().iterator();
-			final ExecutionNode singletonNode = iterator.next();
-			assertThat(singletonNode.getType(), is("SingletonNode"));
-			final ExecutionNode collectionNode = iterator.next();
-			assertThat(collectionNode.getType(), is("EnumerateCollectionNode"));
-			assertThat(collectionNode.getDatabase(), is("_system"));
-			assertThat(collectionNode.getCollection(), is("_apps"));
-			assertThat(collectionNode.getOutVariable(), is(notNullValue()));
-			assertThat(collectionNode.getOutVariable().getName(), is("i"));
-			final ExecutionNode returnNode = iterator.next();
-			assertThat(returnNode.getType(), is("ReturnNode"));
-			assertThat(returnNode.getInVariable(), is(notNullValue()));
-			assertThat(returnNode.getInVariable().getName(), is("i"));
-		});
-		f.get();
+		final AqlExecutionExplainEntity explain = f.get();
+		assertThat(explain, is(notNullValue()));
+		assertThat(explain.getPlan(), is(notNullValue()));
+		assertThat(explain.getPlans(), is(nullValue()));
+		final ExecutionPlan plan = explain.getPlan();
+		assertThat(plan.getCollections().size(), is(1));
+		assertThat(plan.getCollections().iterator().next().getName(), is("_apps"));
+		assertThat(plan.getCollections().iterator().next().getType(), is("read"));
+		assertThat(plan.getEstimatedCost(), greaterThan(0));
+		assertThat(plan.getEstimatedNrItems(), greaterThan(0));
+		assertThat(plan.getVariables().size(), is(1));
+		assertThat(plan.getVariables().iterator().next().getName(), is("i"));
+		assertThat(plan.getNodes().size(), is(3));
+		final Iterator<ExecutionNode> iterator = plan.getNodes().iterator();
+		final ExecutionNode singletonNode = iterator.next();
+		assertThat(singletonNode.getType(), is("SingletonNode"));
+		final ExecutionNode collectionNode = iterator.next();
+		assertThat(collectionNode.getType(), is("EnumerateCollectionNode"));
+		assertThat(collectionNode.getDatabase(), is("_system"));
+		assertThat(collectionNode.getCollection(), is("_apps"));
+		assertThat(collectionNode.getOutVariable(), is(notNullValue()));
+		assertThat(collectionNode.getOutVariable().getName(), is("i"));
+		final ExecutionNode returnNode = iterator.next();
+		assertThat(returnNode.getType(), is("ReturnNode"));
+		assertThat(returnNode.getInVariable(), is(notNullValue()));
+		assertThat(returnNode.getInVariable().getName(), is("i"));
 	}
 
 	@Test
 	public void parseQuery() throws InterruptedException, ExecutionException {
 		final CompletableFuture<AqlParseEntity> f = arangoDB.db().parseQuery("for i in _apps return i");
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((parse, ex) -> {
-			assertThat(parse, is(notNullValue()));
-			assertThat(parse.getBindVars(), is(empty()));
-			assertThat(parse.getCollections().size(), is(1));
-			assertThat(parse.getCollections().iterator().next(), is("_apps"));
-			assertThat(parse.getAst().size(), is(1));
-			final AstNode root = parse.getAst().iterator().next();
-			assertThat(root.getType(), is("root"));
-			assertThat(root.getName(), is(nullValue()));
-			assertThat(root.getSubNodes(), is(notNullValue()));
-			assertThat(root.getSubNodes().size(), is(2));
-			final Iterator<AstNode> iterator = root.getSubNodes().iterator();
-			final AstNode for_ = iterator.next();
-			assertThat(for_.getType(), is("for"));
-			assertThat(for_.getSubNodes(), is(notNullValue()));
-			assertThat(for_.getSubNodes().size(), is(2));
-			final Iterator<AstNode> iterator2 = for_.getSubNodes().iterator();
-			final AstNode first = iterator2.next();
-			assertThat(first.getType(), is("variable"));
-			assertThat(first.getName(), is("i"));
-			final AstNode second = iterator2.next();
-			assertThat(second.getType(), is("collection"));
-			assertThat(second.getName(), is("_apps"));
-			final AstNode return_ = iterator.next();
-			assertThat(return_.getType(), is("return"));
-			assertThat(return_.getSubNodes(), is(notNullValue()));
-			assertThat(return_.getSubNodes().size(), is(1));
-			assertThat(return_.getSubNodes().iterator().next().getType(), is("reference"));
-			assertThat(return_.getSubNodes().iterator().next().getName(), is("i"));
-		});
-		f.get();
+		final AqlParseEntity parse = f.get();
+		assertThat(parse, is(notNullValue()));
+		assertThat(parse.getBindVars(), is(empty()));
+		assertThat(parse.getCollections().size(), is(1));
+		assertThat(parse.getCollections().iterator().next(), is("_apps"));
+		assertThat(parse.getAst().size(), is(1));
+		final AstNode root = parse.getAst().iterator().next();
+		assertThat(root.getType(), is("root"));
+		assertThat(root.getName(), is(nullValue()));
+		assertThat(root.getSubNodes(), is(notNullValue()));
+		assertThat(root.getSubNodes().size(), is(2));
+		final Iterator<AstNode> iterator = root.getSubNodes().iterator();
+		final AstNode for_ = iterator.next();
+		assertThat(for_.getType(), is("for"));
+		assertThat(for_.getSubNodes(), is(notNullValue()));
+		assertThat(for_.getSubNodes().size(), is(2));
+		final Iterator<AstNode> iterator2 = for_.getSubNodes().iterator();
+		final AstNode first = iterator2.next();
+		assertThat(first.getType(), is("variable"));
+		assertThat(first.getName(), is("i"));
+		final AstNode second = iterator2.next();
+		assertThat(second.getType(), is("collection"));
+		assertThat(second.getName(), is("_apps"));
+		final AstNode return_ = iterator.next();
+		assertThat(return_.getType(), is("return"));
+		assertThat(return_.getSubNodes(), is(notNullValue()));
+		assertThat(return_.getSubNodes().size(), is(1));
+		assertThat(return_.getSubNodes().iterator().next().getType(), is("reference"));
+		assertThat(return_.getSubNodes().iterator().next().getName(), is("i"));
 	}
 
 	@Test
@@ -766,11 +734,9 @@ public class ArangoDatabaseTest extends BaseTest {
 		try {
 			final CompletableFuture<GraphEntity> f = db.createGraph(GRAPH_NAME, null, null);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((result, ex) -> {
-				assertThat(result, is(notNullValue()));
-				assertThat(result.getName(), is(GRAPH_NAME));
-			});
-			f.get();
+			final GraphEntity result = f.get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getName(), is(GRAPH_NAME));
 		} finally {
 			db.graph(GRAPH_NAME).drop().get();
 		}
@@ -782,11 +748,9 @@ public class ArangoDatabaseTest extends BaseTest {
 			db.createGraph(GRAPH_NAME, null, null).get();
 			final CompletableFuture<Collection<GraphEntity>> f = db.getGraphs();
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((graphs, ex) -> {
-				assertThat(graphs, is(notNullValue()));
-				assertThat(graphs.size(), is(1));
-			});
-			f.get();
+			final Collection<GraphEntity> graphs = f.get();
+			assertThat(graphs, is(notNullValue()));
+			assertThat(graphs.size(), is(1));
 		} finally {
 			db.graph(GRAPH_NAME).drop().get();
 		}
@@ -797,10 +761,8 @@ public class ArangoDatabaseTest extends BaseTest {
 		final TransactionOptions options = new TransactionOptions().params("test");
 		final CompletableFuture<String> f = db.transaction("function (params) {return params;}", String.class, options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result, is("test"));
-		});
-		f.get();
+		final String result = f.get();
+		assertThat(result, is("test"));
 	}
 
 	@Test
@@ -809,10 +771,8 @@ public class ArangoDatabaseTest extends BaseTest {
 		final CompletableFuture<Integer> f = db.transaction("function (params) {return params;}", Integer.class,
 			options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result, is(5));
-		});
-		f.get();
+		final Integer result = f.get();
+		assertThat(result, is(5));
 	}
 
 	@Test
@@ -821,11 +781,9 @@ public class ArangoDatabaseTest extends BaseTest {
 		final CompletableFuture<VPackSlice> f = db.transaction("function (params) {return params;}", VPackSlice.class,
 			options);
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result.isString(), is(true));
-			assertThat(result.getAsString(), is("test"));
-		});
-		f.get();
+		final VPackSlice result = f.get();
+		assertThat(result.isString(), is(true));
+		assertThat(result.getAsString(), is("test"));
 	}
 
 	@Test
@@ -864,29 +822,26 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
-	public void transactionPojoReturn() {
+	public void transactionPojoReturn() throws InterruptedException, ExecutionException {
 		final String action = "function() { return {'value':'hello world'}; }";
 		final CompletableFuture<TransactionTestEntity> f = db.transaction(action, TransactionTestEntity.class,
 			new TransactionOptions());
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((res, ex) -> {
-			assertThat(res, is(notNullValue()));
-			assertThat(res.value, is("hello world"));
-		});
+		final TransactionTestEntity res = f.get();
+		assertThat(res, is(notNullValue()));
+		assertThat(res.value, is("hello world"));
 	}
 
 	@Test
 	public void getInfo() throws InterruptedException, ExecutionException {
 		final CompletableFuture<DatabaseEntity> f = db.getInfo();
 		assertThat(f, is(notNullValue()));
-		f.whenComplete((info, ex) -> {
-			assertThat(info, is(notNullValue()));
-			assertThat(info.getId(), is(notNullValue()));
-			assertThat(info.getName(), is(TEST_DB));
-			assertThat(info.getPath(), is(notNullValue()));
-			assertThat(info.getIsSystem(), is(false));
-		});
-		f.get();
+		final DatabaseEntity info = f.get();
+		assertThat(info, is(notNullValue()));
+		assertThat(info.getId(), is(notNullValue()));
+		assertThat(info.getName(), is(TEST_DB));
+		assertThat(info.getPath(), is(notNullValue()));
+		assertThat(info.getIsSystem(), is(false));
 	}
 
 	@Test
@@ -912,30 +867,28 @@ public class ArangoDatabaseTest extends BaseTest {
 			final CompletableFuture<TraversalEntity<BaseDocument, BaseEdgeDocument>> f = db
 					.executeTraversal(BaseDocument.class, BaseEdgeDocument.class, options);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((traversal, ex) -> {
-				assertThat(traversal, is(notNullValue()));
+			final TraversalEntity<BaseDocument, BaseEdgeDocument> traversal = f.get();
+			assertThat(traversal, is(notNullValue()));
 
-				final Collection<BaseDocument> vertices = traversal.getVertices();
-				assertThat(vertices, is(notNullValue()));
-				assertThat(vertices.size(), is(4));
+			final Collection<BaseDocument> vertices = traversal.getVertices();
+			assertThat(vertices, is(notNullValue()));
+			assertThat(vertices.size(), is(4));
 
-				final Iterator<BaseDocument> verticesIterator = vertices.iterator();
-				for (final String e : new String[] { "Alice", "Bob", "Charlie", "Dave" }) {
-					assertThat(verticesIterator.next().getKey(), is(e));
-				}
+			final Iterator<BaseDocument> verticesIterator = vertices.iterator();
+			for (final String e : new String[] { "Alice", "Bob", "Charlie", "Dave" }) {
+				assertThat(verticesIterator.next().getKey(), is(e));
+			}
 
-				final Collection<PathEntity<BaseDocument, BaseEdgeDocument>> paths = traversal.getPaths();
-				assertThat(paths, is(notNullValue()));
-				assertThat(paths.size(), is(4));
+			final Collection<PathEntity<BaseDocument, BaseEdgeDocument>> paths = traversal.getPaths();
+			assertThat(paths, is(notNullValue()));
+			assertThat(paths.size(), is(4));
 
-				assertThat(paths.iterator().hasNext(), is(true));
-				final PathEntity<BaseDocument, BaseEdgeDocument> first = paths.iterator().next();
-				assertThat(first, is(notNullValue()));
-				assertThat(first.getEdges().size(), is(0));
-				assertThat(first.getVertices().size(), is(1));
-				assertThat(first.getVertices().iterator().next().getKey(), is("Alice"));
-			});
-			f.get();
+			assertThat(paths.iterator().hasNext(), is(true));
+			final PathEntity<BaseDocument, BaseEdgeDocument> first = paths.iterator().next();
+			assertThat(first, is(notNullValue()));
+			assertThat(first.getEdges().size(), is(0));
+			assertThat(first.getVertices().size(), is(1));
+			assertThat(first.getVertices().iterator().next().getKey(), is("Alice"));
 		} finally {
 			db.collection("person").drop().get();
 			db.collection("knows").drop().get();
@@ -951,11 +904,9 @@ public class ArangoDatabaseTest extends BaseTest {
 			db.collection(COLLECTION_NAME).insertDocument(value).get();
 			final CompletableFuture<BaseDocument> f = db.getDocument(COLLECTION_NAME + "/123", BaseDocument.class);
 			assertThat(f, is(notNullValue()));
-			f.whenComplete((document, ex) -> {
-				assertThat(document, is(notNullValue()));
-				assertThat(document.getKey(), is("123"));
-			});
-			f.get();
+			final BaseDocument document = f.get();
+			assertThat(document, is(notNullValue()));
+			assertThat(document.getKey(), is("123"));
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
 		}
