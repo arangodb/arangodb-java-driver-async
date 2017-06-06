@@ -44,8 +44,8 @@ import com.arangodb.internal.ArangoExecutorAsync;
 import com.arangodb.internal.CollectionCache;
 import com.arangodb.internal.DocumentCache;
 import com.arangodb.internal.InternalArangoDatabase;
-import com.arangodb.internal.velocystream.CommunicationAsync;
 import com.arangodb.internal.velocystream.ConnectionAsync;
+import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.model.AqlFunctionCreateOptions;
 import com.arangodb.model.AqlFunctionDeleteOptions;
 import com.arangodb.model.AqlFunctionGetOptions;
@@ -73,9 +73,9 @@ public class ArangoDatabaseAsync extends
 		super(arangoDB, arangoDB.executor(), arangoDB.util(), name);
 	}
 
-	protected ArangoDatabaseAsync(final CommunicationAsync communication, final ArangoSerialization util,
+	protected ArangoDatabaseAsync(final VstCommunicationAsync communication, final ArangoSerialization util,
 		final DocumentCache documentCache, final CollectionCache collectionCache, final String name) {
-		super(null, new ArangoExecutorAsync(communication, util, documentCache, collectionCache), util, name);
+		super(null, new ArangoExecutorAsync(communication, util, documentCache), util, name);
 	}
 
 	/**

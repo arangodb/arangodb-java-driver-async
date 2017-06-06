@@ -33,6 +33,7 @@ import com.arangodb.entity.DocumentImportEntity;
 import com.arangodb.entity.DocumentUpdateEntity;
 import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.MultiDocumentEntity;
+import com.arangodb.internal.ArangoExecutor.ResponseDeserializer;
 import com.arangodb.internal.ArangoExecutorAsync;
 import com.arangodb.internal.InternalArangoCollection;
 import com.arangodb.internal.velocystream.ConnectionAsync;
@@ -49,6 +50,7 @@ import com.arangodb.model.GeoIndexOptions;
 import com.arangodb.model.HashIndexOptions;
 import com.arangodb.model.PersistentIndexOptions;
 import com.arangodb.model.SkiplistIndexOptions;
+import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.Response;
 
 /**
@@ -480,8 +482,12 @@ public class ArangoCollectionAsync extends
 	 */
 	public CompletableFuture<Boolean> documentExists(final String key) {
 		final CompletableFuture<Boolean> result = new CompletableFuture<>();
-		executor.communication().execute(documentExistsRequest(key, new DocumentExistsOptions()))
-				.whenComplete(documentExistsResponseConsumer(result));
+		executor.execute(documentExistsRequest(key, new DocumentExistsOptions()), new ResponseDeserializer<Response>() {
+			@Override
+			public Response deserialize(final Response response) throws VPackException {
+				return response;
+			}
+		}).whenComplete(documentExistsResponseConsumer(result));
 		return result;
 	}
 
@@ -499,8 +505,12 @@ public class ArangoCollectionAsync extends
 	 */
 	public CompletableFuture<Boolean> documentExists(final String key, final DocumentExistsOptions options) {
 		final CompletableFuture<Boolean> result = new CompletableFuture<>();
-		executor.communication().execute(documentExistsRequest(key, options))
-				.whenComplete(documentExistsResponseConsumer(result));
+		executor.execute(documentExistsRequest(key, options), new ResponseDeserializer<Response>() {
+			@Override
+			public Response deserialize(final Response response) throws VPackException {
+				return response;
+			}
+		}).whenComplete(documentExistsResponseConsumer(result));
 		return result;
 	}
 

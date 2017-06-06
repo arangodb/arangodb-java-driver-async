@@ -33,6 +33,11 @@ import com.arangodb.ArangoDBException;
 import com.arangodb.entity.ErrorEntity;
 import com.arangodb.internal.ArangoDBConstants;
 import com.arangodb.internal.CollectionCache;
+import com.arangodb.internal.HostHandler;
+import com.arangodb.internal.velocystream.internal.AuthenticationRequest;
+import com.arangodb.internal.velocystream.internal.ConnectionPool;
+import com.arangodb.internal.velocystream.internal.Message;
+import com.arangodb.internal.velocystream.internal.MessageStore;
 import com.arangodb.util.ArangoSerialization;
 import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocypack.exception.VPackParserException;
@@ -43,9 +48,10 @@ import com.arangodb.velocystream.Response;
  * @author Mark - mark at arangodb.com
  *
  */
-public class CommunicationAsync extends Communication<CompletableFuture<Response>, ConnectionAsync> {
+public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Response>, ConnectionAsync> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CommunicationAsync.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(VstCommunicationAsync.class);
+	private final CollectionCache collectionCache;
 
 	public static class Builder {
 
@@ -98,18 +104,16 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 			return this;
 		}
 
-		public Communication<CompletableFuture<Response>, ConnectionAsync> build(
-			final ArangoSerialization util,
-			final CollectionCache collectionCache) {
-			return new CommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, util,
+		public VstCommunicationAsync build(final ArangoSerialization util, final CollectionCache collectionCache) {
+			return new VstCommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, util,
 					collectionCache, chunksize, maxConnections);
 		}
 	}
 
-	private CommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
+	private VstCommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
 		final String password, final Boolean useSsl, final SSLContext sslContext, final ArangoSerialization util,
 		final CollectionCache collectionCache, final Integer chunksize, final Integer maxConnections) {
-		super(timeout, user, password, useSsl, sslContext, util, collectionCache, chunksize,
+		super(timeout, user, password, useSsl, sslContext, util, chunksize,
 				new ConnectionPool<ConnectionAsync>(maxConnections) {
 					private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder(hostHandler,
 							new MessageStore()).timeout(timeout).useSsl(useSsl).sslContext(sslContext);
@@ -119,6 +123,7 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 						return builder.build();
 					}
 				});
+		this.collectionCache = collectionCache;
 	}
 
 	@Override

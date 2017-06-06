@@ -24,22 +24,23 @@ import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
 
 import com.arangodb.ArangoDBException;
-import com.arangodb.internal.velocystream.Communication;
-import com.arangodb.internal.velocystream.ConnectionAsync;
+import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.util.ArangoSerialization;
 import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.Request;
-import com.arangodb.velocystream.Response;
 
 /**
  * @author Mark - mark at arangodb.com
  *
  */
-public class ArangoExecutorAsync extends ArangoExecutor<CompletableFuture<Response>, ConnectionAsync> {
+public class ArangoExecutorAsync extends ArangoExecutor {
 
-	public ArangoExecutorAsync(final Communication<CompletableFuture<Response>, ConnectionAsync> communication,
-		final ArangoSerialization util, final DocumentCache documentCache, final CollectionCache collectionCache) {
-		super(communication, util, documentCache, collectionCache);
+	private final VstCommunicationAsync communication;
+
+	public ArangoExecutorAsync(final VstCommunicationAsync communication, final ArangoSerialization util,
+		final DocumentCache documentCache) {
+		super(util, documentCache);
+		this.communication = communication;
 	}
 
 	public <T> CompletableFuture<T> execute(final Request request, final Type type) {
@@ -48,7 +49,7 @@ public class ArangoExecutorAsync extends ArangoExecutor<CompletableFuture<Respon
 
 	public <T> CompletableFuture<T> execute(final Request request, final ResponseDeserializer<T> responseDeserializer) {
 		final CompletableFuture<T> result = new CompletableFuture<>();
-		communication().execute(request).whenComplete((response, ex) -> {
+		communication.execute(request).whenComplete((response, ex) -> {
 			if (response != null) {
 				try {
 					result.complete(responseDeserializer.deserialize(response));
@@ -64,4 +65,7 @@ public class ArangoExecutorAsync extends ArangoExecutor<CompletableFuture<Respon
 		return result;
 	}
 
+	public void disconnect() {
+		communication.disconnect();
+	}
 }

@@ -39,21 +39,22 @@ import com.arangodb.internal.ArangoDBConstants;
 import com.arangodb.internal.ArangoExecutorAsync;
 import com.arangodb.internal.CollectionCache;
 import com.arangodb.internal.CollectionCache.DBAccess;
+import com.arangodb.internal.DefaultHostHandler;
 import com.arangodb.internal.DocumentCache;
+import com.arangodb.internal.Host;
+import com.arangodb.internal.HostHandler;
 import com.arangodb.internal.InternalArangoDB;
 import com.arangodb.internal.util.ArangoDeserializerImpl;
 import com.arangodb.internal.util.ArangoSerializerImpl;
 import com.arangodb.internal.util.ArangoUtilImpl;
 import com.arangodb.internal.velocypack.VPackDocumentModule;
 import com.arangodb.internal.velocypack.VPackDriverModule;
-import com.arangodb.internal.velocystream.Communication;
-import com.arangodb.internal.velocystream.CommunicationAsync;
-import com.arangodb.internal.velocystream.CommunicationSync;
 import com.arangodb.internal.velocystream.ConnectionAsync;
-import com.arangodb.internal.velocystream.ConnectionSync;
-import com.arangodb.internal.velocystream.DefaultHostHandler;
-import com.arangodb.internal.velocystream.Host;
-import com.arangodb.internal.velocystream.HostHandler;
+import com.arangodb.internal.velocystream.VstCommunication;
+import com.arangodb.internal.velocystream.VstCommunicationAsync;
+import com.arangodb.internal.velocystream.VstCommunicationSync;
+import com.arangodb.internal.velocystream.VstProtocol;
+import com.arangodb.internal.velocystream.internal.ConnectionSync;
 import com.arangodb.model.LogOptions;
 import com.arangodb.model.UserCreateOptions;
 import com.arangodb.model.UserUpdateOptions;
@@ -344,27 +345,26 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 					collectionCache, syncBuilder(hostHandler));
 		}
 
-		private CommunicationAsync.Builder asyncBuilder(final HostHandler hostHandler) {
-			return new CommunicationAsync.Builder(hostHandler).timeout(timeout).user(user).password(password)
+		private VstCommunicationAsync.Builder asyncBuilder(final HostHandler hostHandler) {
+			return new VstCommunicationAsync.Builder(hostHandler).timeout(timeout).user(user).password(password)
 					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections);
 		}
 
-		private CommunicationSync.Builder syncBuilder(final HostHandler hostHandler) {
-			return new CommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)
+		private VstCommunicationSync.Builder syncBuilder(final HostHandler hostHandler) {
+			return new VstCommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)
 					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections);
 		}
 
 	}
 
-	public ArangoDBAsync(final CommunicationAsync.Builder commBuilder, final ArangoSerialization util,
-		final CollectionCache collectionCache, final CommunicationSync.Builder syncbuilder) {
-		super(new ArangoExecutorAsync(commBuilder.build(util, collectionCache), util, new DocumentCache(),
-				collectionCache), util);
-		final Communication<Response, ConnectionSync> cacheCom = syncbuilder.build(util, collectionCache);
+	public ArangoDBAsync(final VstCommunicationAsync.Builder commBuilder, final ArangoSerialization util,
+		final CollectionCache collectionCache, final VstCommunicationSync.Builder syncbuilder) {
+		super(new ArangoExecutorAsync(commBuilder.build(util, collectionCache), util, new DocumentCache()), util);
+		final VstCommunication<Response, ConnectionSync> cacheCom = syncbuilder.build(util, collectionCache);
 		collectionCache.init(new DBAccess() {
 			@Override
 			public ArangoDatabase db(final String name) {
-				return new ArangoDatabase(cacheCom, util, executor.documentCache(), null, name);
+				return new ArangoDatabase(new VstProtocol(cacheCom), util, executor.documentCache(), name);
 			}
 		});
 	}
@@ -375,7 +375,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	}
 
 	public void shutdown() {
-		executor.communication().disconnect();
+		executor.disconnect();
 	}
 
 	/**

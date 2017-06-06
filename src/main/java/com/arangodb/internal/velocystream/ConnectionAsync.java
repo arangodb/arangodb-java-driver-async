@@ -27,6 +27,12 @@ import java.util.concurrent.FutureTask;
 
 import javax.net.ssl.SSLContext;
 
+import com.arangodb.internal.HostHandler;
+import com.arangodb.internal.velocystream.internal.Chunk;
+import com.arangodb.internal.velocystream.internal.Connection;
+import com.arangodb.internal.velocystream.internal.Message;
+import com.arangodb.internal.velocystream.internal.MessageStore;
+
 /**
  * @author Mark - mark at arangodb.com
  *
