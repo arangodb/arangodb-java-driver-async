@@ -34,6 +34,7 @@ import javax.net.ssl.SSLContext;
 import com.arangodb.entity.ArangoDBVersion;
 import com.arangodb.entity.LogEntity;
 import com.arangodb.entity.LogLevelEntity;
+import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.UserEntity;
 import com.arangodb.internal.ArangoDBConstants;
 import com.arangodb.internal.ArangoExecutorAsync;
@@ -459,6 +460,16 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	 */
 	public CompletableFuture<ArangoDBVersion> getVersion() {
 		return db().getVersion();
+	}
+
+	/**
+	 * Returns the server role.
+	 * 
+	 * @return the server role
+	 * @throws ArangoDBException
+	 */
+	public CompletableFuture<ServerRole> getRole() {
+		return executor.execute(getRoleRequest(), getRoleResponseDeserializer());
 	}
 
 	/**

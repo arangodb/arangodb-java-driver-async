@@ -62,6 +62,7 @@ import com.arangodb.entity.QueryCachePropertiesEntity;
 import com.arangodb.entity.QueryCachePropertiesEntity.CacheMode;
 import com.arangodb.entity.QueryEntity;
 import com.arangodb.entity.QueryTrackingPropertiesEntity;
+import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.TraversalEntity;
 import com.arangodb.model.AqlFunctionDeleteOptions;
 import com.arangodb.model.AqlQueryOptions;
@@ -135,6 +136,9 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test
 	public void deleteSystemCollection() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			return;
+		}
 		final String name = "_system_test";
 		db.createCollection(name, new CollectionCreateOptions().isSystem(true)).get();
 		db.collection(name).drop(true).get();
@@ -147,6 +151,9 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test
 	public void deleteSystemCollectionFail() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			return;
+		}
 		final String name = "_system_test";
 		db.createCollection(name, new CollectionCreateOptions().isSystem(true)).get();
 		try {
@@ -488,6 +495,9 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test
 	public void queryWithCache() throws InterruptedException, ArangoDBException, ExecutionException {
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			return;
+		}
 		try {
 			db.createCollection(COLLECTION_NAME, null).get();
 			for (int i = 0; i < 10; i++) {
