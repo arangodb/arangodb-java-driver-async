@@ -1975,6 +1975,9 @@ public class ArangoCollectionTest extends BaseTest {
 
 	@Test
 	public void rename() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			return;
+		}
 		try {
 			final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).rename(COLLECTION_NAME + "1");
 			assertThat(f, is(notNullValue()));
