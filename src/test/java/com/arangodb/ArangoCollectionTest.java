@@ -660,7 +660,7 @@ public class ArangoCollectionTest extends BaseTest {
 		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
 				.get();
 		final DocumentDeleteOptions options = new DocumentDeleteOptions().ifMatch(createResult.getRev());
-		db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, options);
+		db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, options).get();
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
 			BaseDocument.class, null);
 		assertThat(f, is(notNullValue()));
