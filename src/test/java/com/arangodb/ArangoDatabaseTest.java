@@ -53,6 +53,7 @@ import com.arangodb.entity.ArangoDBVersion;
 import com.arangodb.entity.BaseDocument;
 import com.arangodb.entity.BaseEdgeDocument;
 import com.arangodb.entity.CollectionEntity;
+import com.arangodb.entity.CollectionPropertiesEntity;
 import com.arangodb.entity.CollectionType;
 import com.arangodb.entity.DatabaseEntity;
 import com.arangodb.entity.GraphEntity;
@@ -62,6 +63,7 @@ import com.arangodb.entity.QueryCachePropertiesEntity;
 import com.arangodb.entity.QueryCachePropertiesEntity.CacheMode;
 import com.arangodb.entity.QueryEntity;
 import com.arangodb.entity.QueryTrackingPropertiesEntity;
+import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.TraversalEntity;
 import com.arangodb.model.AqlFunctionDeleteOptions;
 import com.arangodb.model.AqlQueryOptions;
@@ -113,6 +115,75 @@ public class ArangoDatabaseTest extends BaseTest {
 			assertThat(result.getId(), is(notNullValue()));
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
+		}
+	}
+
+	@Test
+	public void createCollectionWithReplicationFactor() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+			return;
+		}
+		try {
+			final CollectionEntity result = db
+					.createCollection(COLLECTION_NAME, new CollectionCreateOptions().replicationFactor(2)).get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getId(), is(notNullValue()));
+			assertThat(db.collection(COLLECTION_NAME).getProperties().get().getReplicationFactor(), is(2));
+		} finally {
+			db.collection(COLLECTION_NAME).drop();
+		}
+	}
+
+	@Test
+	public void createCollectionWithNumberOfShards() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+			return;
+		}
+		try {
+			final CollectionEntity result = db
+					.createCollection(COLLECTION_NAME, new CollectionCreateOptions().numberOfShards(2)).get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getId(), is(notNullValue()));
+			assertThat(db.collection(COLLECTION_NAME).getProperties().get().getNumberOfShards(), is(2));
+		} finally {
+			db.collection(COLLECTION_NAME).drop();
+		}
+	}
+
+	@Test
+	public void createCollectionWithNumberOfShardsAndShardKey() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+			return;
+		}
+		try {
+			final CollectionEntity result = db
+					.createCollection(COLLECTION_NAME, new CollectionCreateOptions().numberOfShards(2).shardKeys("a"))
+					.get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getId(), is(notNullValue()));
+			final CollectionPropertiesEntity properties = db.collection(COLLECTION_NAME).getProperties().get();
+			assertThat(properties.getNumberOfShards(), is(2));
+			assertThat(properties.getShardKeys().size(), is(1));
+		} finally {
+			db.collection(COLLECTION_NAME).drop();
+		}
+	}
+
+	@Test
+	public void createCollectionWithNumberOfShardsAndShardKeys() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+			return;
+		}
+		try {
+			final CollectionEntity result = db.createCollection(COLLECTION_NAME,
+				new CollectionCreateOptions().numberOfShards(2).shardKeys("a", "b")).get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getId(), is(notNullValue()));
+			final CollectionPropertiesEntity properties = db.collection(COLLECTION_NAME).getProperties().get();
+			assertThat(properties.getNumberOfShards(), is(2));
+			assertThat(properties.getShardKeys().size(), is(2));
+		} finally {
+			db.collection(COLLECTION_NAME).drop();
 		}
 	}
 
