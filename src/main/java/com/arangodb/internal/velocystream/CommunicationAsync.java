@@ -33,7 +33,7 @@ import com.arangodb.ArangoDBException;
 import com.arangodb.entity.ErrorEntity;
 import com.arangodb.internal.ArangoDBConstants;
 import com.arangodb.internal.CollectionCache;
-import com.arangodb.util.ArangoUtil;
+import com.arangodb.util.ArangoSerialization;
 import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocypack.exception.VPackParserException;
 import com.arangodb.velocystream.Request;
@@ -99,7 +99,7 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 		}
 
 		public Communication<CompletableFuture<Response>, ConnectionAsync> build(
-			final ArangoUtil util,
+			final ArangoSerialization util,
 			final CollectionCache collectionCache) {
 			return new CommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, util,
 					collectionCache, chunksize, maxConnections);
@@ -107,7 +107,7 @@ public class CommunicationAsync extends Communication<CompletableFuture<Response
 	}
 
 	private CommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
-		final String password, final Boolean useSsl, final SSLContext sslContext, final ArangoUtil util,
+		final String password, final Boolean useSsl, final SSLContext sslContext, final ArangoSerialization util,
 		final CollectionCache collectionCache, final Integer chunksize, final Integer maxConnections) {
 		super(timeout, user, password, useSsl, sslContext, util, collectionCache, chunksize,
 				new ConnectionPool<ConnectionAsync>(maxConnections) {

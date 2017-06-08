@@ -59,8 +59,8 @@ import com.arangodb.model.LogOptions;
 import com.arangodb.model.UserCreateOptions;
 import com.arangodb.model.UserUpdateOptions;
 import com.arangodb.util.ArangoDeserializer;
+import com.arangodb.util.ArangoSerialization;
 import com.arangodb.util.ArangoSerializer;
-import com.arangodb.util.ArangoUtil;
 import com.arangodb.velocypack.VPack;
 import com.arangodb.velocypack.VPackAnnotationFieldFilter;
 import com.arangodb.velocypack.VPackAnnotationFieldNaming;
@@ -357,10 +357,10 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 
 	}
 
-	public ArangoDBAsync(final CommunicationAsync.Builder commBuilder, final ArangoUtil util,
+	public ArangoDBAsync(final CommunicationAsync.Builder commBuilder, final ArangoSerialization util,
 		final CollectionCache collectionCache, final CommunicationSync.Builder syncbuilder) {
 		super(new ArangoExecutorAsync(commBuilder.build(util, collectionCache), util, new DocumentCache(),
-				collectionCache));
+				collectionCache), util);
 		final Communication<Response, ConnectionSync> cacheCom = syncbuilder.build(util, collectionCache);
 		collectionCache.init(new DBAccess() {
 			@Override
