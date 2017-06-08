@@ -36,10 +36,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.arangodb.entity.ArangoDBVersion.License;
 import com.arangodb.entity.CollectionType;
 import com.arangodb.entity.EdgeDefinition;
 import com.arangodb.entity.GraphEntity;
 import com.arangodb.model.CollectionCreateOptions;
+import com.arangodb.model.GraphCreateOptions;
 
 /**
  * @author Mark - mark at arangodb.com
@@ -191,5 +193,22 @@ public class ArangoGraphTest extends BaseTest {
 		final Collection<EdgeDefinition> edgeDefinitions = graph.getEdgeDefinitions();
 		assertThat(edgeDefinitions.size(), is(1));
 		assertThat(edgeDefinitions.iterator().next().getCollection(), is(EDGE_COL_2));
+	}
+
+	@Test
+	public void smartGraph() throws InterruptedException, ExecutionException {
+		if (arangoDB.getVersion().get().getLicense() == License.ENTERPRISE) {
+			teardown();
+			final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<>();
+			edgeDefinitions.add(new EdgeDefinition().collection(EDGE_COL_1).from(VERTEX_COL_1).to(VERTEX_COL_2));
+			edgeDefinitions
+					.add(new EdgeDefinition().collection(EDGE_COL_2).from(VERTEX_COL_2).to(VERTEX_COL_1, VERTEX_COL_3));
+			final GraphEntity graph = db.createGraph(GRAPH_NAME, edgeDefinitions,
+				new GraphCreateOptions().isSmart(true).smartGraphAttribute("test").numberOfShards(2)).get();
+			assertThat(graph, is(notNullValue()));
+			assertThat(graph.getIsSmart(), is(true));
+			assertThat(graph.getSmartGraphAttribute(), is("test"));
+			assertThat(graph.getNumberOfShards(), is(2));
+		}
 	}
 }
