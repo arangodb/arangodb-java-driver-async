@@ -120,7 +120,7 @@ public class ArangoDBTest {
 			assertThat(dbs, hasItem("_system"));
 			assertThat(dbs, hasItem(BaseTest.TEST_DB));
 		} finally {
-			arangoDB.db(BaseTest.TEST_DB).drop();
+			arangoDB.db(BaseTest.TEST_DB).drop().get();
 		}
 	}
 
@@ -164,7 +164,7 @@ public class ArangoDBTest {
 			});
 			f.get();
 		} finally {
-			arangoDB.deleteUser(USER);
+			arangoDB.deleteUser(USER).get();
 		}
 	}
 
@@ -510,7 +510,7 @@ public class ArangoDBTest {
 			f.get();
 		} finally {
 			entity.setAgency(LogLevelEntity.LogLevel.INFO);
-			arangoDB.setLogLevel(entity);
+			arangoDB.setLogLevel(entity).get();
 		}
 	}
 }
