@@ -199,6 +199,9 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test
 	public void deleteSystemCollection() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			return;
+		}
 		final String name = "_system_test";
 		db.createCollection(name, new CollectionCreateOptions().isSystem(true)).get();
 		db.collection(name).drop(true).get();
@@ -211,6 +214,9 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test
 	public void deleteSystemCollectionFail() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			return;
+		}
 		final String name = "_system_test";
 		db.createCollection(name, new CollectionCreateOptions().isSystem(true)).get();
 		try {
