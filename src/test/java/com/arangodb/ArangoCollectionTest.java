@@ -871,7 +871,7 @@ public class ArangoCollectionTest extends BaseTest {
 	public void getIndexes() throws InterruptedException, ExecutionException {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
-		db.collection(COLLECTION_NAME).createHashIndex(fields, null);
+		db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
 		final CompletableFuture<Collection<IndexEntity>> f = db.collection(COLLECTION_NAME).getIndexes();
 		assertThat(f, is(notNullValue()));
 		final Collection<IndexEntity> indexes = f.get();
