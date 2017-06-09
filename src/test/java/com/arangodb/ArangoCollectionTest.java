@@ -630,7 +630,7 @@ public class ArangoCollectionTest extends BaseTest {
 		final BaseDocument doc = new BaseDocument();
 		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
 				.get();
-		db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, null);
+		db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, null).get();
 		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
 			BaseDocument.class, null);
 		assertThat(f, is(notNullValue()));

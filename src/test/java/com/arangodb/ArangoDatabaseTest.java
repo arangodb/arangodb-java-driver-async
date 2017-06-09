@@ -534,7 +534,7 @@ public class ArangoDatabaseTest extends BaseTest {
 		} finally {
 			final QueryCachePropertiesEntity properties = new QueryCachePropertiesEntity();
 			properties.setMode(CacheMode.off);
-			db.setQueryCacheProperties(properties);
+			db.setQueryCacheProperties(properties).get();
 		}
 	}
 
