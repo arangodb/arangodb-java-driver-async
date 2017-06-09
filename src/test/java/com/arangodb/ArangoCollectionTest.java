@@ -756,7 +756,9 @@ public class ArangoCollectionTest extends BaseTest {
 		assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
 		assertThat(indexResult.getIsNewlyCreated(), is(true));
 		assertThat(indexResult.getMinLength(), is(nullValue()));
-		assertThat(indexResult.getSelectivityEstimate(), is(1));
+		if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+			assertThat(indexResult.getSelectivityEstimate(), is(1));
+		}
 		assertThat(indexResult.getSparse(), is(false));
 		assertThat(indexResult.getType(), is(IndexType.hash));
 		assertThat(indexResult.getUnique(), is(false));
