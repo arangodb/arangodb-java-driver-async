@@ -135,7 +135,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			assertThat(result.getId(), is(notNullValue()));
 			assertThat(db.collection(COLLECTION_NAME).getProperties().get().getReplicationFactor(), is(2));
 		} finally {
-			db.collection(COLLECTION_NAME).drop();
+			db.collection(COLLECTION_NAME).drop().get();
 		}
 	}
 
@@ -151,7 +151,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			assertThat(result.getId(), is(notNullValue()));
 			assertThat(db.collection(COLLECTION_NAME).getProperties().get().getNumberOfShards(), is(2));
 		} finally {
-			db.collection(COLLECTION_NAME).drop();
+			db.collection(COLLECTION_NAME).drop().get();
 		}
 	}
 
@@ -170,7 +170,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			assertThat(properties.getNumberOfShards(), is(2));
 			assertThat(properties.getShardKeys().size(), is(1));
 		} finally {
-			db.collection(COLLECTION_NAME).drop();
+			db.collection(COLLECTION_NAME).drop().get();
 		}
 	}
 
@@ -188,7 +188,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			assertThat(properties.getNumberOfShards(), is(2));
 			assertThat(properties.getShardKeys().size(), is(2));
 		} finally {
-			db.collection(COLLECTION_NAME).drop();
+			db.collection(COLLECTION_NAME).drop().get();
 		}
 	}
 
@@ -783,7 +783,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			final QueryEntity queryEntity = slowQueries.iterator().next();
 			assertThat(queryEntity.getQuery(), is("return sleep(1.1)"));
 
-			db.clearSlowQueries();
+			db.clearSlowQueries().get();
 			assertThat(db.getSlowQueries().get().size(), is(0));
 		} finally {
 			properties.setSlowQueryThreshold(slowQueryThreshold);
@@ -895,20 +895,20 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
-	public void transactionEmpty() {
-		db.transaction("function () {}", null, null);
+	public void transactionEmpty() throws InterruptedException, ExecutionException {
+		db.transaction("function () {}", null, null).get();
 	}
 
 	@Test
-	public void transactionallowImplicit() {
+	public void transactionallowImplicit() throws InterruptedException, ExecutionException {
 		try {
-			db.createCollection("someCollection", null);
-			db.createCollection("someOtherCollection", null);
+			db.createCollection("someCollection", null).get();
+			db.createCollection("someOtherCollection", null).get();
 			final String action = "function (params) {" + "var db = require('internal').db;"
 					+ "return {'a':db.someCollection.all().toArray()[0], 'b':db.someOtherCollection.all().toArray()[0]};"
 					+ "}";
 			final TransactionOptions options = new TransactionOptions().readCollections("someCollection");
-			db.transaction(action, VPackSlice.class, options);
+			db.transaction(action, VPackSlice.class, options).get();
 			try {
 				options.allowImplicit(false);
 				db.transaction(action, VPackSlice.class, options).get();
@@ -916,8 +916,8 @@ public class ArangoDatabaseTest extends BaseTest {
 			} catch (final Exception e) {
 			}
 		} finally {
-			db.collection("someCollection").drop();
-			db.collection("someOtherCollection").drop();
+			db.collection("someCollection").drop().get();
+			db.collection("someOtherCollection").drop().get();
 		}
 	}
 
