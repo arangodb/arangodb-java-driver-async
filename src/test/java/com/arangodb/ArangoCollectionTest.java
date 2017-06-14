@@ -802,6 +802,7 @@ public class ArangoCollectionTest extends BaseTest {
 
 	@Test
 	public void createHashIndex() throws InterruptedException, ExecutionException {
+		final boolean singleServer = arangoDB.getRole().get() == ServerRole.SINGLE;
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
 		fields.add("b");
@@ -816,11 +817,8 @@ public class ArangoCollectionTest extends BaseTest {
 			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
 			assertThat(indexResult.getIsNewlyCreated(), is(true));
 			assertThat(indexResult.getMinLength(), is(nullValue()));
-			try {
-				if (arangoDB.getRole().get() == ServerRole.SINGLE) {
-					assertThat(indexResult.getSelectivityEstimate(), is(1));
-				}
-			} catch (InterruptedException | ExecutionException e) {
+			if (singleServer) {
+				assertThat(indexResult.getSelectivityEstimate(), is(1));
 			}
 			assertThat(indexResult.getSparse(), is(false));
 			assertThat(indexResult.getType(), is(IndexType.hash));
