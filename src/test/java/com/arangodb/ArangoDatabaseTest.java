@@ -285,8 +285,8 @@ public class ArangoDatabaseTest extends BaseTest {
 	public void getCollections() throws InterruptedException, ExecutionException {
 		try {
 			final Collection<CollectionEntity> systemCollections = db.getCollections(null).get();
-			db.createCollection(COLLECTION_NAME + "1", null);
-			db.createCollection(COLLECTION_NAME + "2", null);
+			db.createCollection(COLLECTION_NAME + "1", null).get();
+			db.createCollection(COLLECTION_NAME + "2", null).get();
 			final CompletableFuture<Collection<CollectionEntity>> f = db.getCollections(null);
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((collections, ex) -> {
