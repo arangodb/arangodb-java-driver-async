@@ -1336,26 +1336,26 @@ public class ArangoCollectionTest extends BaseTest {
 	@Test
 	public void importDocumentsOverwriteFalse() throws InterruptedException, ExecutionException {
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument());
+		collection.insertDocument(new BaseDocument()).get();
 		assertThat(collection.count().get().getCount(), is(1L));
 
 		final Collection<BaseDocument> values = new ArrayList<>();
 		values.add(new BaseDocument());
 		values.add(new BaseDocument());
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(false));
+		collection.importDocuments(values, new DocumentImportOptions().overwrite(false)).get();
 		assertThat(collection.count().get().getCount(), is(3L));
 	}
 
 	@Test
 	public void importDocumentsOverwriteTrue() throws InterruptedException, ExecutionException {
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument());
+		collection.insertDocument(new BaseDocument()).get();
 		assertThat(collection.count().get().getCount(), is(1L));
 
 		final Collection<BaseDocument> values = new ArrayList<>();
 		values.add(new BaseDocument());
 		values.add(new BaseDocument());
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(true));
+		collection.importDocuments(values, new DocumentImportOptions().overwrite(true)).get();
 		assertThat(collection.count().get().getCount(), is(2L));
 	}
 
@@ -1541,11 +1541,11 @@ public class ArangoCollectionTest extends BaseTest {
 	@Test
 	public void importDocumentsJsonOverwriteTrue() throws InterruptedException, ExecutionException {
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument());
+		collection.insertDocument(new BaseDocument()).get();
 		assertThat(collection.count().get().getCount(), is(1L));
 
 		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(true));
+		collection.importDocuments(values, new DocumentImportOptions().overwrite(true)).get();
 		assertThat(collection.count().get().getCount(), is(2L));
 	}
 
@@ -1573,7 +1573,7 @@ public class ArangoCollectionTest extends BaseTest {
 				}
 			}
 		} finally {
-			collection.drop();
+			collection.drop().get();
 		}
 	}
 
