@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1026,6 +1028,26 @@ public class ArangoDatabaseTest extends BaseTest {
 			f.get();
 		} finally {
 			db.collection(COLLECTION_NAME).drop().get();
+		}
+	}
+
+
+	@Test
+	public void shouldIncludeExceptionMessage() {
+		final String exceptionMessage = "My error context";
+		final String action = "function (params) {"
+				+ "throw '" + exceptionMessage + "';"
+				+ "}";
+		try {
+			db.transaction(action, VPackSlice.class, null).join();
+			fail();
+		} catch (final CompletionException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof ArangoDBException) {
+				assertTrue(((ArangoDBException) cause).getException().equals(exceptionMessage));
+			} else {
+				fail("Root cause expected to be an ArangoDBException");
+			}
 		}
 	}
 

@@ -140,9 +140,7 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 						if (response.getResponseCode() >= 300) {
 							if (response.getBody() != null) {
 								final ErrorEntity errorEntity = util.deserialize(response.getBody(), ErrorEntity.class);
-								final String errorMessage = String.format("Response: %s, Error: %s - %s",
-									errorEntity.getCode(), errorEntity.getErrorNum(), errorEntity.getErrorMessage());
-								rfuture.completeExceptionally(new ArangoDBException(errorMessage));
+								rfuture.completeExceptionally(new ArangoDBException(errorEntity));
 							} else {
 								rfuture.completeExceptionally(new ArangoDBException(
 										String.format("Response Code: %s", response.getResponseCode())));
