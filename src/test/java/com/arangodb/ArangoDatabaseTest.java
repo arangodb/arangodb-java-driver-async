@@ -1031,22 +1031,22 @@ public class ArangoDatabaseTest extends BaseTest {
 		}
 	}
 
-
 	@Test
-	public void shouldIncludeExceptionMessage() {
-		final String exceptionMessage = "My error context";
-		final String action = "function (params) {"
-				+ "throw '" + exceptionMessage + "';"
-				+ "}";
-		try {
-			db.transaction(action, VPackSlice.class, null).join();
-			fail();
-		} catch (final CompletionException e) {
-			Throwable cause = e.getCause();
-			if (cause instanceof ArangoDBException) {
-				assertTrue(((ArangoDBException) cause).getException().equals(exceptionMessage));
-			} else {
-				fail("Root cause expected to be an ArangoDBException");
+	public void shouldIncludeExceptionMessage() throws InterruptedException, ExecutionException {
+		final String version = db.getVersion().get().getVersion();
+		if (version.startsWith("3.1") || version.startsWith("3.0")) {
+			final String exceptionMessage = "My error context";
+			final String action = "function (params) {" + "throw '" + exceptionMessage + "';" + "}";
+			try {
+				db.transaction(action, VPackSlice.class, null).join();
+				fail();
+			} catch (final CompletionException e) {
+				final Throwable cause = e.getCause();
+				if (cause instanceof ArangoDBException) {
+					assertTrue(((ArangoDBException) cause).getException().equals(exceptionMessage));
+				} else {
+					fail("Root cause expected to be an ArangoDBException");
+				}
 			}
 		}
 	}
