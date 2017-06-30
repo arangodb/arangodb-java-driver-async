@@ -37,7 +37,7 @@ import com.arangodb.ArangoDBAsync;
 import com.arangodb.entity.ArangoDBVersion;
 
 /**
- * @author Mark - mark at arangodb.com
+ * @author Mark Vollmary
  *
  */
 public class SslExample {

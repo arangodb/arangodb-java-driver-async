@@ -29,7 +29,7 @@ import com.arangodb.internal.ArangoCursorExecute;
 import com.arangodb.internal.InternalArangoDatabase;
 
 /**
- * @author Mark - mark at arangodb.com
+ * @author Mark Vollmary
  *
  */
 public class ArangoCursorAsync<T> extends ArangoCursor<T> {

@@ -30,7 +30,7 @@ import com.arangodb.ArangoDBAsync;
 import com.arangodb.ArangoDatabaseAsync;
 
 /**
- * @author Mark - mark at arangodb.com
+ * @author Mark Vollmary
  *
  */
 public class ExampleBase {
