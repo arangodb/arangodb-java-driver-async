@@ -61,6 +61,7 @@ import com.arangodb.entity.DatabaseEntity;
 import com.arangodb.entity.GraphEntity;
 import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.PathEntity;
+import com.arangodb.entity.Permissions;
 import com.arangodb.entity.QueryCachePropertiesEntity;
 import com.arangodb.entity.QueryCachePropertiesEntity.CacheMode;
 import com.arangodb.entity.QueryEntity;
@@ -324,10 +325,30 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
-	public void grantAccess() throws InterruptedException, ExecutionException {
+	public void grantAccessRW() throws InterruptedException, ExecutionException {
 		try {
 			arangoDB.createUser("user1", "1234", null).get();
-			db.grantAccess("user1").get();
+			db.grantAccess("user1", Permissions.RW).get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test
+	public void grantAccessRO() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234", null).get();
+			db.grantAccess("user1", Permissions.RO).get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test
+	public void grantAccessNONE() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234", null).get();
+			db.grantAccess("user1", Permissions.NONE).get();
 		} finally {
 			arangoDB.deleteUser("user1").get();
 		}
@@ -335,14 +356,14 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test(expected = ExecutionException.class)
 	public void grantAccessUserNotFound() throws InterruptedException, ExecutionException {
-		db.grantAccess("user1").get();
+		db.grantAccess("user1", Permissions.RW).get();
 	}
 
 	@Test
 	public void revokeAccess() throws InterruptedException, ExecutionException {
 		try {
 			arangoDB.createUser("user1", "1234", null).get();
-			db.revokeAccess("user1").get();
+			db.grantAccess("user1", Permissions.NONE).get();
 		} finally {
 			arangoDB.deleteUser("user1").get();
 		}
@@ -350,7 +371,7 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test(expected = ExecutionException.class)
 	public void revokeAccessUserNotFound() throws InterruptedException, ExecutionException {
-		db.revokeAccess("user1").get();
+		db.grantAccess("user1", Permissions.NONE).get();
 	}
 
 	@Test

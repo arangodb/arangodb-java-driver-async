@@ -57,6 +57,7 @@ import com.arangodb.entity.DocumentUpdateEntity;
 import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.IndexType;
 import com.arangodb.entity.MultiDocumentEntity;
+import com.arangodb.entity.Permissions;
 import com.arangodb.entity.ServerRole;
 import com.arangodb.model.CollectionCreateOptions;
 import com.arangodb.model.CollectionPropertiesOptions;
@@ -2006,6 +2007,56 @@ public class ArangoCollectionTest extends BaseTest {
 			assertThat(result.getRevision(), is(notNullValue()));
 		});
 		f.get();
+	}
+
+	@Test
+	public void grantAccessRW() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234", null).get();
+			db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.RW).get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test
+	public void grantAccessRO() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234", null).get();
+			db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.RO).get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test
+	public void grantAccessNONE() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234", null).get();
+			db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test(expected = ExecutionException.class)
+	public void grantAccessUserNotFound() throws InterruptedException, ExecutionException {
+		db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.RW).get();
+	}
+
+	@Test
+	public void revokeAccess() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234", null).get();
+			db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test(expected = ExecutionException.class)
+	public void revokeAccessUserNotFound() throws InterruptedException, ExecutionException {
+		db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
 	}
 
 }

@@ -33,6 +33,7 @@ import com.arangodb.entity.DocumentImportEntity;
 import com.arangodb.entity.DocumentUpdateEntity;
 import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.MultiDocumentEntity;
+import com.arangodb.entity.Permissions;
 import com.arangodb.internal.ArangoExecutor.ResponseDeserializer;
 import com.arangodb.internal.ArangoExecutorAsync;
 import com.arangodb.internal.InternalArangoCollection;
@@ -778,6 +779,23 @@ public class ArangoCollectionAsync extends
 	 */
 	public CompletableFuture<CollectionRevisionEntity> getRevision() {
 		return executor.execute(getRevisionRequest(), CollectionRevisionEntity.class);
+	}
+
+	/**
+	 * Grants or revoke access to the collection for user user. You need permission to the _system database in order to
+	 * execute this call.
+	 * 
+	 * @see <a href=
+	 *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-collection-access"> API
+	 *      Documentation</a>
+	 * @param user
+	 *            The name of the user
+	 * @param permissions
+	 *            The permissions the user grant
+	 */
+	public CompletableFuture<Void> grantAccess(final String user, final Permissions permissions)
+			throws ArangoDBException {
+		return executor.execute(grantAccessRequest(user, permissions), Void.class);
 	}
 
 }
