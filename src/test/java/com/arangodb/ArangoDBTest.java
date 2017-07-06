@@ -160,7 +160,6 @@ public class ArangoDBTest {
 			f.whenComplete((result, ex) -> {
 				assertThat(result, is(notNullValue()));
 				assertThat(result.getUser(), is(USER));
-				assertThat(result.getChangePassword(), is(false));
 			});
 			f.get();
 		} finally {
