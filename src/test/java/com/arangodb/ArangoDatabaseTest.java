@@ -325,6 +325,16 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
+	public void grantAccess() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234", null).get();
+			db.grantAccess("user1").get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test
 	public void grantAccessRW() throws InterruptedException, ExecutionException {
 		try {
 			arangoDB.createUser("user1", "1234", null).get();
@@ -363,7 +373,7 @@ public class ArangoDatabaseTest extends BaseTest {
 	public void revokeAccess() throws InterruptedException, ExecutionException {
 		try {
 			arangoDB.createUser("user1", "1234", null).get();
-			db.grantAccess("user1", Permissions.NONE).get();
+			db.revokeAccess("user1").get();
 		} finally {
 			arangoDB.deleteUser("user1").get();
 		}
@@ -371,7 +381,7 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test(expected = ExecutionException.class)
 	public void revokeAccessUserNotFound() throws InterruptedException, ExecutionException {
-		db.grantAccess("user1", Permissions.NONE).get();
+		db.revokeAccess("user1").get();
 	}
 
 	@Test

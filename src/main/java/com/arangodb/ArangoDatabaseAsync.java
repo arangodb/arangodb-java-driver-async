@@ -229,14 +229,12 @@ public class ArangoDatabaseAsync extends
 	 * Grants access to the database dbname for user user. You need permission to the _system database in order to
 	 * execute this call.
 	 * 
-	 * @deprecated use {@link #grantAccess(String, Permissions)} instead
 	 * @see <a href= "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-database-access">
 	 *      API Documentation</a>
 	 * @param user
 	 *            The name of the user
 	 * @return void
 	 */
-	@Deprecated
 	public CompletableFuture<Void> grantAccess(final String user) {
 		return executor.execute(grantAccessRequest(user, Permissions.RW), Void.class);
 	}
@@ -245,14 +243,12 @@ public class ArangoDatabaseAsync extends
 	 * Revokes access to the database dbname for user user. You need permission to the _system database in order to
 	 * execute this call.
 	 * 
-	 * @deprecated use {@link #grantAccess(String, Permissions)} instead
 	 * @see <a href= "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-database-access">
 	 *      API Documentation</a>
 	 * @param user
 	 *            The name of the user
 	 * @return void
 	 */
-	@Deprecated
 	public CompletableFuture<Void> revokeAccess(final String user) {
 		return executor.execute(grantAccessRequest(user, Permissions.NONE), Void.class);
 	}
