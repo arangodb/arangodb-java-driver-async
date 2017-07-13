@@ -730,7 +730,7 @@ public class ArangoDatabaseTest extends BaseTest {
 
 	@Test
 	public void queryWithWarning() throws InterruptedException, ExecutionException {
-		final CompletableFuture<ArangoCursorAsync<String>> f = arangoDB.db().query("return _users + 1", null, null,
+		final CompletableFuture<ArangoCursorAsync<String>> f = arangoDB.db().query("return _apps + 1", null, null,
 			String.class);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((cursor, ex) -> {
