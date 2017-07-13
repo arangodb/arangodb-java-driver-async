@@ -254,6 +254,19 @@ public class ArangoDatabaseAsync extends
 	}
 
 	/**
+	 * Clear the database access level, revert back to the default access level.
+	 * 
+	 * @see <a href= "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-database-access">
+	 *      API Documentation</a>
+	 * @param user
+	 *            The name of the user
+	 * @return void
+	 */
+	public CompletableFuture<Void> resetAccess(final String user) {
+		return executor.execute(resetAccessRequest(user), Void.class);
+	}
+
+	/**
 	 * Create a cursor and return the first results
 	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API

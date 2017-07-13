@@ -34,6 +34,7 @@ import javax.net.ssl.SSLContext;
 import com.arangodb.entity.ArangoDBVersion;
 import com.arangodb.entity.LogEntity;
 import com.arangodb.entity.LogLevelEntity;
+import com.arangodb.entity.Permissions;
 import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.UserEntity;
 import com.arangodb.internal.ArangoDBConstants;
@@ -573,6 +574,14 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	 */
 	public CompletableFuture<UserEntity> replaceUser(final String user, final UserUpdateOptions options) {
 		return executor.execute(replaceUserRequest(db().name(), user, options), UserEntity.class);
+	}
+
+	public CompletableFuture<Void> updateUserDefaultDatabaseAccess(final String user, final Permissions permissions) {
+		return executor.execute(updateUserDefaultDatabaseAccessRequest(user, permissions), Void.class);
+	}
+
+	public CompletableFuture<Void> updateUserDefaultCollectionAccess(final String user, final Permissions permissions) {
+		return executor.execute(updateUserDefaultDatabaseAccessRequest(user, permissions), Void.class);
 	}
 
 	/**

@@ -236,6 +236,22 @@ public class ArangoCollectionAsync extends
 	}
 
 	/**
+	 * Reads multiple documents
+	 * 
+	 * @param keys
+	 *            The keys of the documents
+	 * @param type
+	 *            The type of the documents (POJO class, VPackSlice or String for Json)
+	 * @return the documents and possible errors
+	 */
+	public <T> CompletableFuture<MultiDocumentEntity<T>> getDocuments(
+		final Collection<String> keys,
+		final Class<T> type) {
+		final DocumentReadOptions options = new DocumentReadOptions();
+		return executor.execute(getDocumentsRequest(keys, options), getDocumentsResponseDeserializer(type, options));
+	}
+
+	/**
 	 * Replaces the document with key with the one in the body, provided there is such a document and no precondition is
 	 * violated
 	 * 
@@ -792,10 +808,39 @@ public class ArangoCollectionAsync extends
 	 *            The name of the user
 	 * @param permissions
 	 *            The permissions the user grant
+	 * @return void
 	 */
-	public CompletableFuture<Void> grantAccess(final String user, final Permissions permissions)
-			throws ArangoDBException {
+	public CompletableFuture<Void> grantAccess(final String user, final Permissions permissions) {
 		return executor.execute(grantAccessRequest(user, permissions), Void.class);
+	}
+
+	/**
+	 * Revokes access to the collection for user user. You need permission to the _system database in order to execute
+	 * this call.
+	 * 
+	 * @see <a href=
+	 *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-collection-access"> API
+	 *      Documentation</a>
+	 * @param user
+	 *            The name of the user
+	 * @return void
+	 */
+	public CompletableFuture<Void> revokeAccess(final String user) {
+		return executor.execute(grantAccessRequest(user, Permissions.NONE), Void.class);
+	}
+
+	/**
+	 * Clear the collection access level, revert back to the default access level.
+	 * 
+	 * @see <a href=
+	 *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-collection-access"> API
+	 *      Documentation</a>
+	 * @param user
+	 *            The name of the user
+	 * @return void
+	 */
+	public CompletableFuture<Void> resetAccess(final String user) {
+		return executor.execute(resetAccessRequest(user), Void.class);
 	}
 
 }

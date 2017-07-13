@@ -385,6 +385,21 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
+	public void resetAccess() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234", null).get();
+			db.resetAccess("user1").get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test(expected = ExecutionException.class)
+	public void resetAccessUserNotFound() throws InterruptedException, ExecutionException {
+		db.resetAccess("user1").get();
+	}
+
+	@Test
 	public void query() throws InterruptedException, ExecutionException {
 		try {
 			db.createCollection(COLLECTION_NAME, null).get();

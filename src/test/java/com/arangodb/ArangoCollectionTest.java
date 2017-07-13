@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
@@ -34,7 +35,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -252,6 +255,41 @@ public class ArangoCollectionTest extends BaseTest {
 	@Test(expected = ArangoDBException.class)
 	public void getDocumentWrongKey() throws InterruptedException, ExecutionException {
 		db.collection(COLLECTION_NAME).getDocument("no/no", BaseDocument.class).get();
+	}
+
+	@Test
+	public void getDocuments() throws InterruptedException, ExecutionException {
+		final Collection<BaseDocument> values = new ArrayList<>();
+		values.add(new BaseDocument("1"));
+		values.add(new BaseDocument("2"));
+		values.add(new BaseDocument("3"));
+		db.collection(COLLECTION_NAME).insertDocuments(values).get();
+		final MultiDocumentEntity<BaseDocument> documents = db.collection(COLLECTION_NAME)
+				.getDocuments(Arrays.asList("1", "2", "3"), BaseDocument.class).get();
+		assertThat(documents, is(notNullValue()));
+		assertThat(documents.getDocuments().size(), is(3));
+		for (final BaseDocument document : documents.getDocuments()) {
+			assertThat(document.getId(),
+				isOneOf(COLLECTION_NAME + "/" + "1", COLLECTION_NAME + "/" + "2", COLLECTION_NAME + "/" + "3"));
+		}
+	}
+
+	@Test
+	public void getDocumentsNotFound() throws InterruptedException, ExecutionException {
+		final MultiDocumentEntity<BaseDocument> readResult = db.collection(COLLECTION_NAME)
+				.getDocuments(Collections.singleton("no"), BaseDocument.class).get();
+		assertThat(readResult, is(notNullValue()));
+		assertThat(readResult.getDocuments().size(), is(0));
+		assertThat(readResult.getErrors().size(), is(1));
+	}
+
+	@Test
+	public void getDocumentsWrongKey() throws InterruptedException, ExecutionException {
+		final MultiDocumentEntity<BaseDocument> readResult = db.collection(COLLECTION_NAME)
+				.getDocuments(Collections.singleton("no/no"), BaseDocument.class).get();
+		assertThat(readResult, is(notNullValue()));
+		assertThat(readResult.getDocuments().size(), is(0));
+		assertThat(readResult.getErrors().size(), is(1));
 	}
 
 	@Test
@@ -2057,6 +2095,21 @@ public class ArangoCollectionTest extends BaseTest {
 	@Test(expected = ExecutionException.class)
 	public void revokeAccessUserNotFound() throws InterruptedException, ExecutionException {
 		db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
+	}
+
+	@Test
+	public void resetAccess() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234", null).get();
+			db.collection(COLLECTION_NAME).resetAccess("user1").get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test(expected = ExecutionException.class)
+	public void resetAccessUserNotFound() throws InterruptedException, ExecutionException {
+		db.collection(COLLECTION_NAME).resetAccess("user1").get();
 	}
 
 }

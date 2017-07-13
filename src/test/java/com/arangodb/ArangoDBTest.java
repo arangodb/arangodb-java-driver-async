@@ -44,6 +44,7 @@ import com.arangodb.entity.ArangoDBVersion;
 import com.arangodb.entity.LogEntity;
 import com.arangodb.entity.LogLevel;
 import com.arangodb.entity.LogLevelEntity;
+import com.arangodb.entity.Permissions;
 import com.arangodb.entity.UserEntity;
 import com.arangodb.model.LogOptions;
 import com.arangodb.model.LogOptions.SortOrder;
@@ -310,6 +311,28 @@ public class ArangoDBTest {
 				});
 				f.get();
 			}
+		} finally {
+			arangoDB.deleteUser(USER).get();
+		}
+	}
+
+	@Test
+	public void updateUserDefaultDatabaseAccess() throws InterruptedException, ExecutionException {
+		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
+		try {
+			arangoDB.createUser(USER, PW).get();
+			arangoDB.updateUserDefaultDatabaseAccess(USER, Permissions.RW).get();
+		} finally {
+			arangoDB.deleteUser(USER).get();
+		}
+	}
+
+	@Test
+	public void updateUserDefaultCollectionAccess() throws InterruptedException, ExecutionException {
+		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
+		try {
+			arangoDB.createUser(USER, PW).get();
+			arangoDB.updateUserDefaultCollectionAccess(USER, Permissions.RW).get();
 		} finally {
 			arangoDB.deleteUser(USER).get();
 		}
