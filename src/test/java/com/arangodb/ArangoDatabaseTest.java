@@ -400,6 +400,16 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
+	public void updateUserDefaultCollectionAccess() throws InterruptedException, ExecutionException {
+		try {
+			arangoDB.createUser("user1", "1234").get();
+			db.updateUserDefaultCollectionAccess("user1", Permissions.RW).get();
+		} finally {
+			arangoDB.deleteUser("user1").get();
+		}
+	}
+
+	@Test
 	public void query() throws InterruptedException, ExecutionException {
 		try {
 			db.createCollection(COLLECTION_NAME, null).get();

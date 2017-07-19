@@ -581,7 +581,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 	}
 
 	public CompletableFuture<Void> updateUserDefaultCollectionAccess(final String user, final Permissions permissions) {
-		return executor.execute(updateUserDefaultDatabaseAccessRequest(user, permissions), Void.class);
+		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
 	}
 
 	/**

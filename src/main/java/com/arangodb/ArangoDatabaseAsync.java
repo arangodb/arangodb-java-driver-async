@@ -266,6 +266,10 @@ public class ArangoDatabaseAsync extends
 		return executor.execute(resetAccessRequest(user), Void.class);
 	}
 
+	public CompletableFuture<Void> updateUserDefaultCollectionAccess(final String user, final Permissions permissions) {
+		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
+	}
+
 	/**
 	 * Create a cursor and return the first results
 	 * 
