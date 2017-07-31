@@ -260,14 +260,54 @@ public class ArangoDatabaseAsync extends
 	 *      API Documentation</a>
 	 * @param user
 	 *            The name of the user
+	 * @since ArangoDB 3.2.0
 	 * @return void
 	 */
 	public CompletableFuture<Void> resetAccess(final String user) {
 		return executor.execute(resetAccessRequest(user), Void.class);
 	}
 
+	/**
+	 * Sets the default access level for collections within this database for the user <code>user</code>. You need
+	 * permission to the _system database in order to execute this call.
+	 * 
+	 * @param user
+	 *            The name of the user
+	 * @param permissions
+	 *            The permissions the user grant
+	 * @since ArangoDB 3.2.0
+	 * @throws ArangoDBException
+	 */
+	public CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions)
+			throws ArangoDBException {
+		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
+	}
+
+	/**
+	 * @deprecated use {@link #grantDefaultCollectionAccess(String, Permissions)} instead
+	 * @param user
+	 *            The name of the user
+	 * @param permissions
+	 *            The permissions the user grant
+	 * @since ArangoDB 3.2.0
+	 */
+	@Deprecated
 	public CompletableFuture<Void> updateUserDefaultCollectionAccess(final String user, final Permissions permissions) {
 		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
+	}
+
+	/**
+	 * Get specific database access level
+	 * 
+	 * @see <a href= "https://docs.arangodb.com/current/HTTP/UserManagement/#get-the-database-access-level"> API
+	 *      Documentation</a>
+	 * @param user
+	 *            The name of the user
+	 * @return permissions of the user
+	 * @since ArangoDB 3.2.0
+	 */
+	public CompletableFuture<Permissions> getPermissions(final String user) throws ArangoDBException {
+		return executor.execute(getPermissionsRequest(user), getPermissionsResponseDeserialzer());
 	}
 
 	/**

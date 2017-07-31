@@ -321,7 +321,7 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		try {
 			arangoDB.createUser(USER, PW).get();
-			arangoDB.updateUserDefaultDatabaseAccess(USER, Permissions.RW).get();
+			arangoDB.grantDefaultDatabaseAccess(USER, Permissions.RW).get();
 		} finally {
 			arangoDB.deleteUser(USER).get();
 		}
@@ -332,7 +332,7 @@ public class ArangoDBTest {
 		final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
 		try {
 			arangoDB.createUser(USER, PW).get();
-			arangoDB.updateUserDefaultCollectionAccess(USER, Permissions.RW).get();
+			arangoDB.grantDefaultCollectionAccess(USER, Permissions.RW).get();
 		} finally {
 			arangoDB.deleteUser(USER).get();
 		}

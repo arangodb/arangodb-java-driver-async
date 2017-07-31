@@ -2112,4 +2112,8 @@ public class ArangoCollectionTest extends BaseTest {
 		db.collection(COLLECTION_NAME).resetAccess("user1").get();
 	}
 
+	@Test
+	public void getPermissions() throws ArangoDBException, InterruptedException, ExecutionException {
+		assertThat(Permissions.RW, is(db.collection(COLLECTION_NAME).getPermissions("root").get()));
+	}
 }

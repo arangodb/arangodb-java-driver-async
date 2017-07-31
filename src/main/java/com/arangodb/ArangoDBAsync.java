@@ -576,11 +576,65 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		return executor.execute(replaceUserRequest(db().name(), user, options), UserEntity.class);
 	}
 
+	/**
+	 * @deprecated use {@link #grantDefaultDatabaseAccess(String, Permissions)} instead
+	 * 
+	 * @param user
+	 *            The name of the user
+	 * @param permissions
+	 *            The permissions the user grant
+	 * @since ArangoDB 3.2.0
+	 * @return void
+	 */
+	@Deprecated
 	public CompletableFuture<Void> updateUserDefaultDatabaseAccess(final String user, final Permissions permissions) {
 		return executor.execute(updateUserDefaultDatabaseAccessRequest(user, permissions), Void.class);
 	}
 
+	/**
+	 * Sets the default access level for databases for the user <code>user</code>. You need permission to the _system
+	 * database in order to execute this call.
+	 * 
+	 * @param user
+	 *            The name of the user
+	 * @param permissions
+	 *            The permissions the user grant
+	 * @since ArangoDB 3.2.0
+	 * @return void
+	 */
+	public CompletableFuture<Void> grantDefaultDatabaseAccess(final String user, final Permissions permissions)
+			throws ArangoDBException {
+		return executor.execute(updateUserDefaultDatabaseAccessRequest(user, permissions), Void.class);
+	}
+
+	/**
+	 * @deprecated user {@link #grantDefaultCollectionAccess(String, Permissions)} instead
+	 * 
+	 * @param user
+	 *            The name of the user
+	 * @param permissions
+	 *            The permissions the user grant
+	 * @since ArangoDB 3.2.0
+	 * @return void
+	 */
+	@Deprecated
 	public CompletableFuture<Void> updateUserDefaultCollectionAccess(final String user, final Permissions permissions) {
+		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
+	}
+
+	/**
+	 * Sets the default access level for collections for the user <code>user</code>. You need permission to the _system
+	 * database in order to execute this call.
+	 * 
+	 * @param user
+	 *            The name of the user
+	 * @param permissions
+	 *            The permissions the user grant
+	 * @since ArangoDB 3.2.0
+	 * @return void
+	 */
+	public CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions)
+			throws ArangoDBException {
 		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
 	}
 

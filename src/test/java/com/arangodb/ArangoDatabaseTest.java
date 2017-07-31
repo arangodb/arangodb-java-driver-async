@@ -400,13 +400,18 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
-	public void updateUserDefaultCollectionAccess() throws InterruptedException, ExecutionException {
+	public void grantDefaultCollectionAccess() throws InterruptedException, ExecutionException {
 		try {
 			arangoDB.createUser("user1", "1234").get();
-			db.updateUserDefaultCollectionAccess("user1", Permissions.RW).get();
+			db.grantDefaultCollectionAccess("user1", Permissions.RW).get();
 		} finally {
 			arangoDB.deleteUser("user1").get();
 		}
+	}
+
+	@Test
+	public void getPermissions() throws ArangoDBException, InterruptedException, ExecutionException {
+		assertThat(Permissions.RW, is(db.getPermissions("root").get()));
 	}
 
 	@Test
