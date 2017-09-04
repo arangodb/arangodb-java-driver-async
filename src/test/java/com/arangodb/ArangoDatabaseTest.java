@@ -248,7 +248,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			db.createCollection(COLLECTION_NAME, null).get();
 			final Collection<String> fields = new ArrayList<>();
 			fields.add("a");
-			final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+			final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
 			final CompletableFuture<IndexEntity> f = db.getIndex(createResult.getId());
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((readResult, ex) -> {
@@ -267,7 +267,7 @@ public class ArangoDatabaseTest extends BaseTest {
 			db.createCollection(COLLECTION_NAME, null).get();
 			final Collection<String> fields = new ArrayList<>();
 			fields.add("a");
-			final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+			final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
 			final CompletableFuture<String> f = db.deleteIndex(createResult.getId());
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((id, ex) -> {

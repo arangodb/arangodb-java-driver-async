@@ -777,7 +777,7 @@ public class ArangoCollectionTest extends BaseTest {
 	public void getIndex() throws InterruptedException, ExecutionException {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
-		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+		final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).getIndex(createResult.getId());
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((readResult, ex) -> {
@@ -791,7 +791,7 @@ public class ArangoCollectionTest extends BaseTest {
 	public void getIndexByKey() throws InterruptedException, ExecutionException {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
-		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+		final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
 		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME)
 				.getIndex(createResult.getId().split("/")[1]);
 		assertThat(f, is(notNullValue()));
@@ -806,7 +806,7 @@ public class ArangoCollectionTest extends BaseTest {
 	public void deleteIndex() throws InterruptedException, ExecutionException {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
-		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+		final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
 		final CompletableFuture<String> f = db.collection(COLLECTION_NAME).deleteIndex(createResult.getId());
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((id, ex) -> {
@@ -824,7 +824,7 @@ public class ArangoCollectionTest extends BaseTest {
 	public void deleteIndexByKey() throws InterruptedException, ExecutionException {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
-		final IndexEntity createResult = db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+		final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
 		final CompletableFuture<String> f = db.collection(COLLECTION_NAME)
 				.deleteIndex(createResult.getId().split("/")[1]);
 		assertThat(f, is(notNullValue()));
@@ -845,7 +845,7 @@ public class ArangoCollectionTest extends BaseTest {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
 		fields.add("b");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createHashIndex(fields, null);
+		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((indexResult, ex) -> {
 			assertThat(indexResult, is(notNullValue()));
@@ -870,7 +870,7 @@ public class ArangoCollectionTest extends BaseTest {
 	public void createGeoIndex() throws InterruptedException, ExecutionException {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createGeoIndex(fields, null);
+		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureGeoIndex(fields, null);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((indexResult, ex) -> {
 			assertThat(indexResult, is(notNullValue()));
@@ -893,7 +893,7 @@ public class ArangoCollectionTest extends BaseTest {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
 		fields.add("b");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createGeoIndex(fields, null);
+		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureGeoIndex(fields, null);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((indexResult, ex) -> {
 			assertThat(indexResult, is(notNullValue()));
@@ -917,7 +917,7 @@ public class ArangoCollectionTest extends BaseTest {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
 		fields.add("b");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createSkiplistIndex(fields, null);
+		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureSkiplistIndex(fields, null);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((indexResult, ex) -> {
 			assertThat(indexResult, is(notNullValue()));
@@ -941,7 +941,7 @@ public class ArangoCollectionTest extends BaseTest {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
 		fields.add("b");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createPersistentIndex(fields, null);
+		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensurePersistentIndex(fields, null);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((indexResult, ex) -> {
 			assertThat(indexResult, is(notNullValue()));
@@ -964,7 +964,7 @@ public class ArangoCollectionTest extends BaseTest {
 	public void createFulltextIndex() throws InterruptedException, ExecutionException {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).createFulltextIndex(fields, null);
+		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureFulltextIndex(fields, null);
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((indexResult, ex) -> {
 			assertThat(indexResult, is(notNullValue()));
@@ -985,7 +985,7 @@ public class ArangoCollectionTest extends BaseTest {
 	public void getIndexes() throws InterruptedException, ExecutionException {
 		final Collection<String> fields = new ArrayList<>();
 		fields.add("a");
-		db.collection(COLLECTION_NAME).createHashIndex(fields, null).get();
+		db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
 		final CompletableFuture<Collection<IndexEntity>> f = db.collection(COLLECTION_NAME).getIndexes();
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((indexes, ex) -> {
