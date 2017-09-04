@@ -1,3 +1,14 @@
+v4.2.4 (2017-09-04)
+---------------------------
+* fixed ArangoDatabaseAsync.transaction(): ignore null result
+* added properties validation arangodb.host
+* added ArangoCollectionAsync.ensure<IndexType>Index()
+* made ArangoCollectionAsync.create<IndexType>Index() deprecated
+* let ArangoCursor implement Iterable
+* fixed issue #145: ArangoCollectionAsync.updateDocument()
+* fixed issue #145: ArangoVertexCollectionAsync.updateVertex()
+* fixed issue #145: ArangoEdgeCollectionAsync.updateEdge()
+
 v4.2.3 (2017-07-31)
 ---------------------------
 * added ArangoDatabaseAsync.getPermissions(String)
