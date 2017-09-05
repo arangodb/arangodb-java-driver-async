@@ -757,6 +757,16 @@ public class ArangoCollectionAsync extends
 	}
 
 	/**
+	 * Checks whether the collection exists
+	 * 
+	 * @return true if the collection exists, otherwise false
+	 */
+	public CompletableFuture<Boolean> exists() {
+		return db().getCollections()
+				.thenApply(collections -> collections.stream().map(c -> c.getName()).anyMatch(c -> c.equals(name())));
+	}
+
+	/**
 	 * Removes all documents from the collection, but leaves the indexes intact
 	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#truncate-collection">API

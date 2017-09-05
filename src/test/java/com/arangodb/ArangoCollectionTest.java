@@ -1003,6 +1003,12 @@ public class ArangoCollectionTest extends BaseTest {
 	}
 
 	@Test
+	public void exists() throws InterruptedException, ExecutionException {
+		assertThat(db.collection(COLLECTION_NAME).exists().get(), is(true));
+		assertThat(db.collection(COLLECTION_NAME + "no").exists().get(), is(false));
+	}
+
+	@Test
 	public void truncate() throws InterruptedException, ExecutionException {
 		final BaseDocument doc = new BaseDocument();
 		db.collection(COLLECTION_NAME).insertDocument(doc, null).get();
