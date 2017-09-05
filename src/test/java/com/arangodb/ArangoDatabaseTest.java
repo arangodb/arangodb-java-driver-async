@@ -101,6 +101,12 @@ public class ArangoDatabaseTest extends BaseTest {
 	}
 
 	@Test
+	public void exists() throws InterruptedException, ExecutionException {
+		assertThat(db.exists().get(), is(true));
+		assertThat(arangoDB.db("no").exists().get(), is(false));
+	}
+
+	@Test
 	public void getAccessibleDatabases() throws InterruptedException, ExecutionException {
 		final CompletableFuture<Collection<String>> f = db.getAccessibleDatabases();
 		assertThat(f, is(notNullValue()));

@@ -91,6 +91,15 @@ public class ArangoDatabaseAsync extends
 	}
 
 	/**
+	 * Checks whether the database exists
+	 * 
+	 * @return true if the database exists, otherwise false
+	 */
+	public CompletableFuture<Boolean> exists() {
+		return arango().getDatabases().thenApply(databases -> databases.contains(name()));
+	}
+
+	/**
 	 * Retrieves a list of all databases the current user can access
 	 * 
 	 * @see <a href=
