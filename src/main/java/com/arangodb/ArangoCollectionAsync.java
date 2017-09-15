@@ -762,8 +762,7 @@ public class ArangoCollectionAsync extends
 	 * @return true if the collection exists, otherwise false
 	 */
 	public CompletableFuture<Boolean> exists() {
-		return db().getCollections()
-				.thenApply(collections -> collections.stream().map(c -> c.getName()).anyMatch(c -> c.equals(name())));
+		return getInfo().thenApply(info -> info != null).exceptionally(e -> e == null);
 	}
 
 	/**
