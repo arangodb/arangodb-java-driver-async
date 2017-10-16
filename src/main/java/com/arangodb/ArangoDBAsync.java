@@ -41,6 +41,7 @@ import com.arangodb.internal.ArangoDBConstants;
 import com.arangodb.internal.ArangoExecutorAsync;
 import com.arangodb.internal.CollectionCache;
 import com.arangodb.internal.CollectionCache.DBAccess;
+import com.arangodb.internal.CommunicationProtocol;
 import com.arangodb.internal.DefaultHostHandler;
 import com.arangodb.internal.DocumentCache;
 import com.arangodb.internal.Host;
@@ -359,14 +360,17 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 
 	}
 
+	private final CommunicationProtocol cp;
+
 	public ArangoDBAsync(final VstCommunicationAsync.Builder commBuilder, final ArangoSerialization util,
 		final CollectionCache collectionCache, final VstCommunicationSync.Builder syncbuilder) {
 		super(new ArangoExecutorAsync(commBuilder.build(util, collectionCache), util, new DocumentCache()), util);
 		final VstCommunication<Response, ConnectionSync> cacheCom = syncbuilder.build(util, collectionCache);
+		cp = new VstProtocol(cacheCom);
 		collectionCache.init(new DBAccess() {
 			@Override
 			public ArangoDatabase db(final String name) {
-				return new ArangoDatabase(new VstProtocol(cacheCom), util, executor.documentCache(), name);
+				return new ArangoDatabase(cp, util, executor.documentCache(), name);
 			}
 		});
 	}
@@ -376,8 +380,13 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		return executor;
 	}
 
-	public void shutdown() {
-		executor.disconnect();
+	public void shutdown() throws ArangoDBException {
+		try {
+			executor.disconnect();
+			cp.close();
+		} catch (final IOException e) {
+			throw new ArangoDBException(e);
+		}
 	}
 
 	/**

@@ -2,6 +2,9 @@ v4.2.5 (2017-xx-xx)
 ---------------------------
 * added ArangoCollectionAsync.exists()
 * added ArangoDatabaseAsync.exists()
+* added BaseDocument.setId(String)
+* added GraphCreateOptions.replicationFactor(Integer)
+* ArangoDBAsync.shutdown() now closes all connections 
 
 v4.2.4 (2017-09-04)
 ---------------------------
