@@ -4,7 +4,7 @@
 
 	<groupId>com.arangodb</groupId>
 	<artifactId>arangodb-java-driver-async</artifactId>
-	<version>4.2.6-SNAPSHOT</version>
+	<version>4.2.7</version>
 	<inceptionYear>2016</inceptionYear>
 	<packaging>jar</packaging>
 
@@ -32,7 +32,7 @@
 	<developers>
 		<developer>
 			<id>mpv1989</id>
-			<name>Mark</name>
+			<name>Mark Vollmary</name>
 			<url>https://github.com/mpv1989</url>
 		</developer>
 	</developers>
