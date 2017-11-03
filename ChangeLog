@@ -1,3 +1,9 @@
+v4.2.x (2017-xx-xx)
+---------------------------
+* added ArangoGraphAsync.exists()
+* fixed de-/serialization of negative int values
+* exclude junit dependency of json-simple
+
 v4.2.5 (2017-10-16)
 ---------------------------
 * added ArangoCollectionAsync.exists()
