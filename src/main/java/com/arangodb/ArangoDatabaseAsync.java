@@ -45,6 +45,7 @@ import com.arangodb.internal.ArangoExecutorAsync;
 import com.arangodb.internal.CollectionCache;
 import com.arangodb.internal.DocumentCache;
 import com.arangodb.internal.InternalArangoDatabase;
+import com.arangodb.internal.net.HostHandle;
 import com.arangodb.internal.velocystream.ConnectionAsync;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.model.AqlFunctionCreateOptions;
@@ -372,9 +373,9 @@ public class ArangoDatabaseAsync extends
 	private <T> ArangoCursorAsync<T> createCursor(final CursorEntity result, final Class<T> type) {
 		return new ArangoCursorAsync<>(this, new ArangoCursorExecute() {
 			@Override
-			public CursorEntity next(final String id) {
+			public CursorEntity next(final String id, final HostHandle hostHandle) {
 				final CompletableFuture<CursorEntity> result = executor.execute(queryNextRequest(id),
-					CursorEntity.class);
+					CursorEntity.class, hostHandle);
 				try {
 					return result.get();
 				} catch (InterruptedException | ExecutionException e) {
@@ -383,9 +384,9 @@ public class ArangoDatabaseAsync extends
 			}
 
 			@Override
-			public void close(final String id) {
+			public void close(final String id, final HostHandle hostHandle) {
 				try {
-					executor.execute(queryCloseRequest(id), Void.class).get();
+					executor.execute(queryCloseRequest(id), Void.class, hostHandle).get();
 				} catch (InterruptedException | ExecutionException e) {
 					throw new ArangoDBException(e);
 				}

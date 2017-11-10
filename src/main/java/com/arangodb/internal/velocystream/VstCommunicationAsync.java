@@ -33,9 +33,9 @@ import com.arangodb.ArangoDBException;
 import com.arangodb.entity.ErrorEntity;
 import com.arangodb.internal.ArangoDBConstants;
 import com.arangodb.internal.CollectionCache;
-import com.arangodb.internal.HostHandler;
+import com.arangodb.internal.net.ConnectionPool;
+import com.arangodb.internal.net.HostHandler;
 import com.arangodb.internal.velocystream.internal.AuthenticationRequest;
-import com.arangodb.internal.velocystream.internal.ConnectionPool;
 import com.arangodb.internal.velocystream.internal.Message;
 import com.arangodb.internal.velocystream.internal.MessageStore;
 import com.arangodb.util.ArangoSerialization;
@@ -113,21 +113,24 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 	private VstCommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
 		final String password, final Boolean useSsl, final SSLContext sslContext, final ArangoSerialization util,
 		final CollectionCache collectionCache, final Integer chunksize, final Integer maxConnections) {
-		super(timeout, user, password, useSsl, sslContext, util, chunksize,
-				new ConnectionPool<ConnectionAsync>(maxConnections) {
-					private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder(hostHandler,
-							new MessageStore()).timeout(timeout).useSsl(useSsl).sslContext(sslContext);
+		super(timeout, user, password, useSsl, sslContext, util, chunksize, new ConnectionPool<ConnectionAsync>(
+				maxConnections != null ? Math.max(1, maxConnections) : ArangoDBConstants.MAX_CONNECTIONS_VST_DEFAULT) {
+			private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder(hostHandler, new MessageStore())
+					.timeout(timeout).useSsl(useSsl).sslContext(sslContext);
 
-					@Override
-					public ConnectionAsync createConnection() {
-						return builder.build();
-					}
-				});
+			@Override
+			public ConnectionAsync createConnection() {
+				return builder.build();
+			}
+		});
 		this.collectionCache = collectionCache;
 	}
 
 	@Override
-	public CompletableFuture<Response> execute(final Request request, final ConnectionAsync connection) {
+	protected CompletableFuture<Response> execute(
+		final Request request,
+		final ConnectionAsync connection,
+		final boolean closeConnection) {
 		connect(connection);
 		final CompletableFuture<Response> rfuture = new CompletableFuture<>();
 		try {
@@ -162,6 +165,10 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 		} catch (final IOException | VPackException e) {
 			LOGGER.error(e.getMessage(), e);
 			rfuture.completeExceptionally(e);
+		} finally {
+			if (closeConnection) {
+				connection.close();
+			}
 		}
 		return rfuture;
 	}
@@ -181,7 +188,7 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 		try {
 			response = execute(
 				new AuthenticationRequest(user, password != null ? password : "", ArangoDBConstants.ENCRYPTION_PLAIN),
-				connection).get();
+				connection, false).get();
 		} catch (final InterruptedException e) {
 			throw new ArangoDBException(e);
 		} catch (final ExecutionException e) {

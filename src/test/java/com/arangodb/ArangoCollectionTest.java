@@ -1575,11 +1575,11 @@ public class ArangoCollectionTest extends BaseTest {
 	@Test
 	public void importDocumentsJsonOverwriteFalse() throws InterruptedException, ExecutionException {
 		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument());
+		collection.insertDocument(new BaseDocument()).get();
 		assertThat(collection.count().get().getCount(), is(1L));
 
 		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(false));
+		collection.importDocuments(values, new DocumentImportOptions().overwrite(false)).get();
 		assertThat(collection.count().get().getCount(), is(3L));
 	}
 

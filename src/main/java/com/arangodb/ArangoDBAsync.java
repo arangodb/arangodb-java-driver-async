@@ -25,28 +25,38 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.SSLContext;
 
 import com.arangodb.entity.ArangoDBVersion;
+import com.arangodb.entity.LoadBalancingStrategy;
 import com.arangodb.entity.LogEntity;
 import com.arangodb.entity.LogLevelEntity;
 import com.arangodb.entity.Permissions;
 import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.UserEntity;
 import com.arangodb.internal.ArangoDBConstants;
+import com.arangodb.internal.ArangoExecutor.ResponseDeserializer;
 import com.arangodb.internal.ArangoExecutorAsync;
 import com.arangodb.internal.CollectionCache;
 import com.arangodb.internal.CollectionCache.DBAccess;
-import com.arangodb.internal.CommunicationProtocol;
-import com.arangodb.internal.DefaultHostHandler;
 import com.arangodb.internal.DocumentCache;
 import com.arangodb.internal.Host;
-import com.arangodb.internal.HostHandler;
 import com.arangodb.internal.InternalArangoDB;
+import com.arangodb.internal.net.CommunicationProtocol;
+import com.arangodb.internal.net.ExtendedHostResolver;
+import com.arangodb.internal.net.FallbackHostHandler;
+import com.arangodb.internal.net.HostHandler;
+import com.arangodb.internal.net.HostResolver;
+import com.arangodb.internal.net.HostResolver.EndpointResolver;
+import com.arangodb.internal.net.RandomHostHandler;
+import com.arangodb.internal.net.RoundRobinHostHandler;
+import com.arangodb.internal.net.SimpleHostResolver;
 import com.arangodb.internal.util.ArangoDeserializerImpl;
 import com.arangodb.internal.util.ArangoSerializerImpl;
 import com.arangodb.internal.util.ArangoUtilImpl;
@@ -75,9 +85,12 @@ import com.arangodb.velocypack.VPackModule;
 import com.arangodb.velocypack.VPackParser;
 import com.arangodb.velocypack.VPackParserModule;
 import com.arangodb.velocypack.VPackSerializer;
+import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.ValueType;
+import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocypack.module.jdk8.VPackJdk8Module;
 import com.arangodb.velocystream.Request;
+import com.arangodb.velocystream.RequestType;
 import com.arangodb.velocystream.Response;
 
 /**
@@ -101,6 +114,8 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		private final VPackParser.Builder vpackParserBuilder;
 		private ArangoSerializer serializer;
 		private ArangoDeserializer deserializer;
+		private Boolean acquireHostList;
+		private LoadBalancingStrategy loadBalancingStrategy;
 
 		public Builder() {
 			super();
@@ -206,6 +221,16 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 
 		public Builder maxConnections(final Integer maxConnections) {
 			this.maxConnections = maxConnections;
+			return this;
+		}
+
+		public Builder acquireHostList(final Boolean acquireHostList) {
+			this.acquireHostList = acquireHostList;
+			return this;
+		}
+
+		public Builder loadBalancingStrategy(final LoadBalancingStrategy loadBalancingStrategy) {
+			this.loadBalancingStrategy = loadBalancingStrategy;
 			return this;
 		}
 
@@ -343,9 +368,11 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 					: new ArangoSerializerImpl(vpacker, vpackerNull, vpackParser);
 			final ArangoDeserializer deserializerTemp = deserializer != null ? deserializer
 					: new ArangoDeserializerImpl(vpackerNull, vpackParser);
-			final HostHandler hostHandler = new DefaultHostHandler(new ArrayList<>(hosts));
+
+			final HostResolver hostResolver = createHostResolver();
+			final HostHandler hostHandler = createHostHandler(hostResolver);
 			return new ArangoDBAsync(asyncBuilder(hostHandler), new ArangoUtilImpl(serializerTemp, deserializerTemp),
-					collectionCache, syncBuilder(hostHandler));
+					collectionCache, syncBuilder(hostHandler), hostResolver);
 		}
 
 		private VstCommunicationAsync.Builder asyncBuilder(final HostHandler hostHandler) {
@@ -358,12 +385,39 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections);
 		}
 
+		private HostResolver createHostResolver() {
+			return acquireHostList != null && acquireHostList.booleanValue()
+					? new ExtendedHostResolver(new ArrayList<>(hosts)) : new SimpleHostResolver(new ArrayList<>(hosts));
+		}
+
+		private HostHandler createHostHandler(final HostResolver hostResolver) {
+			final HostHandler hostHandler;
+			if (loadBalancingStrategy != null) {
+				switch (loadBalancingStrategy) {
+				case ONE_RANDOM:
+					hostHandler = new RandomHostHandler(hostResolver, new FallbackHostHandler(hostResolver));
+					break;
+				case ROUND_ROBIN:
+					hostHandler = new RoundRobinHostHandler(hostResolver);
+					break;
+				case NONE:
+				default:
+					hostHandler = new FallbackHostHandler(hostResolver);
+					break;
+				}
+			} else {
+				hostHandler = new FallbackHostHandler(hostResolver);
+			}
+			return hostHandler;
+		}
+
 	}
 
 	private final CommunicationProtocol cp;
 
 	public ArangoDBAsync(final VstCommunicationAsync.Builder commBuilder, final ArangoSerialization util,
-		final CollectionCache collectionCache, final VstCommunicationSync.Builder syncbuilder) {
+		final CollectionCache collectionCache, final VstCommunicationSync.Builder syncbuilder,
+		final HostResolver hostResolver) {
 		super(new ArangoExecutorAsync(commBuilder.build(util, collectionCache), util, new DocumentCache()), util);
 		final VstCommunication<Response, ConnectionSync> cacheCom = syncbuilder.build(util, collectionCache);
 		cp = new VstProtocol(cacheCom);
@@ -371,6 +425,40 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 			@Override
 			public ArangoDatabase db(final String name) {
 				return new ArangoDatabase(cp, util, executor.documentCache(), name);
+			}
+		});
+		hostResolver.init(new EndpointResolver() {
+			@Override
+			public Collection<String> resolve(final boolean closeConnections) throws ArangoDBException {
+				try {
+					return executor.execute(
+						new Request(ArangoDBConstants.SYSTEM, RequestType.GET, ArangoDBConstants.PATH_ENDPOINTS),
+						new ResponseDeserializer<Collection<String>>() {
+							@Override
+							public Collection<String> deserialize(final Response response) throws VPackException {
+								final VPackSlice field = response.getBody().get(ArangoDBConstants.ENDPOINTS);
+								Collection<String> endpoints;
+								if (field.isNone()) {
+									endpoints = Collections.<String> emptyList();
+								} else {
+									endpoints = util().deserialize(field, Collection.class);
+								}
+								return endpoints;
+							}
+						}, null).get();
+				} catch (InterruptedException | ExecutionException e) {
+					throw new ArangoDBException(e);
+					// TODO
+					// if (e.getResponseCode() == 403) {
+					// response = Collections.<String> emptyList();
+					// } else {
+					// throw e;
+					// }
+				} finally {
+					if (closeConnections) {
+						ArangoDBAsync.this.shutdown();
+					}
+				}
 			}
 		});
 	}
