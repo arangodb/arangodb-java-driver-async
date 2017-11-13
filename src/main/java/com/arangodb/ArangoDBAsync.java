@@ -144,6 +144,8 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 					useSsl = loadUseSsl(properties, useSsl);
 					chunksize = loadChunkSize(properties, chunksize);
 					maxConnections = loadMaxConnections(properties, maxConnections);
+					acquireHostList = loadAcquireHostList(properties, acquireHostList);
+					loadBalancingStrategy = loadLoadBalancingStrategy(properties, loadBalancingStrategy);
 				} catch (final IOException e) {
 					throw new ArangoDBException(e);
 				}
