@@ -129,10 +129,7 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 	}
 
 	@Override
-	protected CompletableFuture<Response> execute(
-		final Request request,
-		final ConnectionAsync connection,
-		final boolean closeConnection) {
+	protected CompletableFuture<Response> execute(final Request request, final ConnectionAsync connection) {
 		connect(connection);
 		final CompletableFuture<Response> rfuture = new CompletableFuture<>();
 		try {
@@ -167,10 +164,6 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 		} catch (final IOException | VPackException e) {
 			LOGGER.error(e.getMessage(), e);
 			rfuture.completeExceptionally(e);
-		} finally {
-			if (closeConnection) {
-				connection.close();
-			}
 		}
 		return rfuture;
 	}
@@ -190,7 +183,7 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 		try {
 			response = execute(
 				new AuthenticationRequest(user, password != null ? password : "", ArangoDBConstants.ENCRYPTION_PLAIN),
-				connection, false).get();
+				connection).get();
 		} catch (final InterruptedException e) {
 			throw new ArangoDBException(e);
 		} catch (final ExecutionException e) {

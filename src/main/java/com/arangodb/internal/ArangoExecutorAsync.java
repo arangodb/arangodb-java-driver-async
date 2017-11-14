@@ -61,16 +61,8 @@ public class ArangoExecutorAsync extends ArangoExecutor {
 		final Request request,
 		final ResponseDeserializer<T> responseDeserializer,
 		final HostHandle hostHandle) {
-		return execute(request, responseDeserializer, hostHandle, false);
-	}
-
-	public <T> CompletableFuture<T> execute(
-		final Request request,
-		final ResponseDeserializer<T> responseDeserializer,
-		final HostHandle hostHandle,
-		final boolean closeConnection) {
 		final CompletableFuture<T> result = new CompletableFuture<>();
-		communication.execute(request, hostHandle, closeConnection).whenComplete((response, ex) -> {
+		communication.execute(request, hostHandle).whenComplete((response, ex) -> {
 			if (response != null) {
 				try {
 					result.complete(responseDeserializer.deserialize(response));
