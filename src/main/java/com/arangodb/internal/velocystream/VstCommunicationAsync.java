@@ -33,7 +33,9 @@ import com.arangodb.ArangoDBException;
 import com.arangodb.entity.ErrorEntity;
 import com.arangodb.internal.ArangoDBConstants;
 import com.arangodb.internal.CollectionCache;
+import com.arangodb.internal.Host;
 import com.arangodb.internal.net.ConnectionPool;
+import com.arangodb.internal.net.DelHostHandler;
 import com.arangodb.internal.net.HostHandler;
 import com.arangodb.internal.velocystream.internal.AuthenticationRequest;
 import com.arangodb.internal.velocystream.internal.Message;
@@ -115,12 +117,12 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 		final CollectionCache collectionCache, final Integer chunksize, final Integer maxConnections) {
 		super(timeout, user, password, useSsl, sslContext, util, chunksize, new ConnectionPool<ConnectionAsync>(
 				maxConnections != null ? Math.max(1, maxConnections) : ArangoDBConstants.MAX_CONNECTIONS_VST_DEFAULT) {
-			private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder(hostHandler, new MessageStore())
+			private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder(new MessageStore())
 					.timeout(timeout).useSsl(useSsl).sslContext(sslContext);
 
 			@Override
-			public ConnectionAsync createConnection() {
-				return builder.build();
+			public ConnectionAsync createConnection(final Host host) {
+				return builder.hostHandler(new DelHostHandler(hostHandler, host)).build();
 			}
 		});
 		this.collectionCache = collectionCache;

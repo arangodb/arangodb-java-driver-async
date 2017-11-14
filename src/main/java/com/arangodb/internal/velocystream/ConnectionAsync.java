@@ -29,9 +29,9 @@ import javax.net.ssl.SSLContext;
 
 import com.arangodb.internal.net.HostHandler;
 import com.arangodb.internal.velocystream.internal.Chunk;
-import com.arangodb.internal.velocystream.internal.VstConnection;
 import com.arangodb.internal.velocystream.internal.Message;
 import com.arangodb.internal.velocystream.internal.MessageStore;
+import com.arangodb.internal.velocystream.internal.VstConnection;
 
 /**
  * @author Mark Vollmary
@@ -41,16 +41,20 @@ public class ConnectionAsync extends VstConnection {
 
 	public static class Builder {
 
-		private final HostHandler hostHandler;
 		private final MessageStore messageStore;
+		private HostHandler hostHandler;
 		private Integer timeout;
 		private Boolean useSsl;
 		private SSLContext sslContext;
 
-		public Builder(final HostHandler hostHandler, final MessageStore messageStore) {
+		public Builder(final MessageStore messageStore) {
 			super();
-			this.hostHandler = hostHandler;
 			this.messageStore = messageStore;
+		}
+
+		public Builder hostHandler(final HostHandler hostHandler) {
+			this.hostHandler = hostHandler;
+			return this;
 		}
 
 		public Builder timeout(final Integer timeout) {
