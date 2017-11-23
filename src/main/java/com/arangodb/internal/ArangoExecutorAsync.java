@@ -20,10 +20,12 @@
 
 package com.arangodb.internal;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
 
 import com.arangodb.ArangoDBException;
+import com.arangodb.internal.net.HostHandle;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.util.ArangoSerialization;
 import com.arangodb.velocypack.exception.VPackException;
@@ -47,9 +49,20 @@ public class ArangoExecutorAsync extends ArangoExecutor {
 		return execute(request, (response) -> createResult(type, response));
 	}
 
+	public <T> CompletableFuture<T> execute(final Request request, final Type type, final HostHandle hostHandle) {
+		return execute(request, (response) -> createResult(type, response), hostHandle);
+	}
+
 	public <T> CompletableFuture<T> execute(final Request request, final ResponseDeserializer<T> responseDeserializer) {
+		return execute(request, responseDeserializer, null);
+	}
+
+	public <T> CompletableFuture<T> execute(
+		final Request request,
+		final ResponseDeserializer<T> responseDeserializer,
+		final HostHandle hostHandle) {
 		final CompletableFuture<T> result = new CompletableFuture<>();
-		communication.execute(request).whenComplete((response, ex) -> {
+		communication.execute(request, hostHandle).whenComplete((response, ex) -> {
 			if (response != null) {
 				try {
 					result.complete(responseDeserializer.deserialize(response));
@@ -65,7 +78,7 @@ public class ArangoExecutorAsync extends ArangoExecutor {
 		return result;
 	}
 
-	public void disconnect() {
+	public void disconnect() throws IOException {
 		communication.disconnect();
 	}
 }
