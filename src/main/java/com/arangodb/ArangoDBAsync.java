@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -443,7 +444,14 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 								if (field.isNone()) {
 									endpoints = Collections.<String> emptyList();
 								} else {
-									endpoints = util().deserialize(field, Collection.class);
+									final Collection<Map<String, String>> tmp = util().deserialize(field,
+										Collection.class);
+									endpoints = new ArrayList<>();
+									for (final Map<String, String> map : tmp) {
+										for (final String value : map.values()) {
+											endpoints.add(value);
+										}
+									}
 								}
 								return endpoints;
 							}
