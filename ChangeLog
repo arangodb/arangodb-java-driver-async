@@ -1,3 +1,8 @@
+v4.3.1 (2017-11-27)
+---------------------------
+* fixed default Json parsing, include null values (Issue #163)
+* fixed Json parsing of negative long (Issue #151)
+
 v4.3.0 (2017-11-23)
 ---------------------------
 * added load balancing (ArangoDBAsync.Builder.loadBalancingStrategy())
