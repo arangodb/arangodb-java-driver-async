@@ -765,7 +765,7 @@ public class ArangoDatabaseTest extends BaseTest {
 	@Test
 	public void queryClose() throws IOException, ArangoDBException, InterruptedException, ExecutionException {
 		final ArangoCursorAsync<String> cursor = arangoDB.db()
-				.query("for i in _apps return i._id", null, new AqlQueryOptions().batchSize(1), String.class).get();
+				.query("for i in 1..2 return i", null, new AqlQueryOptions().batchSize(1), String.class).get();
 		cursor.close();
 		int count = 0;
 		try {
