@@ -56,7 +56,6 @@ mvn clean install -DskipTests=true -Dgpg.skip=true -Dmaven.javadoc.skip=true -B
 ## Table of Contents
 
 * [Driver setup](#driver-setup)
-  * [Network protocol](#network-protocol)
   * [SSL](#ssl)
   * [Connection pooling](#connection-pooling)
   * [Fallback hosts](#fallback-hosts)
@@ -156,18 +155,6 @@ Example for arangodb.properties:
   arangodb.password=
 
 ```
-
-## Network protocol
-
-The drivers default used network protocol is the binary protocol VelocyStream which offers the best performance within the driver. To use HTTP, you have to set the configuration `useProtocol` to `Protocol.HTTP_JSON` for HTTP with Json content or `Protocol.HTTP_VPACK` for HTTP with [VelocyPack](https://github.com/arangodb/velocypack/blob/master/VelocyPack.md) content.
-
-``` Java
-
-  ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().useProtocol(Protocol.VST).build();
-
-```
-
-**Note**: If you are using ArangoDB 3.0.x you have to set the protocol to `Protocol.HTTP_JSON` because it is the only one supported.
 
 ## SSL
 
