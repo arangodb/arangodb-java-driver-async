@@ -17,7 +17,7 @@
 ## Learn more
 * [ArangoDB](https://www.arangodb.com/)
 * [Examples](src/test/java/com/arangodb/example)
-* [JavaDoc](http://arangodb.github.io/arangodb-java-driver-async/javadoc-4_2/index.html)
+* [JavaDoc](http://arangodb.github.io/arangodb-java-driver-async/javadoc-4_3/index.html)
 * [JavaDoc VelocyPack](http://arangodb.github.io/java-velocypack/javadoc-1_0/index.html)
 
 ## Maven
