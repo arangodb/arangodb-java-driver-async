@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.arangodb.entity.ArangoDBVersion.License;
@@ -58,8 +58,12 @@ public class ArangoGraphTest extends BaseTest {
 	private static final String VERTEX_COL_3 = "db_vertex3_collection_test";
 	private static final String VERTEX_COL_4 = "db_vertex4_collection_test";
 
-	@Before
-	public void setup() throws InterruptedException, ExecutionException {
+	@BeforeClass
+	public static void setup() throws InterruptedException, ExecutionException {
+		try {
+			db.graph(GRAPH_NAME).drop().get();
+		} catch (final Exception e) {
+		}
 		for (final String collection : new String[] { VERTEX_COL_1, VERTEX_COL_2, VERTEX_COL_2, VERTEX_COL_3,
 				VERTEX_COL_4 }) {
 			try {
@@ -85,12 +89,8 @@ public class ArangoGraphTest extends BaseTest {
 	public void teardown() throws InterruptedException, ExecutionException {
 		for (final String collection : new String[] { EDGE_COL_1, EDGE_COL_2, VERTEX_COL_1, VERTEX_COL_2, VERTEX_COL_3,
 				VERTEX_COL_4 }) {
-			try {
-				db.collection(collection).drop().get();
-			} catch (final Exception e) {
-			}
+			db.collection(collection).truncate().get();
 		}
-		db.graph(GRAPH_NAME).drop().get();
 	}
 
 	@Test
@@ -132,6 +132,7 @@ public class ArangoGraphTest extends BaseTest {
 		assertThat(graph, is(notNullValue()));
 		final Collection<String> vertexCollections = db.graph(GRAPH_NAME).getVertexCollections().get();
 		assertThat(vertexCollections, hasItems(VERTEX_COL_1, VERTEX_COL_2, VERTEX_COL_3, VERTEX_COL_4));
+		setup();
 	}
 
 	@Test
@@ -163,6 +164,7 @@ public class ArangoGraphTest extends BaseTest {
 				assertThat(e.getTo(), hasItem(VERTEX_COL_2));
 			}
 		}
+		setup();
 	}
 
 	@Test
@@ -185,6 +187,7 @@ public class ArangoGraphTest extends BaseTest {
 				assertThat(e.getTo(), hasItem(VERTEX_COL_4));
 			}
 		}
+		setup();
 	}
 
 	@Test
@@ -193,12 +196,23 @@ public class ArangoGraphTest extends BaseTest {
 		final Collection<EdgeDefinition> edgeDefinitions = graph.getEdgeDefinitions();
 		assertThat(edgeDefinitions.size(), is(1));
 		assertThat(edgeDefinitions.iterator().next().getCollection(), is(EDGE_COL_2));
+		setup();
 	}
 
 	@Test
 	public void smartGraph() throws InterruptedException, ExecutionException {
 		if (arangoDB.getVersion().get().getLicense() == License.ENTERPRISE) {
-			teardown();
+			for (final String collection : new String[] { EDGE_COL_1, EDGE_COL_2, VERTEX_COL_1, VERTEX_COL_2,
+					VERTEX_COL_3, VERTEX_COL_4 }) {
+				try {
+					db.collection(collection).drop().get();
+				} catch (final Exception e) {
+				}
+			}
+			try {
+				db.graph(GRAPH_NAME).drop().get();
+			} catch (final Exception e) {
+			}
 			final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<>();
 			edgeDefinitions.add(new EdgeDefinition().collection(EDGE_COL_1).from(VERTEX_COL_1).to(VERTEX_COL_2));
 			edgeDefinitions

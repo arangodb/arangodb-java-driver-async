@@ -31,7 +31,7 @@ import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.arangodb.entity.BaseDocument;
@@ -52,8 +52,8 @@ public class ArangoVertexCollectionTest extends BaseTest {
 	private static final String GRAPH_NAME = "db_collection_test";
 	private static final String COLLECTION_NAME = "db_vertex_collection_test";
 
-	@Before
-	public void setup() throws InterruptedException, ExecutionException {
+	@BeforeClass
+	public static void setup() throws InterruptedException, ExecutionException {
 		try {
 			db.createCollection(COLLECTION_NAME, null).get();
 		} catch (final Exception e) {
@@ -64,11 +64,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
 
 	@After
 	public void teardown() throws InterruptedException, ExecutionException {
-		try {
-			db.collection(COLLECTION_NAME).drop().get();
-		} catch (final Exception e) {
-		}
-		db.graph(GRAPH_NAME).drop().get();
+		db.collection(COLLECTION_NAME).truncate().get();
 	}
 
 	@Test

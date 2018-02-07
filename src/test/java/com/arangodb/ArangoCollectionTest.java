@@ -44,7 +44,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.arangodb.entity.BaseDocument;
@@ -81,14 +81,14 @@ public class ArangoCollectionTest extends BaseTest {
 
 	private static final String COLLECTION_NAME = "db_collection_test";
 
-	@Before
-	public void setup() throws InterruptedException, ExecutionException {
+	@BeforeClass
+	public static void setup() throws InterruptedException, ExecutionException {
 		db.createCollection(COLLECTION_NAME, null).get();
 	}
 
 	@After
 	public void teardown() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).drop().get();
+		db.collection(COLLECTION_NAME).truncate().get();
 	}
 
 	@Test

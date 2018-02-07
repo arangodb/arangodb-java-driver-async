@@ -32,7 +32,7 @@ import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.arangodb.entity.BaseDocument;
@@ -58,8 +58,8 @@ public class ArangoEdgeCollectionTest extends BaseTest {
 	private static final String EDGE_COLLECTION_NAME = "db_edge_collection_test";
 	private static final String VERTEX_COLLECTION_NAME = "db_vertex_collection_test";
 
-	@Before
-	public void setup() throws InterruptedException, ExecutionException {
+	@BeforeClass
+	public static void setup() throws InterruptedException, ExecutionException {
 		try {
 			db.createCollection(VERTEX_COLLECTION_NAME, null).get();
 		} catch (final Exception e) {
@@ -77,12 +77,8 @@ public class ArangoEdgeCollectionTest extends BaseTest {
 	@After
 	public void teardown() throws InterruptedException, ExecutionException {
 		for (final String collection : new String[] { VERTEX_COLLECTION_NAME, EDGE_COLLECTION_NAME }) {
-			try {
-				db.collection(collection).drop().get();
-			} catch (final ArangoDBException e) {
-			}
+			db.collection(collection).truncate().get();
 		}
-		db.graph(GRAPH_NAME).drop().get();
 	}
 
 	private BaseEdgeDocument createEdgeValue() throws InterruptedException, ExecutionException {
