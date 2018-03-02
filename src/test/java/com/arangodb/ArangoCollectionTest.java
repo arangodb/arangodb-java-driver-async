@@ -2000,20 +2000,27 @@ public class ArangoCollectionTest extends BaseTest {
 
 	@Test
 	public void changeProperties() throws InterruptedException, ExecutionException {
-		final CollectionPropertiesEntity properties = db.collection(COLLECTION_NAME).getProperties().get();
-		assertThat(properties.getWaitForSync(), is(notNullValue()));
-		final CollectionPropertiesOptions options = new CollectionPropertiesOptions();
-		options.waitForSync(!properties.getWaitForSync());
-		options.journalSize(2000000L);
-		final CompletableFuture<CollectionPropertiesEntity> f = db.collection(COLLECTION_NAME)
-				.changeProperties(options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((changedProperties, ex) -> {
-			assertThat(changedProperties.getWaitForSync(), is(notNullValue()));
-			assertThat(changedProperties.getWaitForSync(), is(not(properties.getWaitForSync())));
-			assertThat(changedProperties.getJournalSize(), is(options.getJournalSize()));
-		});
-		f.get();
+		final String collection = COLLECTION_NAME + "_prop";
+		try {
+			db.createCollection(collection).get();
+			final CollectionPropertiesEntity properties = db.collection(collection).getProperties()
+					.get();
+			assertThat(properties.getWaitForSync(), is(notNullValue()));
+			final CollectionPropertiesOptions options = new CollectionPropertiesOptions();
+			options.waitForSync(!properties.getWaitForSync());
+			options.journalSize(2000000L);
+			final CompletableFuture<CollectionPropertiesEntity> f = db.collection(collection)
+					.changeProperties(options);
+			assertThat(f, is(notNullValue()));
+			f.whenComplete((changedProperties, ex) -> {
+				assertThat(changedProperties.getWaitForSync(), is(notNullValue()));
+				assertThat(changedProperties.getWaitForSync(), is(not(properties.getWaitForSync())));
+				assertThat(changedProperties.getJournalSize(), is(options.getJournalSize()));
+			});
+			f.get();
+		} finally {
+			db.collection(collection).drop();
+		}
 	}
 
 	@Test
