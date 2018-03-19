@@ -89,7 +89,10 @@ public class ArangoGraphTest extends BaseTest {
 	public void teardown() throws InterruptedException, ExecutionException {
 		for (final String collection : new String[] { EDGE_COL_1, EDGE_COL_2, VERTEX_COL_1, VERTEX_COL_2, VERTEX_COL_3,
 				VERTEX_COL_4 }) {
-			db.collection(collection).truncate().get();
+			final ArangoCollectionAsync c = db.collection(collection);
+			if (c.exists().get()) {
+				c.truncate().get();
+			}
 		}
 	}
 
