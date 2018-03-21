@@ -342,9 +342,10 @@ public class ArangoDatabaseAsync extends
 		final AqlQueryOptions options,
 		final Class<T> type) throws ArangoDBException {
 		final Request request = queryRequest(query, bindVars, options);
-		final CompletableFuture<CursorEntity> execution = executor.execute(request, CursorEntity.class);
+		final HostHandle hostHandle = new HostHandle();
+		final CompletableFuture<CursorEntity> execution = executor.execute(request, CursorEntity.class, hostHandle);
 		return execution.thenApply(result -> {
-			return createCursor(result, type);
+			return createCursor(result, type, hostHandle);
 		});
 	}
 
@@ -363,17 +364,21 @@ public class ArangoDatabaseAsync extends
 	 */
 	public <T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type)
 			throws ArangoDBException {
+		final HostHandle hostHandle = new HostHandle();
 		final CompletableFuture<CursorEntity> execution = executor.execute(queryNextRequest(cursorId),
-			CursorEntity.class);
+			CursorEntity.class, hostHandle);
 		return execution.thenApply(result -> {
-			return createCursor(result, type);
+			return createCursor(result, type, hostHandle);
 		});
 	}
 
-	private <T> ArangoCursorAsync<T> createCursor(final CursorEntity result, final Class<T> type) {
+	private <T> ArangoCursorAsync<T> createCursor(
+		final CursorEntity result,
+		final Class<T> type,
+		final HostHandle hostHandle) {
 		return new ArangoCursorAsync<>(this, new ArangoCursorExecute() {
 			@Override
-			public CursorEntity next(final String id, final HostHandle hostHandle) {
+			public CursorEntity next(final String id) {
 				final CompletableFuture<CursorEntity> result = executor.execute(queryNextRequest(id),
 					CursorEntity.class, hostHandle);
 				try {
@@ -384,7 +389,7 @@ public class ArangoDatabaseAsync extends
 			}
 
 			@Override
-			public void close(final String id, final HostHandle hostHandle) {
+			public void close(final String id) {
 				try {
 					executor.execute(queryCloseRequest(id), Void.class, hostHandle).get();
 				} catch (InterruptedException | ExecutionException e) {
