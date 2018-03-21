@@ -1,3 +1,11 @@
+v4.3.4 (2018-03-21)
+---------------------------
+
+* fixed serialization of bind parameter with null values
+* made ErrorEntity serializable
+* fixed VelocyStream multi-thread authentication bug
+* fixed load balancing cursor stickiness bug
+
 v4.3.3 (2018-02-01)
 ---------------------------
 * added CollectionCreateOptions.distributeShardsLike(String) (Issue #170)
