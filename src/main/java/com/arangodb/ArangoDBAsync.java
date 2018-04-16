@@ -111,6 +111,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 		private SSLContext sslContext;
 		private Integer chunksize;
 		private Integer maxConnections;
+		private Long connectionTtl;
 		private final VPack.Builder vpackBuilder;
 		private final VPackParser.Builder vpackParserBuilder;
 		private ArangoSerializer serializer;
@@ -145,6 +146,7 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 					useSsl = loadUseSsl(properties, useSsl);
 					chunksize = loadChunkSize(properties, chunksize);
 					maxConnections = loadMaxConnections(properties, maxConnections);
+					connectionTtl = loadConnectionTtl(properties, connectionTtl);
 					acquireHostList = loadAcquireHostList(properties, acquireHostList);
 					loadBalancingStrategy = loadLoadBalancingStrategy(properties, loadBalancingStrategy);
 				} catch (final IOException e) {
@@ -224,6 +226,18 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 
 		public Builder maxConnections(final Integer maxConnections) {
 			this.maxConnections = maxConnections;
+			return this;
+		}
+
+		/**
+		 * Set the maximum time to life of a connection. After this time the connection will be closed automatically.
+		 * 
+		 * @param connectionTtl
+		 *            the maximum time to life of a connection.
+		 * @return {@link ArangoDB.Builder}
+		 */
+		public Builder connectionTtl(final Long connectionTtl) {
+			this.connectionTtl = connectionTtl;
 			return this;
 		}
 
@@ -380,12 +394,14 @@ public class ArangoDBAsync extends InternalArangoDB<ArangoExecutorAsync, Complet
 
 		private VstCommunicationAsync.Builder asyncBuilder(final HostHandler hostHandler) {
 			return new VstCommunicationAsync.Builder(hostHandler).timeout(timeout).user(user).password(password)
-					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections);
+					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections)
+					.connectionTtl(connectionTtl);
 		}
 
 		private VstCommunicationSync.Builder syncBuilder(final HostHandler hostHandler) {
 			return new VstCommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)
-					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections);
+					.useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections)
+					.connectionTtl(connectionTtl);
 		}
 
 		private HostResolver createHostResolver() {

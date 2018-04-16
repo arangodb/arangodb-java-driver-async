@@ -44,6 +44,7 @@ public class ConnectionAsync extends VstConnection {
 		private final MessageStore messageStore;
 		private HostHandler hostHandler;
 		private Integer timeout;
+		private Long ttl;
 		private Boolean useSsl;
 		private SSLContext sslContext;
 
@@ -62,6 +63,11 @@ public class ConnectionAsync extends VstConnection {
 			return this;
 		}
 
+		public Builder ttl(final Long ttl) {
+			this.ttl = ttl;
+			return this;
+		}
+
 		public Builder useSsl(final Boolean useSsl) {
 			this.useSsl = useSsl;
 			return this;
@@ -73,13 +79,13 @@ public class ConnectionAsync extends VstConnection {
 		}
 
 		public ConnectionAsync build() {
-			return new ConnectionAsync(hostHandler, timeout, useSsl, sslContext, messageStore);
+			return new ConnectionAsync(hostHandler, timeout, ttl, useSsl, sslContext, messageStore);
 		}
 	}
 
-	private ConnectionAsync(final HostHandler hostHandler, final Integer timeout, final Boolean useSsl,
+	private ConnectionAsync(final HostHandler hostHandler, final Integer timeout, final Long ttl, final Boolean useSsl,
 		final SSLContext sslContext, final MessageStore messageStore) {
-		super(hostHandler, timeout, useSsl, sslContext, messageStore);
+		super(hostHandler, timeout, ttl, useSsl, sslContext, messageStore);
 	}
 
 	public synchronized CompletableFuture<Message> write(final Message message, final Collection<Chunk> chunks) {

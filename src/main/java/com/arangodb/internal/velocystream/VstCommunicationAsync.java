@@ -59,6 +59,7 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 
 		private final HostHandler hostHandler;
 		private Integer timeout;
+		private Long connectionTtl;
 		private String user;
 		private String password;
 		private Boolean useSsl;
@@ -106,19 +107,25 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 			return this;
 		}
 
+		public Builder connectionTtl(final Long connectionTtl) {
+			this.connectionTtl = connectionTtl;
+			return this;
+		}
+
 		public VstCommunicationAsync build(final ArangoSerialization util, final CollectionCache collectionCache) {
 			return new VstCommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, util,
-					collectionCache, chunksize, maxConnections);
+					collectionCache, chunksize, maxConnections, connectionTtl);
 		}
 	}
 
 	private VstCommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
 		final String password, final Boolean useSsl, final SSLContext sslContext, final ArangoSerialization util,
-		final CollectionCache collectionCache, final Integer chunksize, final Integer maxConnections) {
+		final CollectionCache collectionCache, final Integer chunksize, final Integer maxConnections,
+		final Long connectionTtl) {
 		super(timeout, user, password, useSsl, sslContext, util, chunksize, new ConnectionPool<ConnectionAsync>(
 				maxConnections != null ? Math.max(1, maxConnections) : ArangoDBConstants.MAX_CONNECTIONS_VST_DEFAULT) {
 			private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder(new MessageStore())
-					.timeout(timeout).useSsl(useSsl).sslContext(sslContext);
+					.timeout(timeout).ttl(connectionTtl).useSsl(useSsl).sslContext(sslContext);
 
 			@Override
 			public ConnectionAsync createConnection(final Host host) {
