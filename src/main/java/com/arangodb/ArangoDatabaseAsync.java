@@ -599,8 +599,7 @@ public class ArangoDatabaseAsync extends
 	 * @return all reqistered AQL user functions
 	 */
 	public CompletableFuture<Collection<AqlFunctionEntity>> getAqlFunctions(final AqlFunctionGetOptions options) {
-		return executor.execute(getAqlFunctionsRequest(options), new Type<Collection<AqlFunctionEntity>>() {
-		}.getType());
+		return executor.execute(getAqlFunctionsRequest(options), getAqlFunctionsResponseDeserializer());
 	}
 
 	/**
