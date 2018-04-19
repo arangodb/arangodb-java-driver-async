@@ -1,17 +1,22 @@
+v4.4.0 (2018-04-19)
+---------------------------
+* changed dependency com.arangodb:velocypack to 1.1.0
+  * fixed DateUtil does incorrect conversion of UTC time
+  * serialize BigInteger/BigDecimal as String
+* fixed reconnecting after ArangoDB restarts
+* fixed ArangoCollection.updateDocuments() ignoring DocumentUpdateOptions.serializeNull
+
 v4.3.7 (2018-04-17)
 ---------------------------
-
 * fixed property loading
 * fixed compatibility for ArangoDatabase.getAqlFunctions() for ArangoDB 3.4
 
 v4.3.6 (2018-04-16)
 ---------------------------
-
 * added ArangoDBAsync.Builder.maxConnectionTtl(Integer)
 
 v4.3.4 (2018-03-21)
 ---------------------------
-
 * fixed serialization of bind parameter with null values
 * made ErrorEntity serializable
 * fixed VelocyStream multi-thread authentication bug
