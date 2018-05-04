@@ -874,7 +874,6 @@ public class ArangoCollectionTest extends BaseTest {
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((indexResult, ex) -> {
 			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(false));
 			assertThat(indexResult.getFields(), hasItem("a"));
 			assertThat(indexResult.getGeoJson(), is(false));
 			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
@@ -882,7 +881,7 @@ public class ArangoCollectionTest extends BaseTest {
 			assertThat(indexResult.getMinLength(), is(nullValue()));
 			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
 			assertThat(indexResult.getSparse(), is(true));
-			assertThat(indexResult.getType(), is(IndexType.geo1));
+			assertThat(indexResult.getType(), anyOf(is(IndexType.geo), is(IndexType.geo1)));
 			assertThat(indexResult.getUnique(), is(false));
 		});
 		f.get();
@@ -897,16 +896,15 @@ public class ArangoCollectionTest extends BaseTest {
 		assertThat(f, is(notNullValue()));
 		f.whenComplete((indexResult, ex) -> {
 			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(false));
 			assertThat(indexResult.getFields(), hasItem("a"));
 			assertThat(indexResult.getFields(), hasItem("b"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
+			assertThat(indexResult.getGeoJson(), is(false));
 			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
 			assertThat(indexResult.getIsNewlyCreated(), is(true));
 			assertThat(indexResult.getMinLength(), is(nullValue()));
 			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
 			assertThat(indexResult.getSparse(), is(true));
-			assertThat(indexResult.getType(), is(IndexType.geo2));
+			assertThat(indexResult.getType(), anyOf(is(IndexType.geo), is(IndexType.geo2)));
 			assertThat(indexResult.getUnique(), is(false));
 		});
 		f.get();
@@ -2003,14 +2001,12 @@ public class ArangoCollectionTest extends BaseTest {
 		final String collection = COLLECTION_NAME + "_prop";
 		try {
 			db.createCollection(collection).get();
-			final CollectionPropertiesEntity properties = db.collection(collection).getProperties()
-					.get();
+			final CollectionPropertiesEntity properties = db.collection(collection).getProperties().get();
 			assertThat(properties.getWaitForSync(), is(notNullValue()));
 			final CollectionPropertiesOptions options = new CollectionPropertiesOptions();
 			options.waitForSync(!properties.getWaitForSync());
 			options.journalSize(2000000L);
-			final CompletableFuture<CollectionPropertiesEntity> f = db.collection(collection)
-					.changeProperties(options);
+			final CompletableFuture<CollectionPropertiesEntity> f = db.collection(collection).changeProperties(options);
 			assertThat(f, is(notNullValue()));
 			f.whenComplete((changedProperties, ex) -> {
 				assertThat(changedProperties.getWaitForSync(), is(notNullValue()));
