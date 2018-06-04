@@ -124,12 +124,13 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 		final Long connectionTtl) {
 		super(timeout, user, password, useSsl, sslContext, util, chunksize, new ConnectionPool<ConnectionAsync>(
 				maxConnections != null ? Math.max(1, maxConnections) : ArangoDBConstants.MAX_CONNECTIONS_VST_DEFAULT) {
-			private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder(new MessageStore())
-					.timeout(timeout).ttl(connectionTtl).useSsl(useSsl).sslContext(sslContext);
+			private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder().timeout(timeout)
+					.ttl(connectionTtl).useSsl(useSsl).sslContext(sslContext);
 
 			@Override
 			public ConnectionAsync createConnection(final Host host) {
-				return builder.hostHandler(new DelHostHandler(hostHandler, host)).build();
+				return builder.messageStore(new MessageStore()).hostHandler(new DelHostHandler(hostHandler, host))
+						.build();
 			}
 		});
 		this.collectionCache = collectionCache;
