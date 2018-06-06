@@ -89,6 +89,19 @@ public class ArangoDatabaseTest extends BaseTest {
 	private static final String GRAPH_NAME = "graph_test";
 
 	@Test
+	public void create() throws InterruptedException, ExecutionException {
+		try {
+			final Boolean result = arangoDB.db(BaseTest.TEST_DB + "_1").create().get();
+			assertThat(result, is(true));
+		} finally {
+			try {
+				arangoDB.db(BaseTest.TEST_DB + "_1").drop();
+			} catch (final ArangoDBException e) {
+			}
+		}
+	}
+
+	@Test
 	public void getVersion() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoDBVersion> f = db.getVersion();
 		assertThat(f, is(notNullValue()));

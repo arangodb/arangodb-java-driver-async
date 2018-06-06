@@ -219,6 +219,11 @@ public class ArangoDatabaseAsyncImpl extends
 		return collection(split[0]).deleteIndex(split[1]);
 	}
 
+	@Override
+	public CompletableFuture<Boolean> create() {
+		return arango().createDatabase(name());
+	}
+
 	/**
 	 * Drop an existing database
 	 * 

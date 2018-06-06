@@ -172,6 +172,15 @@ public interface ArangoDatabaseAsync {
 	CompletableFuture<String> deleteIndex(final String id);
 
 	/**
+	 * Creates the database
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#create-database">API
+	 *      Documentation</a>
+	 * @return true if the database was created successfully.
+	 */
+	CompletableFuture<Boolean> create();
+
+	/**
 	 * Drop an existing database
 	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#drop-database">API
