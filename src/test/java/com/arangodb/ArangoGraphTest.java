@@ -20,11 +20,11 @@
 
 package com.arangodb;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
@@ -93,6 +93,17 @@ public class ArangoGraphTest extends BaseTest {
 			if (c.exists().get()) {
 				c.truncate().get();
 			}
+		}
+	}
+
+	@Test
+	public void create() throws InterruptedException, ExecutionException {
+		try {
+			final GraphEntity result = db.graph(GRAPH_NAME + "_1").create(null).get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getName(), is(GRAPH_NAME + "_1"));
+		} finally {
+			db.graph(GRAPH_NAME).drop();
 		}
 	}
 

@@ -29,6 +29,7 @@ import com.arangodb.ArangoVertexCollectionAsync;
 import com.arangodb.entity.EdgeDefinition;
 import com.arangodb.entity.GraphEntity;
 import com.arangodb.internal.velocystream.ConnectionAsync;
+import com.arangodb.model.GraphCreateOptions;
 import com.arangodb.velocystream.Response;
 
 /**
@@ -46,6 +47,18 @@ public class ArangoGraphAsyncImpl extends
 	@Override
 	public CompletableFuture<Boolean> exists() {
 		return getInfo().thenApply(info -> info != null).exceptionally(e -> e == null);
+	}
+
+	@Override
+	public CompletableFuture<GraphEntity> create(final Collection<EdgeDefinition> edgeDefinitions) {
+		return db().createGraph(name(), edgeDefinitions);
+	}
+
+	@Override
+	public CompletableFuture<GraphEntity> createGraph(
+		final Collection<EdgeDefinition> edgeDefinitions,
+		final GraphCreateOptions options) {
+		return db().createGraph(name(), edgeDefinitions, options);
 	}
 
 	@Override

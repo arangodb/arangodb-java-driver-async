@@ -25,6 +25,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.arangodb.entity.EdgeDefinition;
 import com.arangodb.entity.GraphEntity;
+import com.arangodb.model.GraphCreateOptions;
 
 /**
  * @author Mark Vollmary
@@ -52,6 +53,34 @@ public interface ArangoGraphAsync {
 	 * @return true if the graph exists, otherwise false
 	 */
 	CompletableFuture<Boolean> exists();
+
+	/**
+	 * Creates the graph in the graph module. The creation of a graph requires the name of the graph and a definition of
+	 * its edges.
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Management.html#create-a-graph">API
+	 *      Documentation</a>
+	 * @param edgeDefinitions
+	 *            An array of definitions for the edge
+	 * @return information about the graph
+	 */
+	CompletableFuture<GraphEntity> create(final Collection<EdgeDefinition> edgeDefinitions);
+
+	/**
+	 * Creates the graph in the graph module. The creation of a graph requires the name of the graph and a definition of
+	 * its edges.
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Management.html#create-a-graph">API
+	 *      Documentation</a>
+	 * @param edgeDefinitions
+	 *            An array of definitions for the edge
+	 * @param options
+	 *            Additional options, can be null
+	 * @return information about the graph
+	 */
+	CompletableFuture<GraphEntity> createGraph(
+		final Collection<EdgeDefinition> edgeDefinitions,
+		final GraphCreateOptions options);
 
 	/**
 	 * Delete an existing graph
