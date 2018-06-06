@@ -309,8 +309,8 @@ public class ArangoDatabaseAsyncImpl extends
 	}
 
 	@Override
-	public CompletableFuture<Void> deleteAqlFunction(final String name, final AqlFunctionDeleteOptions options) {
-		return executor.execute(deleteAqlFunctionRequest(name, options), Void.class);
+	public CompletableFuture<Integer> deleteAqlFunction(final String name, final AqlFunctionDeleteOptions options) {
+		return executor.execute(deleteAqlFunctionRequest(name, options), deleteAqlFunctionResponseDeserializer());
 	}
 
 	@Override

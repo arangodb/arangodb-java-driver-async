@@ -469,9 +469,9 @@ public interface ArangoDatabaseAsync {
 	 *            the name of the AQL user function
 	 * @param options
 	 *            Additional options, can be null
-	 * @return void
+	 * @return number of deleted functions (since ArangoDB 3.4.0)
 	 */
-	CompletableFuture<Void> deleteAqlFunction(final String name, final AqlFunctionDeleteOptions options);
+	CompletableFuture<Integer> deleteAqlFunction(final String name, final AqlFunctionDeleteOptions options);
 
 	/**
 	 * Gets all reqistered AQL user functions

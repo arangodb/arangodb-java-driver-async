@@ -885,7 +885,15 @@ public class ArangoDatabaseTest extends BaseTest {
 			final Collection<AqlFunctionEntity> aqlFunctions = db.getAqlFunctions(null).get();
 			assertThat(aqlFunctions.size(), is(greaterThan(aqlFunctionsInitial.size())));
 		} finally {
-			db.deleteAqlFunction("myfunctions::temperature::celsiustofahrenheit", null).get();
+			final Integer deleteCount = db.deleteAqlFunction("myfunctions::temperature::celsiustofahrenheit", null)
+					.get();
+			// compatibility with ArangoDB < 3.4
+			final String version = db.getVersion().get().getVersion();
+			if (Integer.valueOf(version.split("\\.")[1]) < 4) {
+				assertThat(deleteCount, is(nullValue()));
+			} else {
+				assertThat(deleteCount, is(1));
+			}
 
 			final Collection<AqlFunctionEntity> aqlFunctions = db.getAqlFunctions(null).get();
 			assertThat(aqlFunctions.size(), is(aqlFunctionsInitial.size()));
