@@ -38,6 +38,7 @@ import com.arangodb.entity.MultiDocumentEntity;
 import com.arangodb.entity.Permissions;
 import com.arangodb.internal.ArangoExecutor.ResponseDeserializer;
 import com.arangodb.internal.velocystream.ConnectionAsync;
+import com.arangodb.model.CollectionCreateOptions;
 import com.arangodb.model.CollectionPropertiesOptions;
 import com.arangodb.model.DocumentCreateOptions;
 import com.arangodb.model.DocumentDeleteOptions;
@@ -380,6 +381,16 @@ public class ArangoCollectionAsyncImpl extends
 	@Override
 	public CompletableFuture<CollectionPropertiesEntity> count() {
 		return executor.execute(countRequest(), CollectionPropertiesEntity.class);
+	}
+
+	@Override
+	public CompletableFuture<CollectionEntity> create() {
+		return db().createCollection(name());
+	}
+
+	@Override
+	public CompletableFuture<CollectionEntity> create(final CollectionCreateOptions options) {
+		return db().createCollection(name(), options);
 	}
 
 	@Override

@@ -33,6 +33,7 @@ import com.arangodb.entity.DocumentUpdateEntity;
 import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.MultiDocumentEntity;
 import com.arangodb.entity.Permissions;
+import com.arangodb.model.CollectionCreateOptions;
 import com.arangodb.model.CollectionPropertiesOptions;
 import com.arangodb.model.DocumentCreateOptions;
 import com.arangodb.model.DocumentDeleteOptions;
@@ -634,6 +635,28 @@ public interface ArangoCollectionAsync {
 	 * @return information about the collection, including the number of documents
 	 */
 	CompletableFuture<CollectionPropertiesEntity> count();
+
+	/**
+	 * Creates the collection
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#create-collection">API
+	 *      Documentation</a>
+	 * @param options
+	 *            Additional options, can be null
+	 * @return information about the collection
+	 */
+	CompletableFuture<CollectionEntity> create();
+
+	/**
+	 * Creates the collection
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#create-collection">API
+	 *      Documentation</a>
+	 * @param options
+	 *            Additional options, can be null
+	 * @return information about the collection
+	 */
+	CompletableFuture<CollectionEntity> create(final CollectionCreateOptions options);
 
 	/**
 	 * Drops the collection

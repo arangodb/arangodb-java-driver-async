@@ -92,6 +92,17 @@ public class ArangoCollectionTest extends BaseTest {
 	}
 
 	@Test
+	public void create() throws InterruptedException, ExecutionException {
+		try {
+			final CollectionEntity result = db.collection(COLLECTION_NAME + "_1").create().get();
+			assertThat(result, is(notNullValue()));
+			assertThat(result.getId(), is(notNullValue()));
+		} finally {
+			db.collection(COLLECTION_NAME + "_1").drop();
+		}
+	}
+
+	@Test
 	public void insertDocument() throws InterruptedException, ExecutionException {
 		final CompletableFuture<DocumentCreateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
 				.insertDocument(new BaseDocument(), null);
