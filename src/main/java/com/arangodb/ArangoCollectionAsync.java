@@ -22,7 +22,6 @@ package com.arangodb;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 import com.arangodb.entity.CollectionEntity;
 import com.arangodb.entity.CollectionPropertiesEntity;
@@ -34,10 +33,6 @@ import com.arangodb.entity.DocumentUpdateEntity;
 import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.MultiDocumentEntity;
 import com.arangodb.entity.Permissions;
-import com.arangodb.internal.ArangoExecutor.ResponseDeserializer;
-import com.arangodb.internal.ArangoExecutorAsync;
-import com.arangodb.internal.InternalArangoCollection;
-import com.arangodb.internal.velocystream.ConnectionAsync;
 import com.arangodb.model.CollectionPropertiesOptions;
 import com.arangodb.model.DocumentCreateOptions;
 import com.arangodb.model.DocumentDeleteOptions;
@@ -51,19 +46,26 @@ import com.arangodb.model.GeoIndexOptions;
 import com.arangodb.model.HashIndexOptions;
 import com.arangodb.model.PersistentIndexOptions;
 import com.arangodb.model.SkiplistIndexOptions;
-import com.arangodb.velocypack.exception.VPackException;
-import com.arangodb.velocystream.Response;
 
 /**
  * @author Mark Vollmary
  *
  */
-public class ArangoCollectionAsync extends
-		InternalArangoCollection<ArangoDBAsync, ArangoDatabaseAsync, ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync> {
+public interface ArangoCollectionAsync {
 
-	protected ArangoCollectionAsync(final ArangoDatabaseAsync db, final String name) {
-		super(db, name);
-	}
+	/**
+	 * The the handler of the database the collection is within
+	 * 
+	 * @return database handler
+	 */
+	public ArangoDatabaseAsync db();
+
+	/**
+	 * The name of the collection
+	 * 
+	 * @return collection name
+	 */
+	public String name();
 
 	/**
 	 * Creates a new document from the given document, unless there is already a document with the _key given. If no
@@ -75,10 +77,7 @@ public class ArangoCollectionAsync extends
 	 *            A representation of a single document (POJO, VPackSlice or String for Json)
 	 * @return information about the document
 	 */
-	public <T> CompletableFuture<DocumentCreateEntity<T>> insertDocument(final T value) {
-		return executor.execute(insertDocumentRequest(value, new DocumentCreateOptions()),
-			insertDocumentResponseDeserializer(value));
-	}
+	<T> CompletableFuture<DocumentCreateEntity<T>> insertDocument(final T value);
 
 	/**
 	 * Creates a new document from the given document, unless there is already a document with the _key given. If no
@@ -92,11 +91,7 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the document
 	 */
-	public <T> CompletableFuture<DocumentCreateEntity<T>> insertDocument(
-		final T value,
-		final DocumentCreateOptions options) {
-		return executor.execute(insertDocumentRequest(value, options), insertDocumentResponseDeserializer(value));
-	}
+	<T> CompletableFuture<DocumentCreateEntity<T>> insertDocument(final T value, final DocumentCreateOptions options);
 
 	/**
 	 * Creates new documents from the given documents, unless there is already a document with the _key given. If no
@@ -108,12 +103,7 @@ public class ArangoCollectionAsync extends
 	 *            A List of documents (POJO, VPackSlice or String for Json)
 	 * @return information about the documents
 	 */
-	public <T> CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<T>>> insertDocuments(
-		final Collection<T> values) {
-		final DocumentCreateOptions params = new DocumentCreateOptions();
-		return executor.execute(insertDocumentsRequest(values, params),
-			insertDocumentsResponseDeserializer(values, params));
-	}
+	<T> CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<T>>> insertDocuments(final Collection<T> values);
 
 	/**
 	 * Creates new documents from the given documents, unless there is already a document with the _key given. If no
@@ -127,13 +117,9 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the documents
 	 */
-	public <T> CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<T>>> insertDocuments(
+	<T> CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<T>>> insertDocuments(
 		final Collection<T> values,
-		final DocumentCreateOptions options) {
-		final DocumentCreateOptions params = (options != null ? options : new DocumentCreateOptions());
-		return executor.execute(insertDocumentsRequest(values, params),
-			insertDocumentsResponseDeserializer(values, params));
-	}
+		final DocumentCreateOptions options);
 
 	/**
 	 * Imports documents
@@ -143,9 +129,7 @@ public class ArangoCollectionAsync extends
 	 * @return information about the import
 	 * @throws ArangoDBException
 	 */
-	public CompletableFuture<DocumentImportEntity> importDocuments(final Collection<?> values) {
-		return importDocuments(values, new DocumentImportOptions());
-	}
+	CompletableFuture<DocumentImportEntity> importDocuments(final Collection<?> values);
 
 	/**
 	 * Imports documents
@@ -157,11 +141,9 @@ public class ArangoCollectionAsync extends
 	 * @return information about the import
 	 * @throws ArangoDBException
 	 */
-	public CompletableFuture<DocumentImportEntity> importDocuments(
+	CompletableFuture<DocumentImportEntity> importDocuments(
 		final Collection<?> values,
-		final DocumentImportOptions options) {
-		return executor.execute(importDocumentsRequest(values, options), DocumentImportEntity.class);
-	}
+		final DocumentImportOptions options);
 
 	/**
 	 * Imports documents
@@ -171,10 +153,7 @@ public class ArangoCollectionAsync extends
 	 * @return information about the import
 	 * @throws ArangoDBException
 	 */
-	public CompletableFuture<DocumentImportEntity> importDocuments(final String values) {
-		return executor.execute(importDocumentsRequest(values, new DocumentImportOptions()),
-			DocumentImportEntity.class);
-	}
+	CompletableFuture<DocumentImportEntity> importDocuments(final String values);
 
 	/**
 	 * Imports documents
@@ -186,11 +165,7 @@ public class ArangoCollectionAsync extends
 	 * @return information about the import
 	 * @throws ArangoDBException
 	 */
-	public CompletableFuture<DocumentImportEntity> importDocuments(
-		final String values,
-		final DocumentImportOptions options) {
-		return executor.execute(importDocumentsRequest(values, options), DocumentImportEntity.class);
-	}
+	CompletableFuture<DocumentImportEntity> importDocuments(final String values, final DocumentImportOptions options);
 
 	/**
 	 * Reads a single document
@@ -203,13 +178,7 @@ public class ArangoCollectionAsync extends
 	 *            The type of the document (POJO class, VPackSlice or String for Json)
 	 * @return the document identified by the key
 	 */
-	public <T> CompletableFuture<T> getDocument(final String key, final Class<T> type) throws ArangoDBException {
-		executor.validateDocumentKey(key);
-		final CompletableFuture<T> result = new CompletableFuture<>();
-		final CompletableFuture<T> execute = executor.execute(getDocumentRequest(key, new DocumentReadOptions()), type);
-		execute.whenComplete((response, ex) -> result.complete(response));
-		return result;
-	}
+	<T> CompletableFuture<T> getDocument(final String key, final Class<T> type) throws ArangoDBException;
 
 	/**
 	 * Reads a single document
@@ -224,16 +193,8 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return the document identified by the key
 	 */
-	public <T> CompletableFuture<T> getDocument(
-		final String key,
-		final Class<T> type,
-		final DocumentReadOptions options) throws ArangoDBException {
-		executor.validateDocumentKey(key);
-		final CompletableFuture<T> result = new CompletableFuture<>();
-		final CompletableFuture<T> execute = executor.execute(getDocumentRequest(key, options), type);
-		execute.whenComplete((response, ex) -> result.complete(response));
-		return result;
-	}
+	<T> CompletableFuture<T> getDocument(final String key, final Class<T> type, final DocumentReadOptions options)
+			throws ArangoDBException;
 
 	/**
 	 * Reads multiple documents
@@ -244,12 +205,7 @@ public class ArangoCollectionAsync extends
 	 *            The type of the documents (POJO class, VPackSlice or String for Json)
 	 * @return the documents and possible errors
 	 */
-	public <T> CompletableFuture<MultiDocumentEntity<T>> getDocuments(
-		final Collection<String> keys,
-		final Class<T> type) {
-		final DocumentReadOptions options = new DocumentReadOptions();
-		return executor.execute(getDocumentsRequest(keys, options), getDocumentsResponseDeserializer(type, options));
-	}
+	<T> CompletableFuture<MultiDocumentEntity<T>> getDocuments(final Collection<String> keys, final Class<T> type);
 
 	/**
 	 * Replaces the document with key with the one in the body, provided there is such a document and no precondition is
@@ -263,10 +219,7 @@ public class ArangoCollectionAsync extends
 	 *            A representation of a single document (POJO, VPackSlice or String for Json)
 	 * @return information about the document
 	 */
-	public <T> CompletableFuture<DocumentUpdateEntity<T>> replaceDocument(final String key, final T value) {
-		return executor.execute(replaceDocumentRequest(key, value, new DocumentReplaceOptions()),
-			replaceDocumentResponseDeserializer(value));
-	}
+	<T> CompletableFuture<DocumentUpdateEntity<T>> replaceDocument(final String key, final T value);
 
 	/**
 	 * Replaces the document with key with the one in the body, provided there is such a document and no precondition is
@@ -282,13 +235,10 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the document
 	 */
-	public <T> CompletableFuture<DocumentUpdateEntity<T>> replaceDocument(
+	<T> CompletableFuture<DocumentUpdateEntity<T>> replaceDocument(
 		final String key,
 		final T value,
-		final DocumentReplaceOptions options) {
-		return executor.execute(replaceDocumentRequest(key, value, options),
-			replaceDocumentResponseDeserializer(value));
-	}
+		final DocumentReplaceOptions options);
 
 	/**
 	 * Replaces multiple documents in the specified collection with the ones in the values, the replaced documents are
@@ -300,12 +250,7 @@ public class ArangoCollectionAsync extends
 	 *            A List of documents (POJO, VPackSlice or String for Json)
 	 * @return information about the documents
 	 */
-	public <T> CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<T>>> replaceDocuments(
-		final Collection<T> values) {
-		final DocumentReplaceOptions params = new DocumentReplaceOptions();
-		return executor.execute(replaceDocumentsRequest(values, params),
-			replaceDocumentsResponseDeserializer(values, params));
-	}
+	<T> CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<T>>> replaceDocuments(final Collection<T> values);
 
 	/**
 	 * Replaces multiple documents in the specified collection with the ones in the values, the replaced documents are
@@ -319,13 +264,9 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the documents
 	 */
-	public <T> CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<T>>> replaceDocuments(
+	<T> CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<T>>> replaceDocuments(
 		final Collection<T> values,
-		final DocumentReplaceOptions options) {
-		final DocumentReplaceOptions params = (options != null ? options : new DocumentReplaceOptions());
-		return executor.execute(replaceDocumentsRequest(values, params),
-			replaceDocumentsResponseDeserializer(values, params));
-	}
+		final DocumentReplaceOptions options);
 
 	/**
 	 * Partially updates the document identified by document-key. The value must contain a document with the attributes
@@ -340,10 +281,7 @@ public class ArangoCollectionAsync extends
 	 *            A representation of a single document (POJO, VPackSlice or String for Json)
 	 * @return information about the document
 	 */
-	public <T> CompletableFuture<DocumentUpdateEntity<T>> updateDocument(final String key, final T value) {
-		return executor.execute(updateDocumentRequest(key, value, new DocumentUpdateOptions()),
-			updateDocumentResponseDeserializer(value));
-	}
+	<T> CompletableFuture<DocumentUpdateEntity<T>> updateDocument(final String key, final T value);
 
 	/**
 	 * Partially updates the document identified by document-key. The value must contain a document with the attributes
@@ -360,12 +298,10 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the document
 	 */
-	public <T> CompletableFuture<DocumentUpdateEntity<T>> updateDocument(
+	<T> CompletableFuture<DocumentUpdateEntity<T>> updateDocument(
 		final String key,
 		final T value,
-		final DocumentUpdateOptions options) {
-		return executor.execute(updateDocumentRequest(key, value, options), updateDocumentResponseDeserializer(value));
-	}
+		final DocumentUpdateOptions options);
 
 	/**
 	 * Partially updates documents, the documents to update are specified by the _key attributes in the objects on
@@ -379,12 +315,7 @@ public class ArangoCollectionAsync extends
 	 *            A list of documents (POJO, VPackSlice or String for Json)
 	 * @return information about the documents
 	 */
-	public <T> CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<T>>> updateDocuments(
-		final Collection<T> values) {
-		final DocumentUpdateOptions params = new DocumentUpdateOptions();
-		return executor.execute(updateDocumentsRequest(values, params),
-			updateDocumentsResponseDeserializer(values, params));
-	}
+	<T> CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<T>>> updateDocuments(final Collection<T> values);
 
 	/**
 	 * Partially updates documents, the documents to update are specified by the _key attributes in the objects on
@@ -400,13 +331,9 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the documents
 	 */
-	public <T> CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<T>>> updateDocuments(
+	<T> CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<T>>> updateDocuments(
 		final Collection<T> values,
-		final DocumentUpdateOptions options) {
-		final DocumentUpdateOptions params = (options != null ? options : new DocumentUpdateOptions());
-		return executor.execute(updateDocumentsRequest(values, params),
-			updateDocumentsResponseDeserializer(values, params));
-	}
+		final DocumentUpdateOptions options);
 
 	/**
 	 * Removes a document
@@ -420,10 +347,7 @@ public class ArangoCollectionAsync extends
 	 *            options.returnOld is set to true, otherwise can be null.
 	 * @return information about the document
 	 */
-	public CompletableFuture<DocumentDeleteEntity<Void>> deleteDocument(final String key) {
-		return executor.execute(deleteDocumentRequest(key, new DocumentDeleteOptions()),
-			deleteDocumentResponseDeserializer(Void.class));
-	}
+	CompletableFuture<DocumentDeleteEntity<Void>> deleteDocument(final String key);
 
 	/**
 	 * Removes a document
@@ -439,12 +363,10 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the document
 	 */
-	public <T> CompletableFuture<DocumentDeleteEntity<T>> deleteDocument(
+	<T> CompletableFuture<DocumentDeleteEntity<T>> deleteDocument(
 		final String key,
 		final Class<T> type,
-		final DocumentDeleteOptions options) {
-		return executor.execute(deleteDocumentRequest(key, options), deleteDocumentResponseDeserializer(type));
-	}
+		final DocumentDeleteOptions options);
 
 	/**
 	 * Removes multiple document
@@ -459,11 +381,7 @@ public class ArangoCollectionAsync extends
 	 *            options.returnOld is set to true, otherwise can be null.
 	 * @return information about the documents
 	 */
-	public CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Void>>> deleteDocuments(
-		final Collection<?> values) {
-		return executor.execute(deleteDocumentsRequest(values, new DocumentDeleteOptions()),
-			deleteDocumentsResponseDeserializer(Void.class));
-	}
+	CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Void>>> deleteDocuments(final Collection<?> values);
 
 	/**
 	 * Removes multiple document
@@ -480,12 +398,10 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the documents
 	 */
-	public <T> CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<T>>> deleteDocuments(
+	<T> CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<T>>> deleteDocuments(
 		final Collection<?> values,
 		final Class<T> type,
-		final DocumentDeleteOptions options) {
-		return executor.execute(deleteDocumentsRequest(values, options), deleteDocumentsResponseDeserializer(type));
-	}
+		final DocumentDeleteOptions options);
 
 	/**
 	 * Checks if the document exists by reading a single document head
@@ -497,16 +413,7 @@ public class ArangoCollectionAsync extends
 	 *            The key of the document
 	 * @return true if the document was found, otherwise false
 	 */
-	public CompletableFuture<Boolean> documentExists(final String key) {
-		final CompletableFuture<Boolean> result = new CompletableFuture<>();
-		executor.execute(documentExistsRequest(key, new DocumentExistsOptions()), new ResponseDeserializer<Response>() {
-			@Override
-			public Response deserialize(final Response response) throws VPackException {
-				return response;
-			}
-		}).whenComplete(documentExistsResponseConsumer(result));
-		return result;
-	}
+	CompletableFuture<Boolean> documentExists(final String key);
 
 	/**
 	 * Checks if the document exists by reading a single document head
@@ -520,29 +427,7 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return true if the document was found, otherwise false
 	 */
-	public CompletableFuture<Boolean> documentExists(final String key, final DocumentExistsOptions options) {
-		final CompletableFuture<Boolean> result = new CompletableFuture<>();
-		executor.execute(documentExistsRequest(key, options), new ResponseDeserializer<Response>() {
-			@Override
-			public Response deserialize(final Response response) throws VPackException {
-				return response;
-			}
-		}).whenComplete(documentExistsResponseConsumer(result));
-		return result;
-	}
-
-	private BiConsumer<? super Response, ? super Throwable> documentExistsResponseConsumer(
-		final CompletableFuture<Boolean> result) {
-		return (response, ex) -> {
-			if (response != null) {
-				result.complete(true);
-			} else if (ex != null) {
-				result.complete(false);
-			} else {
-				result.cancel(true);
-			}
-		};
-	}
+	CompletableFuture<Boolean> documentExists(final String key, final DocumentExistsOptions options);
 
 	/**
 	 * Returns an index
@@ -552,9 +437,7 @@ public class ArangoCollectionAsync extends
 	 *            The index-handle
 	 * @return information about the index
 	 */
-	public CompletableFuture<IndexEntity> getIndex(final String id) {
-		return executor.execute(getIndexRequest(id), IndexEntity.class);
-	}
+	CompletableFuture<IndexEntity> getIndex(final String id);
 
 	/**
 	 * Deletes an index
@@ -564,9 +447,7 @@ public class ArangoCollectionAsync extends
 	 *            The index-handle
 	 * @return the id of the index
 	 */
-	public CompletableFuture<String> deleteIndex(final String id) {
-		return executor.execute(deleteIndexRequest(id), deleteIndexResponseDeserializer());
-	}
+	CompletableFuture<String> deleteIndex(final String id);
 
 	/**
 	 * Creates a hash index for the collection, if it does not already exist.
@@ -580,11 +461,7 @@ public class ArangoCollectionAsync extends
 	 * @return information about the index
 	 */
 	@Deprecated
-	public CompletableFuture<IndexEntity> createHashIndex(
-		final Collection<String> fields,
-		final HashIndexOptions options) {
-		return executor.execute(createHashIndexRequest(fields, options), IndexEntity.class);
-	}
+	CompletableFuture<IndexEntity> createHashIndex(final Collection<String> fields, final HashIndexOptions options);
 
 	/**
 	 * Creates a hash index for the collection, if it does not already exist.
@@ -596,11 +473,7 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the index
 	 */
-	public CompletableFuture<IndexEntity> ensureHashIndex(
-		final Iterable<String> fields,
-		final HashIndexOptions options) {
-		return executor.execute(createHashIndexRequest(fields, options), IndexEntity.class);
-	}
+	CompletableFuture<IndexEntity> ensureHashIndex(final Iterable<String> fields, final HashIndexOptions options);
 
 	/**
 	 * Creates a skip-list index for the collection, if it does not already exist.
@@ -615,11 +488,9 @@ public class ArangoCollectionAsync extends
 	 * @return information about the index
 	 */
 	@Deprecated
-	public CompletableFuture<IndexEntity> createSkiplistIndex(
+	CompletableFuture<IndexEntity> createSkiplistIndex(
 		final Collection<String> fields,
-		final SkiplistIndexOptions options) {
-		return executor.execute(createSkiplistIndexRequest(fields, options), IndexEntity.class);
-	}
+		final SkiplistIndexOptions options);
 
 	/**
 	 * Creates a skip-list index for the collection, if it does not already exist.
@@ -632,11 +503,9 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the index
 	 */
-	public CompletableFuture<IndexEntity> ensureSkiplistIndex(
+	CompletableFuture<IndexEntity> ensureSkiplistIndex(
 		final Iterable<String> fields,
-		final SkiplistIndexOptions options) {
-		return executor.execute(createSkiplistIndexRequest(fields, options), IndexEntity.class);
-	}
+		final SkiplistIndexOptions options);
 
 	/**
 	 * Creates a persistent index for the collection, if it does not already exist.
@@ -651,11 +520,9 @@ public class ArangoCollectionAsync extends
 	 * @return information about the index
 	 */
 	@Deprecated
-	public CompletableFuture<IndexEntity> createPersistentIndex(
+	CompletableFuture<IndexEntity> createPersistentIndex(
 		final Collection<String> fields,
-		final PersistentIndexOptions options) {
-		return executor.execute(createPersistentIndexRequest(fields, options), IndexEntity.class);
-	}
+		final PersistentIndexOptions options);
 
 	/**
 	 * Creates a persistent index for the collection, if it does not already exist.
@@ -668,11 +535,9 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the index
 	 */
-	public CompletableFuture<IndexEntity> ensurePersistentIndex(
+	CompletableFuture<IndexEntity> ensurePersistentIndex(
 		final Iterable<String> fields,
-		final PersistentIndexOptions options) {
-		return executor.execute(createPersistentIndexRequest(fields, options), IndexEntity.class);
-	}
+		final PersistentIndexOptions options);
 
 	/**
 	 * Creates a geo-spatial index for the collection, if it does not already exist.
@@ -687,11 +552,7 @@ public class ArangoCollectionAsync extends
 	 * @return information about the index
 	 */
 	@Deprecated
-	public CompletableFuture<IndexEntity> createGeoIndex(
-		final Collection<String> fields,
-		final GeoIndexOptions options) {
-		return executor.execute(createGeoIndexRequest(fields, options), IndexEntity.class);
-	}
+	CompletableFuture<IndexEntity> createGeoIndex(final Collection<String> fields, final GeoIndexOptions options);
 
 	/**
 	 * Creates a geo-spatial index for the collection, if it does not already exist.
@@ -704,9 +565,7 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the index
 	 */
-	public CompletableFuture<IndexEntity> ensureGeoIndex(final Iterable<String> fields, final GeoIndexOptions options) {
-		return executor.execute(createGeoIndexRequest(fields, options), IndexEntity.class);
-	}
+	CompletableFuture<IndexEntity> ensureGeoIndex(final Iterable<String> fields, final GeoIndexOptions options);
 
 	/**
 	 * Creates a fulltext index for the collection, if it does not already exist.
@@ -721,11 +580,9 @@ public class ArangoCollectionAsync extends
 	 * @return information about the index
 	 */
 	@Deprecated
-	public CompletableFuture<IndexEntity> createFulltextIndex(
+	CompletableFuture<IndexEntity> createFulltextIndex(
 		final Collection<String> fields,
-		final FulltextIndexOptions options) {
-		return executor.execute(createFulltextIndexRequest(fields, options), IndexEntity.class);
-	}
+		final FulltextIndexOptions options);
 
 	/**
 	 * Creates a fulltext index for the collection, if it does not already exist.
@@ -738,11 +595,9 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return information about the index
 	 */
-	public CompletableFuture<IndexEntity> ensureFulltextIndex(
+	CompletableFuture<IndexEntity> ensureFulltextIndex(
 		final Iterable<String> fields,
-		final FulltextIndexOptions options) {
-		return executor.execute(createFulltextIndexRequest(fields, options), IndexEntity.class);
-	}
+		final FulltextIndexOptions options);
 
 	/**
 	 * Returns all indexes of the collection
@@ -752,18 +607,14 @@ public class ArangoCollectionAsync extends
 	 *      Documentation</a>
 	 * @return information about the indexes
 	 */
-	public CompletableFuture<Collection<IndexEntity>> getIndexes() {
-		return executor.execute(getIndexesRequest(), getIndexesResponseDeserializer());
-	}
+	CompletableFuture<Collection<IndexEntity>> getIndexes();
 
 	/**
 	 * Checks whether the collection exists
 	 * 
 	 * @return true if the collection exists, otherwise false
 	 */
-	public CompletableFuture<Boolean> exists() {
-		return getInfo().thenApply(info -> info != null).exceptionally(e -> e == null);
-	}
+	CompletableFuture<Boolean> exists();
 
 	/**
 	 * Removes all documents from the collection, but leaves the indexes intact
@@ -772,9 +623,7 @@ public class ArangoCollectionAsync extends
 	 *      Documentation</a>
 	 * @return information about the collection
 	 */
-	public CompletableFuture<CollectionEntity> truncate() {
-		return executor.execute(truncateRequest(), CollectionEntity.class);
-	}
+	CompletableFuture<CollectionEntity> truncate();
 
 	/**
 	 * Counts the documents in a collection
@@ -784,9 +633,7 @@ public class ArangoCollectionAsync extends
 	 *      Documentation</a>
 	 * @return information about the collection, including the number of documents
 	 */
-	public CompletableFuture<CollectionPropertiesEntity> count() {
-		return executor.execute(countRequest(), CollectionPropertiesEntity.class);
-	}
+	CompletableFuture<CollectionPropertiesEntity> count();
 
 	/**
 	 * Drops the collection
@@ -795,9 +642,7 @@ public class ArangoCollectionAsync extends
 	 *      Documentation</a>
 	 * @return void
 	 */
-	public CompletableFuture<Void> drop() {
-		return executor.execute(dropRequest(null), Void.class);
-	}
+	CompletableFuture<Void> drop();
 
 	/**
 	 * Drops the collection
@@ -809,9 +654,7 @@ public class ArangoCollectionAsync extends
 	 *            order to drop a system collection.
 	 * @return void
 	 */
-	public CompletableFuture<Void> drop(final boolean isSystem) {
-		return executor.execute(dropRequest(isSystem), Void.class);
-	}
+	CompletableFuture<Void> drop(final boolean isSystem);
 
 	/**
 	 * Loads a collection into memory.
@@ -820,9 +663,7 @@ public class ArangoCollectionAsync extends
 	 *      Documentation</a>
 	 * @return information about the collection
 	 */
-	public CompletableFuture<CollectionEntity> load() {
-		return executor.execute(loadRequest(), CollectionEntity.class);
-	}
+	CompletableFuture<CollectionEntity> load();
 
 	/**
 	 * Removes a collection from memory. This call does not delete any documents. You can use the collection afterwards;
@@ -832,9 +673,7 @@ public class ArangoCollectionAsync extends
 	 *      Documentation</a>
 	 * @return information about the collection
 	 */
-	public CompletableFuture<CollectionEntity> unload() {
-		return executor.execute(unloadRequest(), CollectionEntity.class);
-	}
+	CompletableFuture<CollectionEntity> unload();
 
 	/**
 	 * Returns information about the collection
@@ -844,9 +683,7 @@ public class ArangoCollectionAsync extends
 	 *      Documentation</a>
 	 * @return information about the collection
 	 */
-	public CompletableFuture<CollectionEntity> getInfo() {
-		return executor.execute(getInfoRequest(), CollectionEntity.class);
-	}
+	CompletableFuture<CollectionEntity> getInfo();
 
 	/**
 	 * Reads the properties of the specified collection
@@ -856,9 +693,7 @@ public class ArangoCollectionAsync extends
 	 *      Documentation</a>
 	 * @return properties of the collection
 	 */
-	public CompletableFuture<CollectionPropertiesEntity> getProperties() {
-		return executor.execute(getPropertiesRequest(), CollectionPropertiesEntity.class);
-	}
+	CompletableFuture<CollectionPropertiesEntity> getProperties();
 
 	/**
 	 * Changes the properties of a collection
@@ -870,9 +705,7 @@ public class ArangoCollectionAsync extends
 	 *            Additional options, can be null
 	 * @return properties of the collection
 	 */
-	public CompletableFuture<CollectionPropertiesEntity> changeProperties(final CollectionPropertiesOptions options) {
-		return executor.execute(changePropertiesRequest(options), CollectionPropertiesEntity.class);
-	}
+	CompletableFuture<CollectionPropertiesEntity> changeProperties(final CollectionPropertiesOptions options);
 
 	/**
 	 * Renames a collection
@@ -883,9 +716,7 @@ public class ArangoCollectionAsync extends
 	 *            The new name
 	 * @return information about the collection
 	 */
-	public CompletableFuture<CollectionEntity> rename(final String newName) {
-		return executor.execute(renameRequest(newName), CollectionEntity.class);
-	}
+	CompletableFuture<CollectionEntity> rename(final String newName);
 
 	/**
 	 * Retrieve the collections revision
@@ -894,9 +725,7 @@ public class ArangoCollectionAsync extends
 	 *      Documentation</a>
 	 * @return information about the collection, including the collections revision
 	 */
-	public CompletableFuture<CollectionRevisionEntity> getRevision() {
-		return executor.execute(getRevisionRequest(), CollectionRevisionEntity.class);
-	}
+	CompletableFuture<CollectionRevisionEntity> getRevision();
 
 	/**
 	 * Grants or revoke access to the collection for user user. You need permission to the _system database in order to
@@ -911,9 +740,7 @@ public class ArangoCollectionAsync extends
 	 *            The permissions the user grant
 	 * @return void
 	 */
-	public CompletableFuture<Void> grantAccess(final String user, final Permissions permissions) {
-		return executor.execute(grantAccessRequest(user, permissions), Void.class);
-	}
+	CompletableFuture<Void> grantAccess(final String user, final Permissions permissions);
 
 	/**
 	 * Revokes access to the collection for user user. You need permission to the _system database in order to execute
@@ -926,9 +753,7 @@ public class ArangoCollectionAsync extends
 	 *            The name of the user
 	 * @return void
 	 */
-	public CompletableFuture<Void> revokeAccess(final String user) {
-		return executor.execute(grantAccessRequest(user, Permissions.NONE), Void.class);
-	}
+	CompletableFuture<Void> revokeAccess(final String user);
 
 	/**
 	 * Clear the collection access level, revert back to the default access level.
@@ -941,9 +766,7 @@ public class ArangoCollectionAsync extends
 	 * @since ArangoDB 3.2.0
 	 * @return void
 	 */
-	public CompletableFuture<Void> resetAccess(final String user) {
-		return executor.execute(resetAccessRequest(user), Void.class);
-	}
+	CompletableFuture<Void> resetAccess(final String user);
 
 	/**
 	 * Get the collection access level
@@ -955,7 +778,5 @@ public class ArangoCollectionAsync extends
 	 * @return permissions of the user
 	 * @since ArangoDB 3.2.0
 	 */
-	public CompletableFuture<Permissions> getPermissions(final String user) throws ArangoDBException {
-		return executor.execute(getPermissionsRequest(user), getPermissionsResponseDeserialzer());
-	}
+	CompletableFuture<Permissions> getPermissions(final String user) throws ArangoDBException;
 }

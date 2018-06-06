@@ -18,16 +18,28 @@
  * Copyright holder is ArangoDB GmbH, Cologne, Germany
  */
 
-package com.arangodb;
+package com.arangodb.internal;
 
+import java.util.Spliterators;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import com.arangodb.ArangoCursorAsync;
+import com.arangodb.entity.CursorEntity;
 
 /**
  * @author Mark Vollmary
  *
  */
-public interface ArangoCursorAsync<T> extends ArangoCursor<T> {
+public class ArangoCursorAsyncImpl<T> extends ArangoCursorImpl<T> implements ArangoCursorAsync<T> {
 
-	Stream<T> streamRemaining();
+	protected ArangoCursorAsyncImpl(final InternalArangoDatabase<?, ?, ?, ?> db, final ArangoCursorExecute execute,
+		final Class<T> type, final CursorEntity result) {
+		super(db, execute, type, result);
+	}
 
+	@Override
+	public Stream<T> streamRemaining() {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
+	}
 }

@@ -25,30 +25,33 @@ import java.util.concurrent.CompletableFuture;
 
 import com.arangodb.entity.EdgeDefinition;
 import com.arangodb.entity.GraphEntity;
-import com.arangodb.internal.ArangoExecutorAsync;
-import com.arangodb.internal.InternalArangoGraph;
-import com.arangodb.internal.velocystream.ConnectionAsync;
-import com.arangodb.velocystream.Response;
 
 /**
  * @author Mark Vollmary
  *
  */
-public class ArangoGraphAsync extends
-		InternalArangoGraph<ArangoDBAsync, ArangoDatabaseAsync, ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync> {
+public interface ArangoGraphAsync {
 
-	protected ArangoGraphAsync(final ArangoDatabaseAsync db, final String name) {
-		super(db, name);
-	}
+	/**
+	 * The the handler of the database the named graph is within
+	 * 
+	 * @return database handler
+	 */
+	public ArangoDatabaseAsync db();
+
+	/**
+	 * The name of the collection
+	 * 
+	 * @return collection name
+	 */
+	public String name();
 
 	/**
 	 * Checks whether the graph exists
 	 * 
 	 * @return true if the graph exists, otherwise false
 	 */
-	public CompletableFuture<Boolean> exists() {
-		return getInfo().thenApply(info -> info != null).exceptionally(e -> e == null);
-	}
+	CompletableFuture<Boolean> exists();
 
 	/**
 	 * Delete an existing graph
@@ -56,9 +59,7 @@ public class ArangoGraphAsync extends
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Management.html#drop-a-graph">API Documentation</a>
 	 * @return void
 	 */
-	public CompletableFuture<Void> drop() {
-		return executor.execute(dropRequest(), Void.class);
-	}
+	CompletableFuture<Void> drop();
 
 	/**
 	 * Get a graph from the graph module
@@ -66,9 +67,7 @@ public class ArangoGraphAsync extends
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Management.html#get-a-graph">API Documentation</a>
 	 * @return the definition content of this graph
 	 */
-	public CompletableFuture<GraphEntity> getInfo() {
-		return executor.execute(getInfoRequest(), getInfoResponseDeserializer());
-	}
+	CompletableFuture<GraphEntity> getInfo();
 
 	/**
 	 * Lists all vertex collections used in this graph
@@ -77,9 +76,7 @@ public class ArangoGraphAsync extends
 	 *      Documentation</a>
 	 * @return all vertex collections within this graph
 	 */
-	public CompletableFuture<Collection<String>> getVertexCollections() {
-		return executor.execute(getVertexCollectionsRequest(), getVertexCollectionsResponseDeserializer());
-	}
+	CompletableFuture<Collection<String>> getVertexCollections();
 
 	/**
 	 * Adds a vertex collection to the set of collections of the graph. If the collection does not exist, it will be
@@ -91,9 +88,7 @@ public class ArangoGraphAsync extends
 	 *            The name of the collection
 	 * @return information about the graph
 	 */
-	public CompletableFuture<GraphEntity> addVertexCollection(final String name) {
-		return executor.execute(addVertexCollectionRequest(name), addVertexCollectionResponseDeserializer());
-	}
+	CompletableFuture<GraphEntity> addVertexCollection(final String name);
 
 	/**
 	 * Returns a handler of the vertex collection by the given name
@@ -102,9 +97,7 @@ public class ArangoGraphAsync extends
 	 *            Name of the vertex collection
 	 * @return collection handler
 	 */
-	public ArangoVertexCollectionAsync vertexCollection(final String name) {
-		return new ArangoVertexCollectionAsync(this, name);
-	}
+	ArangoVertexCollectionAsync vertexCollection(final String name);
 
 	/**
 	 * Returns a handler of the edge collection by the given name
@@ -113,9 +106,7 @@ public class ArangoGraphAsync extends
 	 *            Name of the edge collection
 	 * @return collection handler
 	 */
-	public ArangoEdgeCollectionAsync edgeCollection(final String name) {
-		return new ArangoEdgeCollectionAsync(this, name);
-	}
+	ArangoEdgeCollectionAsync edgeCollection(final String name);
 
 	/**
 	 * Lists all edge collections used in this graph
@@ -124,9 +115,7 @@ public class ArangoGraphAsync extends
 	 *      Documentation</a>
 	 * @return all edge collections within this graph
 	 */
-	public CompletableFuture<Collection<String>> getEdgeDefinitions() {
-		return executor.execute(getEdgeDefinitionsRequest(), getEdgeDefinitionsDeserializer());
-	}
+	CompletableFuture<Collection<String>> getEdgeDefinitions();
 
 	/**
 	 * Add a new edge definition to the graph
@@ -136,9 +125,7 @@ public class ArangoGraphAsync extends
 	 * @param definition
 	 * @return information about the graph
 	 */
-	public CompletableFuture<GraphEntity> addEdgeDefinition(final EdgeDefinition definition) {
-		return executor.execute(addEdgeDefinitionRequest(definition), addEdgeDefinitionResponseDeserializer());
-	}
+	CompletableFuture<GraphEntity> addEdgeDefinition(final EdgeDefinition definition);
 
 	/**
 	 * Change one specific edge definition. This will modify all occurrences of this definition in all graphs known to
@@ -150,9 +137,7 @@ public class ArangoGraphAsync extends
 	 *            The edge definition
 	 * @return information about the graph
 	 */
-	public CompletableFuture<GraphEntity> replaceEdgeDefinition(final EdgeDefinition definition) {
-		return executor.execute(replaceEdgeDefinitionRequest(definition), replaceEdgeDefinitionResponseDeserializer());
-	}
+	CompletableFuture<GraphEntity> replaceEdgeDefinition(final EdgeDefinition definition);
 
 	/**
 	 * Remove one edge definition from the graph. This will only remove the edge collection, the vertex collections
@@ -165,9 +150,6 @@ public class ArangoGraphAsync extends
 	 *            The name of the edge collection used in the definition
 	 * @return information about the graph
 	 */
-	public CompletableFuture<GraphEntity> removeEdgeDefinition(final String definitionName) {
-		return executor.execute(removeEdgeDefinitionRequest(definitionName),
-			removeEdgeDefinitionResponseDeserializer());
-	}
+	CompletableFuture<GraphEntity> removeEdgeDefinition(final String definitionName);
 
 }
