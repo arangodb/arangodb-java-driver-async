@@ -55,4 +55,8 @@ public abstract class BaseTest {
 		arangoDB = null;
 	}
 
+	protected boolean requireVersion(final int major, final int minor) throws InterruptedException, ExecutionException {
+		final String[] split = arangoDB.getVersion().get().getVersion().split("\\.");
+		return Integer.valueOf(split[0]) >= major && Integer.valueOf(split[1]) >= minor;
+	}
 }
