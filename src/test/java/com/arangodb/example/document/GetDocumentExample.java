@@ -27,7 +27,6 @@ import static org.junit.Assert.assertThat;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.json.simple.parser.ParseException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -85,7 +84,7 @@ public class GetDocumentExample extends ExampleBase {
 	}
 
 	@Test
-	public void getAsJson() throws ParseException, InterruptedException, ExecutionException {
+	public void getAsJson() throws InterruptedException, ExecutionException {
 		final CompletableFuture<String> f = collection.getDocument(key, String.class);
 		f.whenComplete((doc, ex) -> {
 			assertThat(doc, is(notNullValue()));
