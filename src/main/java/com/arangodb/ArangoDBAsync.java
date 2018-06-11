@@ -84,30 +84,6 @@ public interface ArangoDBAsync {
 		}
 
 		/**
-		 * @deprecated will be removed in version 4.6.0 use {@link #host(String, int)} instead
-		 * 
-		 * @param host
-		 * @return {@link ArangoDB.Builder}
-		 */
-		@Deprecated
-		public Builder host(final String host) {
-			setHost(host);
-			return this;
-		}
-
-		/**
-		 * @deprecated will be removed in version 4.6.0 use {@link #host(String, int)} instead
-		 * 
-		 * @param port
-		 * @return {@link ArangoDB.Builder}
-		 */
-		@Deprecated
-		public Builder port(final Integer port) {
-			setPort(port);
-			return this;
-		}
-
-		/**
 		 * Adds a host to connect to. Multiple hosts can be added to provide fallbacks.
 		 * 
 		 * @param host
@@ -498,19 +474,6 @@ public interface ArangoDBAsync {
 	CompletableFuture<UserEntity> replaceUser(final String user, final UserUpdateOptions options);
 
 	/**
-	 * @deprecated use {@link #grantDefaultDatabaseAccess(String, Permissions)} instead
-	 * 
-	 * @param user
-	 *            The name of the user
-	 * @param permissions
-	 *            The permissions the user grant
-	 * @since ArangoDB 3.2.0
-	 * @return void
-	 */
-	@Deprecated
-	CompletableFuture<Void> updateUserDefaultDatabaseAccess(final String user, final Permissions permissions);
-
-	/**
 	 * Sets the default access level for databases for the user <code>user</code>. You need permission to the _system
 	 * database in order to execute this call.
 	 * 
@@ -523,19 +486,6 @@ public interface ArangoDBAsync {
 	 */
 	CompletableFuture<Void> grantDefaultDatabaseAccess(final String user, final Permissions permissions)
 			throws ArangoDBException;
-
-	/**
-	 * @deprecated user {@link #grantDefaultCollectionAccess(String, Permissions)} instead
-	 * 
-	 * @param user
-	 *            The name of the user
-	 * @param permissions
-	 *            The permissions the user grant
-	 * @since ArangoDB 3.2.0
-	 * @return void
-	 */
-	@Deprecated
-	CompletableFuture<Void> updateUserDefaultCollectionAccess(final String user, final Permissions permissions);
 
 	/**
 	 * Sets the default access level for collections for the user <code>user</code>. You need permission to the _system

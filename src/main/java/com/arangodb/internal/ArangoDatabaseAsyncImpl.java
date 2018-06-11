@@ -175,12 +175,6 @@ public class ArangoDatabaseAsyncImpl extends
 	}
 
 	@Override
-	@Deprecated
-	public CompletableFuture<Void> updateUserDefaultCollectionAccess(final String user, final Permissions permissions) {
-		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
-	}
-
-	@Override
 	public CompletableFuture<Permissions> getPermissions(final String user) throws ArangoDBException {
 		return executor.execute(getPermissionsRequest(user), getPermissionsResponseDeserialzer());
 	}

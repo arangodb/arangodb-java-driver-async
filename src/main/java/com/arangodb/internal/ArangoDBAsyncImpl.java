@@ -219,21 +219,9 @@ public class ArangoDBAsyncImpl extends
 	}
 
 	@Override
-	@Deprecated
-	public CompletableFuture<Void> updateUserDefaultDatabaseAccess(final String user, final Permissions permissions) {
-		return executor.execute(updateUserDefaultDatabaseAccessRequest(user, permissions), Void.class);
-	}
-
-	@Override
 	public CompletableFuture<Void> grantDefaultDatabaseAccess(final String user, final Permissions permissions)
 			throws ArangoDBException {
 		return executor.execute(updateUserDefaultDatabaseAccessRequest(user, permissions), Void.class);
-	}
-
-	@Override
-	@Deprecated
-	public CompletableFuture<Void> updateUserDefaultCollectionAccess(final String user, final Permissions permissions) {
-		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
 	}
 
 	@Override

@@ -1,5 +1,12 @@
-4.5.0 (xxxx-xx-xx)
+v4.5.0 (2018-06-11)
 ---------------------------
+* removed deprecated ArangoDBAsync.Builder.host(String)
+* removed deprecated ArangoDBAsync.Builder.port(Integer)
+* removed deprecated ArangoCollectionAsync.create[IndexType]Index()
+* removed deprecated ArangoDatabaseAsync.updateUserDefaultCollectionAccess()
+* removed deprecated ArangoDBAsync.updateUserDefaultDatabaseAccess()
+* removed deprecated ArangoDBAsync.updateUserDefaultCollectionAccess()
+* removed several deprecated APIs
 * upgraded dependency velocypack 1.2.0
   * replaced dependency json-simple with jackson
 * added replace-insert support: DocumentCreateOptions.overwrite(Boolean)

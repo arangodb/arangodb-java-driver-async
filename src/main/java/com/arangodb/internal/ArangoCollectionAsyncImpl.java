@@ -291,26 +291,10 @@ public class ArangoCollectionAsyncImpl extends
 	}
 
 	@Override
-	@Deprecated
-	public CompletableFuture<IndexEntity> createHashIndex(
-		final Collection<String> fields,
-		final HashIndexOptions options) {
-		return executor.execute(createHashIndexRequest(fields, options), IndexEntity.class);
-	}
-
-	@Override
 	public CompletableFuture<IndexEntity> ensureHashIndex(
 		final Iterable<String> fields,
 		final HashIndexOptions options) {
 		return executor.execute(createHashIndexRequest(fields, options), IndexEntity.class);
-	}
-
-	@Override
-	@Deprecated
-	public CompletableFuture<IndexEntity> createSkiplistIndex(
-		final Collection<String> fields,
-		final SkiplistIndexOptions options) {
-		return executor.execute(createSkiplistIndexRequest(fields, options), IndexEntity.class);
 	}
 
 	@Override
@@ -321,14 +305,6 @@ public class ArangoCollectionAsyncImpl extends
 	}
 
 	@Override
-	@Deprecated
-	public CompletableFuture<IndexEntity> createPersistentIndex(
-		final Collection<String> fields,
-		final PersistentIndexOptions options) {
-		return executor.execute(createPersistentIndexRequest(fields, options), IndexEntity.class);
-	}
-
-	@Override
 	public CompletableFuture<IndexEntity> ensurePersistentIndex(
 		final Iterable<String> fields,
 		final PersistentIndexOptions options) {
@@ -336,24 +312,8 @@ public class ArangoCollectionAsyncImpl extends
 	}
 
 	@Override
-	@Deprecated
-	public CompletableFuture<IndexEntity> createGeoIndex(
-		final Collection<String> fields,
-		final GeoIndexOptions options) {
-		return executor.execute(createGeoIndexRequest(fields, options), IndexEntity.class);
-	}
-
-	@Override
 	public CompletableFuture<IndexEntity> ensureGeoIndex(final Iterable<String> fields, final GeoIndexOptions options) {
 		return executor.execute(createGeoIndexRequest(fields, options), IndexEntity.class);
-	}
-
-	@Override
-	@Deprecated
-	public CompletableFuture<IndexEntity> createFulltextIndex(
-		final Collection<String> fields,
-		final FulltextIndexOptions options) {
-		return executor.execute(createFulltextIndexRequest(fields, options), IndexEntity.class);
 	}
 
 	@Override

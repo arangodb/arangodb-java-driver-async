@@ -453,20 +453,6 @@ public interface ArangoCollectionAsync {
 	/**
 	 * Creates a hash index for the collection, if it does not already exist.
 	 * 
-	 * @deprecated use {@link #ensureHashIndex(Iterable, HashIndexOptions)} instead
-	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/Hash.html#create-hash-index">API Documentation</a>
-	 * @param fields
-	 *            A list of attribute paths
-	 * @param options
-	 *            Additional options, can be null
-	 * @return information about the index
-	 */
-	@Deprecated
-	CompletableFuture<IndexEntity> createHashIndex(final Collection<String> fields, final HashIndexOptions options);
-
-	/**
-	 * Creates a hash index for the collection, if it does not already exist.
-	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/Hash.html#create-hash-index">API Documentation</a>
 	 * @param fields
 	 *            A list of attribute paths
@@ -475,23 +461,6 @@ public interface ArangoCollectionAsync {
 	 * @return information about the index
 	 */
 	CompletableFuture<IndexEntity> ensureHashIndex(final Iterable<String> fields, final HashIndexOptions options);
-
-	/**
-	 * Creates a skip-list index for the collection, if it does not already exist.
-	 * 
-	 * @deprecated use {@link #ensureSkiplistIndex(Collection, SkiplistIndexOptions)} instead
-	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/Skiplist.html#create-skip-list">API
-	 *      Documentation</a>
-	 * @param fields
-	 *            A list of attribute paths
-	 * @param options
-	 *            Additional options, can be null
-	 * @return information about the index
-	 */
-	@Deprecated
-	CompletableFuture<IndexEntity> createSkiplistIndex(
-		final Collection<String> fields,
-		final SkiplistIndexOptions options);
 
 	/**
 	 * Creates a skip-list index for the collection, if it does not already exist.
@@ -511,23 +480,6 @@ public interface ArangoCollectionAsync {
 	/**
 	 * Creates a persistent index for the collection, if it does not already exist.
 	 * 
-	 * @deprecated use {@link #ensurePersistentIndex(Collection, PersistentIndexOptions)} instead
-	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/Persistent.html#create-a-persistent-index">API
-	 *      Documentation</a>
-	 * @param fields
-	 *            A list of attribute paths
-	 * @param options
-	 *            Additional options, can be null
-	 * @return information about the index
-	 */
-	@Deprecated
-	CompletableFuture<IndexEntity> createPersistentIndex(
-		final Collection<String> fields,
-		final PersistentIndexOptions options);
-
-	/**
-	 * Creates a persistent index for the collection, if it does not already exist.
-	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/Persistent.html#create-a-persistent-index">API
 	 *      Documentation</a>
 	 * @param fields
@@ -543,21 +495,6 @@ public interface ArangoCollectionAsync {
 	/**
 	 * Creates a geo-spatial index for the collection, if it does not already exist.
 	 * 
-	 * @deprecated use {@link #ensureGeoIndex(Collection, GeoIndexOptions)} instead
-	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/Geo.html#create-geospatial-index">API
-	 *      Documentation</a>
-	 * @param fields
-	 *            A list of attribute paths
-	 * @param options
-	 *            Additional options, can be null
-	 * @return information about the index
-	 */
-	@Deprecated
-	CompletableFuture<IndexEntity> createGeoIndex(final Collection<String> fields, final GeoIndexOptions options);
-
-	/**
-	 * Creates a geo-spatial index for the collection, if it does not already exist.
-	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/Geo.html#create-geospatial-index">API
 	 *      Documentation</a>
 	 * @param fields
@@ -567,23 +504,6 @@ public interface ArangoCollectionAsync {
 	 * @return information about the index
 	 */
 	CompletableFuture<IndexEntity> ensureGeoIndex(final Iterable<String> fields, final GeoIndexOptions options);
-
-	/**
-	 * Creates a fulltext index for the collection, if it does not already exist.
-	 * 
-	 * @deprecated use {@link #ensureFulltextIndex(Collection, FulltextIndexOptions)} instead
-	 * @see <a href="https://docs.arangodb.com/current/HTTP/Indexes/Fulltext.html#create-fulltext-index">API
-	 *      Documentation</a>
-	 * @param fields
-	 *            A list of attribute paths
-	 * @param options
-	 *            Additional options, can be null
-	 * @return information about the index
-	 */
-	@Deprecated
-	CompletableFuture<IndexEntity> createFulltextIndex(
-		final Collection<String> fields,
-		final FulltextIndexOptions options);
 
 	/**
 	 * Creates a fulltext index for the collection, if it does not already exist.
