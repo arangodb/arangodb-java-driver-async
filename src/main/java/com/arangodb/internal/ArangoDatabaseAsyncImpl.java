@@ -77,7 +77,7 @@ public class ArangoDatabaseAsyncImpl extends
 	}
 
 	protected ArangoDatabaseAsyncImpl(final VstCommunicationAsync communication, final ArangoSerializationFactory util,
-		final DocumentCache documentCache, final CollectionCache collectionCache, final String name) {
+		final DocumentCache documentCache, final String name) {
 		super(null, new ArangoExecutorAsync(communication, util, documentCache), util, name);
 	}
 

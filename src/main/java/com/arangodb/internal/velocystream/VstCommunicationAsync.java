@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import com.arangodb.ArangoDBException;
 import com.arangodb.entity.ErrorEntity;
 import com.arangodb.internal.ArangoDBConstants;
-import com.arangodb.internal.CollectionCache;
 import com.arangodb.internal.Host;
 import com.arangodb.internal.net.ConnectionPool;
 import com.arangodb.internal.net.DelHostHandler;
@@ -53,7 +52,6 @@ import com.arangodb.velocystream.Response;
 public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Response>, ConnectionAsync> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VstCommunicationAsync.class);
-	private final CollectionCache collectionCache;
 
 	public static class Builder {
 
@@ -112,16 +110,15 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 			return this;
 		}
 
-		public VstCommunicationAsync build(final ArangoSerialization util, final CollectionCache collectionCache) {
-			return new VstCommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, util,
-					collectionCache, chunksize, maxConnections, connectionTtl);
+		public VstCommunicationAsync build(final ArangoSerialization util) {
+			return new VstCommunicationAsync(hostHandler, timeout, user, password, useSsl, sslContext, util, chunksize,
+					maxConnections, connectionTtl);
 		}
 	}
 
 	private VstCommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
 		final String password, final Boolean useSsl, final SSLContext sslContext, final ArangoSerialization util,
-		final CollectionCache collectionCache, final Integer chunksize, final Integer maxConnections,
-		final Long connectionTtl) {
+		final Integer chunksize, final Integer maxConnections, final Long connectionTtl) {
 		super(timeout, user, password, useSsl, sslContext, util, chunksize, new ConnectionPool<ConnectionAsync>(
 				maxConnections != null ? Math.max(1, maxConnections) : ArangoDBConstants.MAX_CONNECTIONS_VST_DEFAULT) {
 			private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder().timeout(timeout)
@@ -133,7 +130,6 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 						.build();
 			}
 		});
-		this.collectionCache = collectionCache;
 	}
 
 	@Override
@@ -145,7 +141,6 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 			send(message, connection).whenComplete((m, ex) -> {
 				if (m != null) {
 					try {
-						collectionCache.setDb(request.getDatabase());
 						final Response response = createResponse(m);
 						if (response.getResponseCode() >= 300) {
 							if (response.getBody() != null) {

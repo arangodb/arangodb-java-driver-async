@@ -35,7 +35,6 @@ import com.arangodb.entity.Permissions;
 import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.UserEntity;
 import com.arangodb.internal.ArangoDBAsyncImpl;
-import com.arangodb.internal.CollectionCache;
 import com.arangodb.internal.InternalArangoDBBuilder;
 import com.arangodb.internal.net.HostHandler;
 import com.arangodb.internal.net.HostResolver;
@@ -43,7 +42,6 @@ import com.arangodb.internal.util.ArangoDeserializerImpl;
 import com.arangodb.internal.util.ArangoSerializationFactory;
 import com.arangodb.internal.util.ArangoSerializerImpl;
 import com.arangodb.internal.util.DefaultArangoSerialization;
-import com.arangodb.internal.velocypack.VPackDocumentModule;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.internal.velocystream.VstCommunicationSync;
 import com.arangodb.model.LogOptions;
@@ -298,10 +296,6 @@ public interface ArangoDBAsync {
 			if (hosts.isEmpty()) {
 				hosts.add(host);
 			}
-			final CollectionCache collectionCache = new CollectionCache();
-			vpackBuilder.registerModule(new VPackDocumentModule(collectionCache));
-			vpackParserBuilder.registerModule(new VPackDocumentModule(collectionCache));
-
 			final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
 			final VPack vpackerNull = vpackBuilder.serializeNullValues(true).build();
 			final VPackParser vpackParser = vpackParserBuilder.build();
@@ -316,8 +310,7 @@ public interface ArangoDBAsync {
 
 			final HostResolver hostResolver = createHostResolver();
 			final HostHandler hostHandler = createHostHandler(hostResolver);
-			return new ArangoDBAsyncImpl(asyncBuilder(hostHandler), util, collectionCache, syncBuilder(hostHandler),
-					hostResolver);
+			return new ArangoDBAsyncImpl(asyncBuilder(hostHandler), util, syncBuilder(hostHandler), hostResolver);
 		}
 
 		private VstCommunicationAsync.Builder asyncBuilder(final HostHandler hostHandler) {

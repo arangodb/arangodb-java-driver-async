@@ -30,7 +30,6 @@ import java.util.concurrent.ExecutionException;
 
 import com.arangodb.ArangoDBAsync;
 import com.arangodb.ArangoDBException;
-import com.arangodb.ArangoDatabase;
 import com.arangodb.ArangoDatabaseAsync;
 import com.arangodb.entity.ArangoDBVersion;
 import com.arangodb.entity.LogEntity;
@@ -39,7 +38,6 @@ import com.arangodb.entity.Permissions;
 import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.UserEntity;
 import com.arangodb.internal.ArangoExecutor.ResponseDeserializer;
-import com.arangodb.internal.CollectionCache.DBAccess;
 import com.arangodb.internal.net.CommunicationProtocol;
 import com.arangodb.internal.net.HostResolver;
 import com.arangodb.internal.net.HostResolver.EndpointResolver;
@@ -70,19 +68,11 @@ public class ArangoDBAsyncImpl extends
 	private final CommunicationProtocol cp;
 
 	public ArangoDBAsyncImpl(final VstCommunicationAsync.Builder commBuilder, final ArangoSerializationFactory util,
-		final CollectionCache collectionCache, final VstCommunicationSync.Builder syncbuilder,
-		final HostResolver hostResolver) {
-		super(new ArangoExecutorAsync(commBuilder.build(util.get(Serializer.INTERNAL), collectionCache), util,
-				new DocumentCache()), util);
-		final VstCommunication<Response, ConnectionSync> cacheCom = syncbuilder.build(util.get(Serializer.INTERNAL),
-			collectionCache);
+		final VstCommunicationSync.Builder syncbuilder, final HostResolver hostResolver) {
+		super(new ArangoExecutorAsync(commBuilder.build(util.get(Serializer.INTERNAL)), util, new DocumentCache()),
+				util);
+		final VstCommunication<Response, ConnectionSync> cacheCom = syncbuilder.build(util.get(Serializer.INTERNAL));
 		cp = new VstProtocol(cacheCom);
-		collectionCache.init(new DBAccess() {
-			@Override
-			public ArangoDatabase db(final String name) {
-				return new ArangoDatabaseImpl(cp, util, executor.documentCache(), name);
-			}
-		});
 		hostResolver.init(new EndpointResolver() {
 			@Override
 			public Collection<String> resolve(final boolean closeConnections) throws ArangoDBException {
