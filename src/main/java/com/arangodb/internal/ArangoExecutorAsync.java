@@ -26,8 +26,8 @@ import java.util.concurrent.CompletableFuture;
 
 import com.arangodb.ArangoDBException;
 import com.arangodb.internal.net.HostHandle;
+import com.arangodb.internal.util.ArangoSerializationFactory;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
-import com.arangodb.util.ArangoSerialization;
 import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.Request;
 
@@ -39,7 +39,7 @@ public class ArangoExecutorAsync extends ArangoExecutor {
 
 	private final VstCommunicationAsync communication;
 
-	public ArangoExecutorAsync(final VstCommunicationAsync communication, final ArangoSerialization util,
+	public ArangoExecutorAsync(final VstCommunicationAsync communication, final ArangoSerializationFactory util,
 		final DocumentCache documentCache) {
 		super(util, documentCache);
 		this.communication = communication;

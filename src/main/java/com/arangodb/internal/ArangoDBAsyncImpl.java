@@ -43,6 +43,8 @@ import com.arangodb.internal.CollectionCache.DBAccess;
 import com.arangodb.internal.net.CommunicationProtocol;
 import com.arangodb.internal.net.HostResolver;
 import com.arangodb.internal.net.HostResolver.EndpointResolver;
+import com.arangodb.internal.util.ArangoSerializationFactory;
+import com.arangodb.internal.util.ArangoSerializationFactory.Serializer;
 import com.arangodb.internal.velocystream.ConnectionAsync;
 import com.arangodb.internal.velocystream.VstCommunication;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
@@ -52,7 +54,6 @@ import com.arangodb.internal.velocystream.internal.ConnectionSync;
 import com.arangodb.model.LogOptions;
 import com.arangodb.model.UserCreateOptions;
 import com.arangodb.model.UserUpdateOptions;
-import com.arangodb.util.ArangoSerialization;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.Request;
@@ -68,11 +69,13 @@ public class ArangoDBAsyncImpl extends
 
 	private final CommunicationProtocol cp;
 
-	public ArangoDBAsyncImpl(final VstCommunicationAsync.Builder commBuilder, final ArangoSerialization util,
+	public ArangoDBAsyncImpl(final VstCommunicationAsync.Builder commBuilder, final ArangoSerializationFactory util,
 		final CollectionCache collectionCache, final VstCommunicationSync.Builder syncbuilder,
 		final HostResolver hostResolver) {
-		super(new ArangoExecutorAsync(commBuilder.build(util, collectionCache), util, new DocumentCache()), util);
-		final VstCommunication<Response, ConnectionSync> cacheCom = syncbuilder.build(util, collectionCache);
+		super(new ArangoExecutorAsync(commBuilder.build(util.get(Serializer.INTERNAL), collectionCache), util,
+				new DocumentCache()), util);
+		final VstCommunication<Response, ConnectionSync> cacheCom = syncbuilder.build(util.get(Serializer.INTERNAL),
+			collectionCache);
 		cp = new VstProtocol(cacheCom);
 		collectionCache.init(new DBAccess() {
 			@Override

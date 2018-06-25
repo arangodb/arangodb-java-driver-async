@@ -46,6 +46,7 @@ import com.arangodb.entity.QueryEntity;
 import com.arangodb.entity.QueryTrackingPropertiesEntity;
 import com.arangodb.entity.TraversalEntity;
 import com.arangodb.internal.net.HostHandle;
+import com.arangodb.internal.util.ArangoSerializationFactory;
 import com.arangodb.internal.velocystream.ConnectionAsync;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.model.AqlFunctionCreateOptions;
@@ -59,7 +60,6 @@ import com.arangodb.model.DocumentReadOptions;
 import com.arangodb.model.GraphCreateOptions;
 import com.arangodb.model.TransactionOptions;
 import com.arangodb.model.TraversalOptions;
-import com.arangodb.util.ArangoSerialization;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocystream.Request;
 import com.arangodb.velocystream.Response;
@@ -73,10 +73,10 @@ public class ArangoDatabaseAsyncImpl extends
 		implements ArangoDatabaseAsync {
 
 	protected ArangoDatabaseAsyncImpl(final ArangoDBAsyncImpl arangoDB, final String name) {
-		super(arangoDB, arangoDB.executor(), arangoDB.util(), name);
+		super(arangoDB, arangoDB.executor(), arangoDB.util, name);
 	}
 
-	protected ArangoDatabaseAsyncImpl(final VstCommunicationAsync communication, final ArangoSerialization util,
+	protected ArangoDatabaseAsyncImpl(final VstCommunicationAsync communication, final ArangoSerializationFactory util,
 		final DocumentCache documentCache, final CollectionCache collectionCache, final String name) {
 		super(null, new ArangoExecutorAsync(communication, util, documentCache), util, name);
 	}

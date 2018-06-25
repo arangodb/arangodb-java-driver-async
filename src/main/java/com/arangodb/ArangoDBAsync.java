@@ -40,8 +40,9 @@ import com.arangodb.internal.InternalArangoDBBuilder;
 import com.arangodb.internal.net.HostHandler;
 import com.arangodb.internal.net.HostResolver;
 import com.arangodb.internal.util.ArangoDeserializerImpl;
+import com.arangodb.internal.util.ArangoSerializationFactory;
 import com.arangodb.internal.util.ArangoSerializerImpl;
-import com.arangodb.internal.util.ArangoUtilImpl;
+import com.arangodb.internal.util.DefaultArangoSerialization;
 import com.arangodb.internal.velocypack.VPackDocumentModule;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.internal.velocystream.VstCommunicationSync;
@@ -49,6 +50,7 @@ import com.arangodb.model.LogOptions;
 import com.arangodb.model.UserCreateOptions;
 import com.arangodb.model.UserUpdateOptions;
 import com.arangodb.util.ArangoDeserializer;
+import com.arangodb.util.ArangoSerialization;
 import com.arangodb.util.ArangoSerializer;
 import com.arangodb.velocypack.VPack;
 import com.arangodb.velocypack.VPackAnnotationFieldFilter;
@@ -251,8 +253,10 @@ public interface ArangoDBAsync {
 		 * 
 		 * @param serializer
 		 *            custom serializer
+		 * @deprecated use {@link #serializer(ArangoSerialization)} instead
 		 * @return builder
 		 */
+		@Deprecated
 		public Builder setSerializer(final ArangoSerializer serializer) {
 			serializer(serializer);
 			return this;
@@ -266,10 +270,27 @@ public interface ArangoDBAsync {
 		 * 
 		 * @param deserializer
 		 *            custom deserializer
+		 * @deprecated use {@link #serializer(ArangoSerialization)} instead
 		 * @return builder
 		 */
+		@Deprecated
 		public Builder setDeserializer(final ArangoDeserializer deserializer) {
 			deserializer(deserializer);
+			return this;
+		}
+
+		/**
+		 * Replace the built-in serializer/deserializer with the given one.
+		 * 
+		 * <br />
+		 * <b>ATTENTION!:</b> Any registered custom serializer/deserializer or module will be ignored.
+		 * 
+		 * @param serialization
+		 *            custom serializer/deserializer
+		 * @return builder
+		 */
+		public Builder serializer(final ArangoSerialization serialization) {
+			setSerializer(serialization);
 			return this;
 		}
 
@@ -288,11 +309,14 @@ public interface ArangoDBAsync {
 					: new ArangoSerializerImpl(vpacker, vpackerNull, vpackParser);
 			final ArangoDeserializer deserializerTemp = deserializer != null ? deserializer
 					: new ArangoDeserializerImpl(vpackerNull, vpackParser);
+			final DefaultArangoSerialization internal = new DefaultArangoSerialization(serializerTemp,
+					deserializerTemp);
+			final ArangoSerialization custom = customSerializer != null ? customSerializer : internal;
+			final ArangoSerializationFactory util = new ArangoSerializationFactory(internal, custom);
 
 			final HostResolver hostResolver = createHostResolver();
 			final HostHandler hostHandler = createHostHandler(hostResolver);
-			return new ArangoDBAsyncImpl(asyncBuilder(hostHandler),
-					new ArangoUtilImpl(serializerTemp, deserializerTemp), collectionCache, syncBuilder(hostHandler),
+			return new ArangoDBAsyncImpl(asyncBuilder(hostHandler), util, collectionCache, syncBuilder(hostHandler),
 					hostResolver);
 		}
 
