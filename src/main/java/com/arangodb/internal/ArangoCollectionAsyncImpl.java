@@ -69,15 +69,17 @@ public class ArangoCollectionAsyncImpl extends
 
 	@Override
 	public <T> CompletableFuture<DocumentCreateEntity<T>> insertDocument(final T value) {
-		return executor.execute(insertDocumentRequest(value, new DocumentCreateOptions()),
-			insertDocumentResponseDeserializer(value));
+		final DocumentCreateOptions options = new DocumentCreateOptions();
+		return executor.execute(insertDocumentRequest(value, options),
+			insertDocumentResponseDeserializer(value, options));
 	}
 
 	@Override
 	public <T> CompletableFuture<DocumentCreateEntity<T>> insertDocument(
 		final T value,
 		final DocumentCreateOptions options) {
-		return executor.execute(insertDocumentRequest(value, options), insertDocumentResponseDeserializer(value));
+		return executor.execute(insertDocumentRequest(value, options),
+			insertDocumentResponseDeserializer(value, options));
 	}
 
 	@Override
@@ -153,8 +155,9 @@ public class ArangoCollectionAsyncImpl extends
 
 	@Override
 	public <T> CompletableFuture<DocumentUpdateEntity<T>> replaceDocument(final String key, final T value) {
-		return executor.execute(replaceDocumentRequest(key, value, new DocumentReplaceOptions()),
-			replaceDocumentResponseDeserializer(value));
+		final DocumentReplaceOptions options = new DocumentReplaceOptions();
+		return executor.execute(replaceDocumentRequest(key, value, options),
+			replaceDocumentResponseDeserializer(value, options));
 	}
 
 	@Override
@@ -163,7 +166,7 @@ public class ArangoCollectionAsyncImpl extends
 		final T value,
 		final DocumentReplaceOptions options) {
 		return executor.execute(replaceDocumentRequest(key, value, options),
-			replaceDocumentResponseDeserializer(value));
+			replaceDocumentResponseDeserializer(value, options));
 	}
 
 	@Override
@@ -185,8 +188,9 @@ public class ArangoCollectionAsyncImpl extends
 
 	@Override
 	public <T> CompletableFuture<DocumentUpdateEntity<T>> updateDocument(final String key, final T value) {
-		return executor.execute(updateDocumentRequest(key, value, new DocumentUpdateOptions()),
-			updateDocumentResponseDeserializer(value));
+		final DocumentUpdateOptions options = new DocumentUpdateOptions();
+		return executor.execute(updateDocumentRequest(key, value, options),
+			updateDocumentResponseDeserializer(value, options));
 	}
 
 	@Override
@@ -194,7 +198,8 @@ public class ArangoCollectionAsyncImpl extends
 		final String key,
 		final T value,
 		final DocumentUpdateOptions options) {
-		return executor.execute(updateDocumentRequest(key, value, options), updateDocumentResponseDeserializer(value));
+		return executor.execute(updateDocumentRequest(key, value, options),
+			updateDocumentResponseDeserializer(value, options));
 	}
 
 	@Override
