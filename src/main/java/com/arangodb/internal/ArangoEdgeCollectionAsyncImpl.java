@@ -25,20 +25,18 @@ import java.util.concurrent.CompletableFuture;
 import com.arangodb.ArangoEdgeCollectionAsync;
 import com.arangodb.entity.EdgeEntity;
 import com.arangodb.entity.EdgeUpdateEntity;
-import com.arangodb.internal.velocystream.ConnectionAsync;
 import com.arangodb.model.DocumentReadOptions;
 import com.arangodb.model.EdgeCreateOptions;
 import com.arangodb.model.EdgeDeleteOptions;
 import com.arangodb.model.EdgeReplaceOptions;
 import com.arangodb.model.EdgeUpdateOptions;
-import com.arangodb.velocystream.Response;
 
 /**
  * @author Mark Vollmary
  *
  */
 public class ArangoEdgeCollectionAsyncImpl extends
-		InternalArangoEdgeCollection<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoGraphAsyncImpl, ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync>
+		InternalArangoEdgeCollection<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoGraphAsyncImpl, ArangoExecutorAsync>
 		implements ArangoEdgeCollectionAsync {
 
 	protected ArangoEdgeCollectionAsyncImpl(final ArangoGraphAsyncImpl graph, final String name) {

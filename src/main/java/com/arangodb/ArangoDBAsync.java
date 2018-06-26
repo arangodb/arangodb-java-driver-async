@@ -34,6 +34,7 @@ import com.arangodb.entity.LogLevelEntity;
 import com.arangodb.entity.Permissions;
 import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.UserEntity;
+import com.arangodb.internal.ArangoContext;
 import com.arangodb.internal.ArangoDBAsyncImpl;
 import com.arangodb.internal.InternalArangoDBBuilder;
 import com.arangodb.internal.net.HostHandler;
@@ -310,7 +311,8 @@ public interface ArangoDBAsync {
 
 			final HostResolver hostResolver = createHostResolver();
 			final HostHandler hostHandler = createHostHandler(hostResolver);
-			return new ArangoDBAsyncImpl(asyncBuilder(hostHandler), util, syncBuilder(hostHandler), hostResolver);
+			return new ArangoDBAsyncImpl(asyncBuilder(hostHandler), util, syncBuilder(hostHandler), hostResolver,
+					new ArangoContext());
 		}
 
 		private VstCommunicationAsync.Builder asyncBuilder(final HostHandler hostHandler) {

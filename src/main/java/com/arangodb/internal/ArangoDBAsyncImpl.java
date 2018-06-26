@@ -43,7 +43,6 @@ import com.arangodb.internal.net.HostResolver;
 import com.arangodb.internal.net.HostResolver.EndpointResolver;
 import com.arangodb.internal.util.ArangoSerializationFactory;
 import com.arangodb.internal.util.ArangoSerializationFactory.Serializer;
-import com.arangodb.internal.velocystream.ConnectionAsync;
 import com.arangodb.internal.velocystream.VstCommunication;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.internal.velocystream.VstCommunicationSync;
@@ -62,23 +61,21 @@ import com.arangodb.velocystream.Response;
  * @author Mark Vollmary
  *
  */
-public class ArangoDBAsyncImpl extends
-		InternalArangoDB<ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync> implements ArangoDBAsync {
+public class ArangoDBAsyncImpl extends InternalArangoDB<ArangoExecutorAsync> implements ArangoDBAsync {
 
 	private final CommunicationProtocol cp;
 
 	public ArangoDBAsyncImpl(final VstCommunicationAsync.Builder commBuilder, final ArangoSerializationFactory util,
-		final VstCommunicationSync.Builder syncbuilder, final HostResolver hostResolver) {
+		final VstCommunicationSync.Builder syncbuilder, final HostResolver hostResolver, final ArangoContext context) {
 		super(new ArangoExecutorAsync(commBuilder.build(util.get(Serializer.INTERNAL)), util, new DocumentCache()),
-				util);
+				util, context);
 		final VstCommunication<Response, ConnectionSync> cacheCom = syncbuilder.build(util.get(Serializer.INTERNAL));
 		cp = new VstProtocol(cacheCom);
 		hostResolver.init(new EndpointResolver() {
 			@Override
 			public Collection<String> resolve(final boolean closeConnections) throws ArangoDBException {
 				try {
-					return executor.execute(
-						new Request(ArangoDBConstants.SYSTEM, RequestType.GET, ArangoDBConstants.PATH_ENDPOINTS),
+					return executor.execute(new Request(ArangoDBConstants.SYSTEM, RequestType.GET, PATH_ENDPOINTS),
 						new ResponseDeserializer<Collection<String>>() {
 							@Override
 							public Collection<String> deserialize(final Response response) throws VPackException {

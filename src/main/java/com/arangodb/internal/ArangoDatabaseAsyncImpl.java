@@ -46,9 +46,7 @@ import com.arangodb.entity.QueryEntity;
 import com.arangodb.entity.QueryTrackingPropertiesEntity;
 import com.arangodb.entity.TraversalEntity;
 import com.arangodb.internal.net.HostHandle;
-import com.arangodb.internal.util.ArangoSerializationFactory;
-import com.arangodb.internal.velocystream.ConnectionAsync;
-import com.arangodb.internal.velocystream.VstCommunicationAsync;
+import com.arangodb.internal.util.DocumentUtil;
 import com.arangodb.model.AqlFunctionCreateOptions;
 import com.arangodb.model.AqlFunctionDeleteOptions;
 import com.arangodb.model.AqlFunctionGetOptions;
@@ -62,23 +60,16 @@ import com.arangodb.model.TransactionOptions;
 import com.arangodb.model.TraversalOptions;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocystream.Request;
-import com.arangodb.velocystream.Response;
 
 /**
  * @author Mark Vollmary
  *
  */
-public class ArangoDatabaseAsyncImpl extends
-		InternalArangoDatabase<ArangoDBAsyncImpl, ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync>
+public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyncImpl, ArangoExecutorAsync>
 		implements ArangoDatabaseAsync {
 
 	protected ArangoDatabaseAsyncImpl(final ArangoDBAsyncImpl arangoDB, final String name) {
-		super(arangoDB, arangoDB.executor(), arangoDB.util, name);
-	}
-
-	protected ArangoDatabaseAsyncImpl(final VstCommunicationAsync communication, final ArangoSerializationFactory util,
-		final DocumentCache documentCache, final String name) {
-		super(null, new ArangoExecutorAsync(communication, util, documentCache), util, name);
+		super(arangoDB, name);
 	}
 
 	@Override
@@ -126,14 +117,14 @@ public class ArangoDatabaseAsyncImpl extends
 
 	@Override
 	public CompletableFuture<IndexEntity> getIndex(final String id) {
-		executor.validateIndexId(id);
+		DocumentUtil.validateIndexId(id);
 		final String[] split = id.split("/");
 		return collection(split[0]).getIndex(split[1]);
 	}
 
 	@Override
 	public CompletableFuture<String> deleteIndex(final String id) {
-		executor.validateIndexId(id);
+		DocumentUtil.validateIndexId(id);
 		final String[] split = id.split("/");
 		return collection(split[0]).deleteIndex(split[1]);
 	}
@@ -362,7 +353,7 @@ public class ArangoDatabaseAsyncImpl extends
 
 	@Override
 	public <T> CompletableFuture<T> getDocument(final String id, final Class<T> type) throws ArangoDBException {
-		executor.validateDocumentId(id);
+		DocumentUtil.validateDocumentId(id);
 		final String[] split = id.split("/");
 		return collection(split[0]).getDocument(split[1], type);
 	}
@@ -370,7 +361,7 @@ public class ArangoDatabaseAsyncImpl extends
 	@Override
 	public <T> CompletableFuture<T> getDocument(final String id, final Class<T> type, final DocumentReadOptions options)
 			throws ArangoDBException {
-		executor.validateDocumentId(id);
+		DocumentUtil.validateDocumentId(id);
 		final String[] split = id.split("/");
 		return collection(split[0]).getDocument(split[1], type, options);
 	}

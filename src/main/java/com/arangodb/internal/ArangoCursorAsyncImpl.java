@@ -33,7 +33,7 @@ import com.arangodb.entity.CursorEntity;
  */
 public class ArangoCursorAsyncImpl<T> extends ArangoCursorImpl<T> implements ArangoCursorAsync<T> {
 
-	protected ArangoCursorAsyncImpl(final InternalArangoDatabase<?, ?, ?, ?> db, final ArangoCursorExecute execute,
+	protected ArangoCursorAsyncImpl(final InternalArangoDatabase<?, ?> db, final ArangoCursorExecute execute,
 		final Class<T> type, final CursorEntity result) {
 		super(db, execute, type, result);
 	}

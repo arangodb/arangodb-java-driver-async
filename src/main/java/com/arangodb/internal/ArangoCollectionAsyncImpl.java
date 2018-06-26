@@ -37,7 +37,7 @@ import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.MultiDocumentEntity;
 import com.arangodb.entity.Permissions;
 import com.arangodb.internal.ArangoExecutor.ResponseDeserializer;
-import com.arangodb.internal.velocystream.ConnectionAsync;
+import com.arangodb.internal.util.DocumentUtil;
 import com.arangodb.model.CollectionCreateOptions;
 import com.arangodb.model.CollectionPropertiesOptions;
 import com.arangodb.model.DocumentCreateOptions;
@@ -59,8 +59,8 @@ import com.arangodb.velocystream.Response;
  * @author Mark Vollmary
  *
  */
-public class ArangoCollectionAsyncImpl extends
-		InternalArangoCollection<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync>
+public class ArangoCollectionAsyncImpl
+		extends InternalArangoCollection<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync>
 		implements ArangoCollectionAsync {
 
 	protected ArangoCollectionAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
@@ -126,7 +126,7 @@ public class ArangoCollectionAsyncImpl extends
 
 	@Override
 	public <T> CompletableFuture<T> getDocument(final String key, final Class<T> type) throws ArangoDBException {
-		executor.validateDocumentKey(key);
+		DocumentUtil.validateDocumentKey(key);
 		final CompletableFuture<T> result = new CompletableFuture<>();
 		final CompletableFuture<T> execute = executor.execute(getDocumentRequest(key, new DocumentReadOptions()), type);
 		execute.whenComplete((response, ex) -> result.complete(response));
@@ -138,7 +138,7 @@ public class ArangoCollectionAsyncImpl extends
 		final String key,
 		final Class<T> type,
 		final DocumentReadOptions options) throws ArangoDBException {
-		executor.validateDocumentKey(key);
+		DocumentUtil.validateDocumentKey(key);
 		final CompletableFuture<T> result = new CompletableFuture<>();
 		final CompletableFuture<T> execute = executor.execute(getDocumentRequest(key, options), type);
 		execute.whenComplete((response, ex) -> result.complete(response));

@@ -28,16 +28,14 @@ import com.arangodb.ArangoGraphAsync;
 import com.arangodb.ArangoVertexCollectionAsync;
 import com.arangodb.entity.EdgeDefinition;
 import com.arangodb.entity.GraphEntity;
-import com.arangodb.internal.velocystream.ConnectionAsync;
 import com.arangodb.model.GraphCreateOptions;
-import com.arangodb.velocystream.Response;
 
 /**
  * @author Mark Vollmary
  *
  */
-public class ArangoGraphAsyncImpl extends
-		InternalArangoGraph<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync, CompletableFuture<Response>, ConnectionAsync>
+public class ArangoGraphAsyncImpl
+		extends InternalArangoGraph<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync>
 		implements ArangoGraphAsync {
 
 	protected ArangoGraphAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
