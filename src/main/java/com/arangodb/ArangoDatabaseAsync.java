@@ -606,4 +606,14 @@ public interface ArangoDatabaseAsync {
 	 * @return void
 	 */
 	CompletableFuture<Void> reloadRouting();
+
+	/**
+	 * Returns a new {@link ArangoRouteAsync} instance for the given path (relative to the database) that can be used to
+	 * perform arbitrary requests.
+	 * 
+	 * @param path
+	 *            The database-relative URL of the route
+	 * @return {@link ArangoRouteAsync}
+	 */
+	ArangoRouteAsync route(String... path);
 }

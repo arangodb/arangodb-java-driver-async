@@ -21,6 +21,7 @@
 package com.arangodb.internal;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -30,6 +31,7 @@ import com.arangodb.ArangoCursorAsync;
 import com.arangodb.ArangoDBException;
 import com.arangodb.ArangoDatabaseAsync;
 import com.arangodb.ArangoGraphAsync;
+import com.arangodb.ArangoRouteAsync;
 import com.arangodb.entity.AqlExecutionExplainEntity;
 import com.arangodb.entity.AqlFunctionEntity;
 import com.arangodb.entity.AqlParseEntity;
@@ -369,5 +371,10 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	@Override
 	public CompletableFuture<Void> reloadRouting() {
 		return executor.execute(reloadRoutingRequest(), Void.class);
+	}
+
+	@Override
+	public ArangoRouteAsync route(final String... path) {
+		return new ArangoRouteAsyncImpl(this, createPath(path), Collections.<String, String> emptyMap());
 	}
 }
