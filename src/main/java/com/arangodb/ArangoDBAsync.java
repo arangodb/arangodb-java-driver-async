@@ -67,11 +67,26 @@ import com.arangodb.velocystream.Request;
 import com.arangodb.velocystream.Response;
 
 /**
+ * Central access point for applications to communicate with an ArangoDB server.
+ * 
+ * <p>
+ * Will be instantiated through {@link ArangoDBAsync.Builder}
+ * </p>
+ * 
+ * <pre>
+ * ArangoDBAsync arango = new ArangoDBAsync.Builder().build();
+ * ArangoDBAsync arango = new ArangoDBAsync.Builder().host("127.0.0.1", 8529).build();
+ * </pre>
+ * 
  * @author Mark Vollmary
- *
  */
 public interface ArangoDBAsync {
 
+	/**
+	 * Builder class to build an instance of {@link ArangoDBAsync}.
+	 * 
+	 * @author Mark Vollmary
+	 */
 	public static class Builder extends InternalArangoDBBuilder {
 
 		public Builder() {
@@ -91,43 +106,97 @@ public interface ArangoDBAsync {
 		 *            address of the host
 		 * @param port
 		 *            port of the host
-		 * @return {@link ArangoDB.Builder}
+		 * @return {@link ArangoDBAsync.Builder}
 		 */
 		public Builder host(final String host, final int port) {
 			setHost(host, port);
 			return this;
 		}
 
+		/**
+		 * Sets the timeout in milliseconds. It is used as socket timeout when opening a VecloyStream.
+		 * 
+		 * @param timeout
+		 *            timeout in milliseconds
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder timeout(final Integer timeout) {
 			setTimeout(timeout);
 			return this;
 		}
 
+		/**
+		 * Sets the username to use for authentication.
+		 * 
+		 * @param user
+		 *            the user in the database (default: <code>root</code>)
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder user(final String user) {
 			setUser(user);
 			return this;
 		}
 
+		/**
+		 * Sets the password for the user for authentication.
+		 * 
+		 * @param password
+		 *            the password of the user in the database (default: <code>null</code>)
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder password(final String password) {
 			setPassword(password);
 			return this;
 		}
 
+		/**
+		 * If set to <code>true</code> SSL will be used when connecting to an ArangoDB server.
+		 * 
+		 * @param useSsl
+		 *            whether or not use SSL (default: <code>false</code>)
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder useSsl(final Boolean useSsl) {
 			setUseSsl(useSsl);
 			return this;
 		}
 
+		/**
+		 * Sets the SSL context to be used when <code>true</code> is passed through {@link #useSsl(Boolean)}.
+		 * 
+		 * @param sslContext
+		 *            SSL context to be used
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder sslContext(final SSLContext sslContext) {
 			setSslContext(sslContext);
 			return this;
 		}
 
+		/**
+		 * Sets the chunk size when {@link Protocol#VST} is used.
+		 * 
+		 * @param chunksize
+		 *            size of a chunk in bytes
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder chunksize(final Integer chunksize) {
 			setChunksize(chunksize);
 			return this;
 		}
 
+		/**
+		 * Sets the maximum number of connections the built in connection pool will open.
+		 * 
+		 * <p>
+		 * In an ArangoDB cluster setup with {@link LoadBalancingStrategy#ROUND_ROBIN} set, this value should be at
+		 * least as high as the number of ArangoDB coordinators in the cluster.
+		 * </p>
+		 * 
+		 * @param maxConnections
+		 *            max number of connections (default: 1)
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder maxConnections(final Integer maxConnections) {
 			setMaxConnections(maxConnections);
 			return this;
@@ -138,23 +207,56 @@ public interface ArangoDBAsync {
 		 * 
 		 * @param connectionTtl
 		 *            the maximum time to life of a connection.
-		 * @return {@link ArangoDB.Builder}
+		 * @return {@link ArangoDBAsync.Builder}
 		 */
 		public Builder connectionTtl(final Long connectionTtl) {
 			setConnectionTtl(connectionTtl);
 			return this;
 		}
 
+		/**
+		 * Whether or not the driver should acquire a list of available coordinators in an ArangoDB cluster or a single
+		 * server with active failover.
+		 * 
+		 * <p>
+		 * The host list will be used for failover and load balancing.
+		 * </p>
+		 * 
+		 * @param acquireHostList
+		 *            whether or not automatically acquire a list of available hosts (default: false)
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder acquireHostList(final Boolean acquireHostList) {
 			setAcquireHostList(acquireHostList);
 			return this;
 		}
 
+		/**
+		 * Sets the load balancing strategy to be used in an ArangoDB cluster setup.
+		 * 
+		 * @param loadBalancingStrategy
+		 *            the load balancing strategy to be used (default: {@link LoadBalancingStrategy#NONE}
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder loadBalancingStrategy(final LoadBalancingStrategy loadBalancingStrategy) {
 			setLoadBalancingStrategy(loadBalancingStrategy);
 			return this;
 		}
 
+		/**
+		 * Register a custom {@link VPackSerializer} for a specific type to be used within the internal serialization
+		 * process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param clazz
+		 *            the type the serializer should be registered for
+		 * @param serializer
+		 *            serializer to register
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public <T> Builder registerSerializer(final Class<T> clazz, final VPackSerializer<T> serializer) {
 			vpackBuilder.registerSerializer(clazz, serializer);
 			return this;
@@ -163,32 +265,89 @@ public interface ArangoDBAsync {
 		/**
 		 * Register a special serializer for a member class which can only be identified by its enclosing class.
 		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
 		 * @param clazz
-		 *            type of the enclosing class
+		 *            the type of the enclosing class
 		 * @param serializer
 		 *            serializer to register
-		 * @return builder
+		 * @return {@link ArangoDBAsync.Builder}
 		 */
 		public <T> Builder registerEnclosingSerializer(final Class<T> clazz, final VPackSerializer<T> serializer) {
 			vpackBuilder.registerEnclosingSerializer(clazz, serializer);
 			return this;
 		}
 
+		/**
+		 * Register a custom {@link VPackDeserializer} for a specific type to be used within the internal serialization
+		 * process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param clazz
+		 *            the type the serializer should be registered for
+		 * @param deserializer
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public <T> Builder registerDeserializer(final Class<T> clazz, final VPackDeserializer<T> deserializer) {
 			vpackBuilder.registerDeserializer(clazz, deserializer);
 			return this;
 		}
 
+		/**
+		 * Register a custom {@link VPackInstanceCreator} for a specific type to be used within the internal
+		 * serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param clazz
+		 *            the type the instance creator should be registered for
+		 * @param creator
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public <T> Builder registerInstanceCreator(final Class<T> clazz, final VPackInstanceCreator<T> creator) {
 			vpackBuilder.registerInstanceCreator(clazz, creator);
 			return this;
 		}
 
+		/**
+		 * Register a custom {@link VPackJsonDeserializer} for a specific type to be used within the internal
+		 * serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param type
+		 *            the type the serializer should be registered for
+		 * @param deserializer
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder registerJsonDeserializer(final ValueType type, final VPackJsonDeserializer deserializer) {
 			vpackParserBuilder.registerDeserializer(type, deserializer);
 			return this;
 		}
 
+		/**
+		 * Register a custom {@link VPackJsonDeserializer} for a specific type and attribute name to be used within the
+		 * internal serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param attribute
+		 * @param type
+		 *            the type the serializer should be registered for
+		 * @param deserializer
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder registerJsonDeserializer(
 			final String attribute,
 			final ValueType type,
@@ -197,11 +356,38 @@ public interface ArangoDBAsync {
 			return this;
 		}
 
+		/**
+		 * Register a custom {@link VPackJsonSerializer} for a specific type to be used within the internal
+		 * serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param clazz
+		 *            the type the serializer should be registered for
+		 * @param serializer
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public <T> Builder registerJsonSerializer(final Class<T> clazz, final VPackJsonSerializer<T> serializer) {
 			vpackParserBuilder.registerSerializer(clazz, serializer);
 			return this;
 		}
 
+		/**
+		 * Register a custom {@link VPackJsonSerializer} for a specific type and attribute name to be used within the
+		 * internal serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param attribute
+		 * @param clazz
+		 *            the type the serializer should be registered for
+		 * @param serializer
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public <T> Builder registerJsonSerializer(
 			final String attribute,
 			final Class<T> clazz,
@@ -210,6 +396,19 @@ public interface ArangoDBAsync {
 			return this;
 		}
 
+		/**
+		 * Register a custom {@link VPackAnnotationFieldFilter} for a specific type to be used within the internal
+		 * serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param type
+		 *            the type the serializer should be registered for
+		 * @param fieldFilter
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public <A extends Annotation> Builder annotationFieldFilter(
 			final Class<A> type,
 			final VPackAnnotationFieldFilter<A> fieldFilter) {
@@ -217,6 +416,19 @@ public interface ArangoDBAsync {
 			return this;
 		}
 
+		/**
+		 * Register a custom {@link VPackAnnotationFieldNaming} for a specific type to be used within the internal
+		 * serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param type
+		 *            the type the serializer should be registered for
+		 * @param fieldNaming
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public <A extends Annotation> Builder annotationFieldNaming(
 			final Class<A> type,
 			final VPackAnnotationFieldNaming<A> fieldNaming) {
@@ -224,21 +436,65 @@ public interface ArangoDBAsync {
 			return this;
 		}
 
+		/**
+		 * Register a {@link VPackModule} to be used within the internal serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 * 
+		 * @param module
+		 *            module to register
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder registerModule(final VPackModule module) {
 			vpackBuilder.registerModule(module);
 			return this;
 		}
 
+		/**
+		 * Register a list of {@link VPackModule} to be used within the internal serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 *
+		 * @param modules
+		 *            modules to register
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder registerModules(final VPackModule... modules) {
 			vpackBuilder.registerModules(modules);
 			return this;
 		}
 
+		/**
+		 * Register a {@link VPackParserModule} to be used within the internal serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 *
+		 * @param module
+		 *            module to register
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder registerJsonModule(final VPackParserModule module) {
 			vpackParserBuilder.registerModule(module);
 			return this;
 		}
 
+		/**
+		 * Register a list of {@link VPackParserModule} to be used within the internal serialization process.
+		 * 
+		 * <p>
+		 * <strong>Attention:</strong>can not be used together with {@link #serializer(ArangoSerialization)}
+		 * </p>
+		 *
+		 * @param modules
+		 *            modules to register
+		 * @return {@link ArangoDBAsync.Builder}
+		 */
 		public Builder registerJsonModules(final VPackParserModule... module) {
 			vpackParserBuilder.registerModules(module);
 			return this;
@@ -253,7 +509,7 @@ public interface ArangoDBAsync {
 		 * @param serializer
 		 *            custom serializer
 		 * @deprecated use {@link #serializer(ArangoSerialization)} instead
-		 * @return builder
+		 * @return {@link ArangoDBAsync.Builder}
 		 */
 		@Deprecated
 		public Builder setSerializer(final ArangoSerializer serializer) {
@@ -270,7 +526,7 @@ public interface ArangoDBAsync {
 		 * @param deserializer
 		 *            custom deserializer
 		 * @deprecated use {@link #serializer(ArangoSerialization)} instead
-		 * @return builder
+		 * @return {@link ArangoDBAsync.Builder}
 		 */
 		@Deprecated
 		public Builder setDeserializer(final ArangoDeserializer deserializer) {
@@ -286,13 +542,18 @@ public interface ArangoDBAsync {
 		 * 
 		 * @param serialization
 		 *            custom serializer/deserializer
-		 * @return builder
+		 * @return {@link ArangoDBAsync.Builder}
 		 */
 		public Builder serializer(final ArangoSerialization serialization) {
 			setSerializer(serialization);
 			return this;
 		}
 
+		/**
+		 * Returns an instance of {@link ArangoDBAsync}.
+		 * 
+		 * @return {@link ArangoDBAsync}
+		 */
 		public synchronized ArangoDBAsync build() {
 			if (hosts.isEmpty()) {
 				hosts.add(host);
