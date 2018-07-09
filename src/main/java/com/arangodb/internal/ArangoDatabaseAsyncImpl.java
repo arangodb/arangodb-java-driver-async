@@ -187,6 +187,20 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	}
 
 	@Override
+	public <T> CompletableFuture<ArangoCursorAsync<T>> query(
+		final String query,
+		final Map<String, Object> bindVars,
+		final Class<T> type) throws ArangoDBException {
+		return query(query, bindVars, null, type);
+	}
+
+	@Override
+	public <T> CompletableFuture<ArangoCursorAsync<T>> query(final String query, final Class<T> type)
+			throws ArangoDBException {
+		return query(query, null, null, type);
+	}
+
+	@Override
 	public <T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type)
 			throws ArangoDBException {
 		final HostHandle hostHandle = new HostHandle();

@@ -269,7 +269,8 @@ public interface ArangoDatabaseAsync {
 	CompletableFuture<Permissions> getPermissions(final String user) throws ArangoDBException;
 
 	/**
-	 * Create a cursor and return the first results
+	 * Performs a database query using the given {@code query} and {@code bindVars}, then returns a new
+	 * {@code ArangoCursor} instance for the result list.
 	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
 	 *      Documentation</a>
@@ -289,6 +290,41 @@ public interface ArangoDatabaseAsync {
 		final Map<String, Object> bindVars,
 		final AqlQueryOptions options,
 		final Class<T> type) throws ArangoDBException;
+
+	/**
+	 * Performs a database query using the given {@code query} and {@code bindVars}, then returns a new
+	 * {@code ArangoCursor} instance for the result list.
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
+	 *      Documentation</a>
+	 * @param query
+	 *            contains the query string to be executed
+	 * @param bindVars
+	 *            key/value pairs representing the bind parameters
+	 * @param type
+	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
+	 * @return cursor of the results
+	 * @throws ArangoDBException
+	 */
+	<T> CompletableFuture<ArangoCursorAsync<T>> query(
+		final String query,
+		final Map<String, Object> bindVars,
+		final Class<T> type) throws ArangoDBException;
+
+	/**
+	 * Performs a database query using the given {@code query}, then returns a new {@code ArangoCursor} instance for the
+	 * result list.
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
+	 *      Documentation</a>
+	 * @param query
+	 *            contains the query string to be executed
+	 * @param type
+	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
+	 * @return cursor of the results
+	 * @throws ArangoDBException
+	 */
+	<T> CompletableFuture<ArangoCursorAsync<T>> query(final String query, final Class<T> type) throws ArangoDBException;
 
 	/**
 	 * Return an cursor from the given cursor-ID if still existing
