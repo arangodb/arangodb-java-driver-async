@@ -80,7 +80,7 @@ import com.arangodb.velocystream.Response;
  * 
  * @author Mark Vollmary
  */
-public interface ArangoDBAsync {
+public interface ArangoDBAsync extends ArangoSerializationAccessor {
 
 	/**
 	 * Builder class to build an instance of {@link ArangoDBAsync}.

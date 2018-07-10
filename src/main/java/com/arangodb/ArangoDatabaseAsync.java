@@ -57,7 +57,7 @@ import com.arangodb.model.TraversalOptions;
  * @see <a href="https://docs.arangodb.com/current/HTTP/AqlQuery/">Query API Documentation</a>
  * @author Mark Vollmary
  */
-public interface ArangoDatabaseAsync {
+public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 
 	/**
 	 * Return the main entry point for the ArangoDB driver

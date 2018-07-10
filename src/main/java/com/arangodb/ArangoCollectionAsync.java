@@ -55,7 +55,7 @@ import com.arangodb.model.SkiplistIndexOptions;
  * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/">Documents API Documentation</a>
  * @author Mark Vollmary
  */
-public interface ArangoCollectionAsync {
+public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 
 	/**
 	 * The the handler of the database the collection is within

@@ -12,6 +12,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - added convenience method `ArangoDatabase#query(String, Map<String, Object>, Class)`
 - added convenience method `ArangoDatabase#query(String, AqlQueryOptions, Class)`
 
+### Fixed
+
+- fixed missing `ArangoDBAsync.util() : ArangoSerialization`
+- fixed missing `ArangoDatabaseAsync.util() : ArangoSerialization`
+- fixed missing `ArangoCollectionAsync.util() : ArangoSerialization`
+- fixed missing `ArangoGraphAsync.util() : ArangoSerialization`
+- fixed missing `ArangoVertexCollectionAsync.util() : ArangoSerialization`
+- fixed missing `ArangoEdgeCollectionAsync.util() : ArangoSerialization`
+
 ## [4.6.0] - 2018-07-02
 
 ### Added
