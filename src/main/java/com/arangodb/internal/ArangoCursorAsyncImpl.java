@@ -26,6 +26,7 @@ import java.util.stream.StreamSupport;
 
 import com.arangodb.ArangoCursorAsync;
 import com.arangodb.entity.CursorEntity;
+import com.arangodb.internal.cursor.ArangoCursorImpl;
 
 /**
  * @author Mark Vollmary
