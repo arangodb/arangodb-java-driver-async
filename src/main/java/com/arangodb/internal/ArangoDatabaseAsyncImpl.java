@@ -32,6 +32,8 @@ import com.arangodb.ArangoDBException;
 import com.arangodb.ArangoDatabaseAsync;
 import com.arangodb.ArangoGraphAsync;
 import com.arangodb.ArangoRouteAsync;
+import com.arangodb.ArangoSearchAsync;
+import com.arangodb.ArangoViewAsync;
 import com.arangodb.entity.AqlExecutionExplainEntity;
 import com.arangodb.entity.AqlFunctionEntity;
 import com.arangodb.entity.AqlParseEntity;
@@ -47,6 +49,8 @@ import com.arangodb.entity.QueryCachePropertiesEntity;
 import com.arangodb.entity.QueryEntity;
 import com.arangodb.entity.QueryTrackingPropertiesEntity;
 import com.arangodb.entity.TraversalEntity;
+import com.arangodb.entity.ViewEntity;
+import com.arangodb.entity.ViewType;
 import com.arangodb.internal.net.HostHandle;
 import com.arangodb.internal.util.DocumentUtil;
 import com.arangodb.model.AqlFunctionCreateOptions;
@@ -60,6 +64,7 @@ import com.arangodb.model.DocumentReadOptions;
 import com.arangodb.model.GraphCreateOptions;
 import com.arangodb.model.TransactionOptions;
 import com.arangodb.model.TraversalOptions;
+import com.arangodb.model.arangosearch.ArangoSearchCreateOptions;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocystream.Request;
 
@@ -399,4 +404,31 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	public ArangoRouteAsync route(final String... path) {
 		return new ArangoRouteAsyncImpl(this, createPath(path), Collections.<String, String> emptyMap());
 	}
+
+	@Override
+	public CompletableFuture<Collection<ViewEntity>> getViews() throws ArangoDBException {
+		return executor.execute(getViewsRequest(), getViewsResponseDeserializer());
+	}
+
+	@Override
+	public ArangoViewAsync view(final String name) {
+		return new ArangoViewAsyncImpl(this, name);
+	}
+
+	@Override
+	public ArangoSearchAsync arangoSearch(final String name) {
+		return new ArangoSearchAsyncImpl(this, name);
+	}
+
+	@Override
+	public CompletableFuture<ViewEntity> createView(final String name, final ViewType type) throws ArangoDBException {
+		return executor.execute(createViewRequest(name, type), ViewEntity.class);
+	}
+
+	@Override
+	public CompletableFuture<ViewEntity> createArangoSearch(final String name, final ArangoSearchCreateOptions options)
+			throws ArangoDBException {
+		return executor.execute(createArangoSearchRequest(name, options), ViewEntity.class);
+	}
+
 }
