@@ -6,17 +6,31 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [4.7.0] - 2018-08-02
+
 ### Added
 
-- added `ArangoCursorAsync.first()`
+- added View support
+  - added `ArangoDatabaseAsync#view(String): ArangoViewAsync`
+  - added `ArangoDatabaseAsync#getViews(): CompletableFuture<Collection<ViewEntity>>`
+  - added `ArangoViewAsync`
+- added arangosearch support
+  - added `ArangoDatabaseAsync#arangoSearch(String): ArangoSearchAsync`
+  - added `ArangoSearchAsync`
+- added `ArangoCursorAsync#first()`
 - added `java.util.stream.Stream` like methods for `ArangoCursor`
-  - added `ArangoCursorAsync.foreach(Consumer)`
-  - added `ArangoCursorAsync.map(Function)`
-  - added `ArangoCursorAsync.filter(Predicate)`
-  - added `ArangoCursorAsync.anyMatch(Predicate)`
-  - added `ArangoCursorAsync.allMatch(Predicate)`
-  - added `ArangoCursorAsync.noneMatch(Predicate)`
-  - added `ArangoCursorAsync.collectInto(Collection)`
+  - added `ArangoCursorAsync#foreach(Consumer)`
+  - added `ArangoCursorAsync#map(Function)`
+  - added `ArangoCursorAsync#filter(Predicate)`
+  - added `ArangoCursorAsync#anyMatch(Predicate)`
+  - added `ArangoCursorAsync#allMatch(Predicate)`
+  - added `ArangoCursorAsync#noneMatch(Predicate)`
+  - added `ArangoCursorAsync#collectInto(Collection)`
+
+### Changed
+
+- upgraded dependency velocypack 1.3.0
+  - `VPackDeserializationContext#deserialize(VPackSlice, Class)` to `VPackDeserializationContext#deserialize(VPackSlice, java.lang.reflect.Type)`
 
 ## [4.6.1] - 2018-07-12
 
