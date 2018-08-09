@@ -43,16 +43,25 @@ public class ArangoViewTest extends BaseTest {
 
 	@BeforeClass
 	public static void setup() throws InterruptedException, ExecutionException {
+		if (!requireVersion(arangoDB, 3, 4)) {
+			return;
+		}
 		db.createView(VIEW_NAME, ViewType.ARANGO_SEARCH).get();
 	}
 
 	@Test
 	public void exists() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		assertThat(db.view(VIEW_NAME).exists().get(), is(true));
 	}
 
 	@Test
 	public void getInfo() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		final ViewEntity info = db.view(VIEW_NAME).getInfo().get();
 		assertThat(info, is(not(nullValue())));
 		assertThat(info.getId(), is(not(nullValue())));
@@ -62,6 +71,9 @@ public class ArangoViewTest extends BaseTest {
 
 	@Test
 	public void drop() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		final String name = VIEW_NAME + "_droptest";
 		db.createView(name, ViewType.ARANGO_SEARCH);
 		final ArangoViewAsync view = db.view(name);
@@ -71,6 +83,9 @@ public class ArangoViewTest extends BaseTest {
 
 	@Test
 	public void rename() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		final String name = VIEW_NAME + "_renametest";
 		final String newName = name + "_new";
 		db.createView(name, ViewType.ARANGO_SEARCH);

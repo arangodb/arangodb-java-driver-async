@@ -52,16 +52,25 @@ public class ArangoSearchTest extends BaseTest {
 
 	@BeforeClass
 	public static void setup() throws InterruptedException, ExecutionException {
+		if (!requireVersion(arangoDB, 3, 4)) {
+			return;
+		}
 		db.createArangoSearch(VIEW_NAME, new ArangoSearchCreateOptions()).get();
 	}
 
 	@Test
 	public void exists() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		assertThat(db.arangoSearch(VIEW_NAME).exists().get(), is(true));
 	}
 
 	@Test
 	public void getInfo() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		final ViewEntity info = db.arangoSearch(VIEW_NAME).getInfo().get();
 		assertThat(info, is(not(nullValue())));
 		assertThat(info.getId(), is(not(nullValue())));
@@ -71,6 +80,9 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void drop() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		final String name = VIEW_NAME + "_droptest";
 		db.createArangoSearch(name, new ArangoSearchCreateOptions());
 		final ArangoViewAsync view = db.arangoSearch(name);
@@ -80,6 +92,9 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void rename() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		final String name = VIEW_NAME + "_renametest";
 		final String newName = name + "_new";
 		db.createArangoSearch(name, new ArangoSearchCreateOptions());
@@ -90,6 +105,9 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void create() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		final String name = VIEW_NAME + "_createtest";
 		final ViewEntity info = db.arangoSearch(name).create().get();
 		assertThat(info, is(not(nullValue())));
@@ -101,6 +119,9 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void createWithOptions() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		final String name = VIEW_NAME + "_createtest_withotpions";
 		final ViewEntity info = db.arangoSearch(name).create(new ArangoSearchCreateOptions()).get();
 		assertThat(info, is(not(nullValue())));
@@ -112,6 +133,9 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void getProperties() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		final String name = VIEW_NAME + "_getpropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
 		view.create(new ArangoSearchCreateOptions()).get();
@@ -131,6 +155,9 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void updateProperties() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		db.createCollection("view_update_prop_test_collection").get();
 		final String name = VIEW_NAME + "_updatepropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
@@ -165,6 +192,9 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void replaceProperties() throws InterruptedException, ExecutionException {
+		if (!requireVersion(3, 4)) {
+			return;
+		}
 		db.createCollection("view_replace_prop_test_collection").get();
 		final String name = VIEW_NAME + "_replacepropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
