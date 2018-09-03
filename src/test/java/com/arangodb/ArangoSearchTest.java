@@ -35,8 +35,8 @@ import com.arangodb.entity.ViewEntity;
 import com.arangodb.entity.ViewType;
 import com.arangodb.entity.arangosearch.ArangoSearchPropertiesEntity;
 import com.arangodb.entity.arangosearch.CollectionLink;
-import com.arangodb.entity.arangosearch.ConsolidateType;
 import com.arangodb.entity.arangosearch.ConsolidationPolicy;
+import com.arangodb.entity.arangosearch.ConsolidationType;
 import com.arangodb.entity.arangosearch.FieldLink;
 import com.arangodb.entity.arangosearch.StoreValuesType;
 import com.arangodb.model.arangosearch.ArangoSearchCreateOptions;
@@ -84,7 +84,7 @@ public class ArangoSearchTest extends BaseTest {
 			return;
 		}
 		final String name = VIEW_NAME + "_droptest";
-		db.createArangoSearch(name, new ArangoSearchCreateOptions());
+		db.createArangoSearch(name, new ArangoSearchCreateOptions()).get();
 		final ArangoViewAsync view = db.arangoSearch(name);
 		view.drop().get();
 		assertThat(view.exists().get(), is(false));
@@ -97,7 +97,7 @@ public class ArangoSearchTest extends BaseTest {
 		}
 		final String name = VIEW_NAME + "_renametest";
 		final String newName = name + "_new";
-		db.createArangoSearch(name, new ArangoSearchCreateOptions());
+		db.createArangoSearch(name, new ArangoSearchCreateOptions()).get();
 		db.arangoSearch(name).rename(newName).get();
 		assertThat(db.arangoSearch(name).exists().get(), is(false));
 		assertThat(db.arangoSearch(newName).exists().get(), is(true));
@@ -138,7 +138,7 @@ public class ArangoSearchTest extends BaseTest {
 		}
 		final String name = VIEW_NAME + "_getpropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
-		view.create(new ArangoSearchCreateOptions());
+		view.create(new ArangoSearchCreateOptions()).get();
 		final ArangoSearchPropertiesEntity properties = view.getProperties().get();
 		assertThat(properties, is(not(nullValue())));
 		assertThat(properties.getId(), is(not(nullValue())));
@@ -160,11 +160,11 @@ public class ArangoSearchTest extends BaseTest {
 		db.createCollection("view_update_prop_test_collection");
 		final String name = VIEW_NAME + "_updatepropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
-		view.create(new ArangoSearchCreateOptions());
+		view.create(new ArangoSearchCreateOptions()).get();
 		final ArangoSearchPropertiesOptions options = new ArangoSearchPropertiesOptions();
 		options.cleanupIntervalStep(15L);
 		options.consolidationIntervalMsec(65000L);
-		options.consolidationPolicy(ConsolidationPolicy.of(ConsolidateType.COUNT).threshold(1.));
+		options.consolidationPolicy(ConsolidationPolicy.of(ConsolidationType.COUNT).threshold(1.));
 		options.link(
 			CollectionLink.on("view_update_prop_test_collection").fields(FieldLink.on("value").analyzers("identity")
 					.trackListPositions(true).includeAllFields(true).storeValues(StoreValuesType.ID)));
@@ -174,7 +174,7 @@ public class ArangoSearchTest extends BaseTest {
 		assertThat(properties.getConsolidationIntervalMsec(), is(65000L));
 		final ConsolidationPolicy consolidate = properties.getConsolidationPolicy();
 		assertThat(consolidate, is(not(nullValue())));
-		assertThat(consolidate.getType(), is(ConsolidateType.COUNT));
+		assertThat(consolidate.getType(), is(ConsolidationType.COUNT));
 		assertThat(consolidate.getThreshold(), is(1.));
 		assertThat(properties.getLinks().size(), is(1));
 		final CollectionLink link = properties.getLinks().iterator().next();
@@ -195,7 +195,7 @@ public class ArangoSearchTest extends BaseTest {
 		db.createCollection("view_replace_prop_test_collection").get();
 		final String name = VIEW_NAME + "_replacepropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
-		view.create(new ArangoSearchCreateOptions());
+		view.create(new ArangoSearchCreateOptions()).get();
 		final ArangoSearchPropertiesOptions options = new ArangoSearchPropertiesOptions();
 		options.link(
 			CollectionLink.on("view_replace_prop_test_collection").fields(FieldLink.on("value").analyzers("identity")));

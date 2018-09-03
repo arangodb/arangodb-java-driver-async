@@ -75,7 +75,7 @@ public class ArangoViewTest extends BaseTest {
 			return;
 		}
 		final String name = VIEW_NAME + "_droptest";
-		db.createView(name, ViewType.ARANGO_SEARCH);
+		db.createView(name, ViewType.ARANGO_SEARCH).get();
 		final ArangoViewAsync view = db.view(name);
 		view.drop().get();
 		assertThat(view.exists().get(), is(false));
@@ -88,7 +88,7 @@ public class ArangoViewTest extends BaseTest {
 		}
 		final String name = VIEW_NAME + "_renametest";
 		final String newName = name + "_new";
-		db.createView(name, ViewType.ARANGO_SEARCH);
+		db.createView(name, ViewType.ARANGO_SEARCH).get();
 		db.view(name).rename(newName).get();
 		assertThat(db.view(name).exists().get(), is(false));
 		assertThat(db.view(newName).exists().get(), is(true));
