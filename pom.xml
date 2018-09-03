@@ -4,7 +4,7 @@
 
 	<groupId>com.arangodb</groupId>
 	<artifactId>arangodb-java-driver-async</artifactId>
-	<version>4.7.1-SNAPSHOT</version>
+	<version>4.7.2</version>
 	<inceptionYear>2016</inceptionYear>
 	<packaging>jar</packaging>
 
@@ -222,7 +222,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -263,5 +263,5 @@
 		<name>ArangoDB GmbH</name>
 		<url>https://www.arangodb.com</url>
 	</organization>
-	
+
 </project>
