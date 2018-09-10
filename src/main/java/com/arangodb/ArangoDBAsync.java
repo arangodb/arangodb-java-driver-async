@@ -36,7 +36,9 @@ import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.UserEntity;
 import com.arangodb.internal.ArangoContext;
 import com.arangodb.internal.ArangoDBAsyncImpl;
+import com.arangodb.internal.ArangoDefaults;
 import com.arangodb.internal.InternalArangoDBBuilder;
+import com.arangodb.internal.net.ConnectionFactory;
 import com.arangodb.internal.net.HostHandler;
 import com.arangodb.internal.net.HostResolver;
 import com.arangodb.internal.util.ArangoDeserializerImpl;
@@ -45,6 +47,7 @@ import com.arangodb.internal.util.ArangoSerializerImpl;
 import com.arangodb.internal.util.DefaultArangoSerialization;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.internal.velocystream.VstCommunicationSync;
+import com.arangodb.internal.velocystream.VstConnectionFactoryAsync;
 import com.arangodb.model.LogOptions;
 import com.arangodb.model.UserCreateOptions;
 import com.arangodb.model.UserUpdateOptions;
@@ -570,7 +573,12 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 			final ArangoSerialization custom = customSerializer != null ? customSerializer : internal;
 			final ArangoSerializationFactory util = new ArangoSerializationFactory(internal, custom);
 
-			final HostResolver hostResolver = createHostResolver();
+			final int max = maxConnections != null ? Math.max(1, maxConnections)
+					: ArangoDefaults.MAX_CONNECTIONS_VST_DEFAULT;
+			final ConnectionFactory connectionFactory = new VstConnectionFactoryAsync(host, timeout, connectionTtl,
+					useSsl, sslContext);
+			final HostResolver hostResolver = createHostResolver(createHostList(max, connectionFactory), max,
+				connectionFactory);
 			final HostHandler hostHandler = createHostHandler(hostResolver);
 			return new ArangoDBAsyncImpl(asyncBuilder(hostHandler), util, syncBuilder(hostHandler), hostResolver,
 					new ArangoContext());

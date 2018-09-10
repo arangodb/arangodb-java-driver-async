@@ -27,7 +27,7 @@ import java.util.concurrent.FutureTask;
 
 import javax.net.ssl.SSLContext;
 
-import com.arangodb.internal.net.HostHandler;
+import com.arangodb.internal.net.HostDescription;
 import com.arangodb.internal.velocystream.internal.Chunk;
 import com.arangodb.internal.velocystream.internal.Message;
 import com.arangodb.internal.velocystream.internal.MessageStore;
@@ -37,12 +37,12 @@ import com.arangodb.internal.velocystream.internal.VstConnection;
  * @author Mark Vollmary
  *
  */
-public class ConnectionAsync extends VstConnection {
+public class VstConnectionAsync extends VstConnection {
 
 	public static class Builder {
 
 		private MessageStore messageStore;
-		private HostHandler hostHandler;
+		private HostDescription host;
 		private Integer timeout;
 		private Long ttl;
 		private Boolean useSsl;
@@ -57,8 +57,8 @@ public class ConnectionAsync extends VstConnection {
 			return this;
 		}
 
-		public Builder hostHandler(final HostHandler hostHandler) {
-			this.hostHandler = hostHandler;
+		public Builder host(final HostDescription host) {
+			this.host = host;
 			return this;
 		}
 
@@ -82,14 +82,14 @@ public class ConnectionAsync extends VstConnection {
 			return this;
 		}
 
-		public ConnectionAsync build() {
-			return new ConnectionAsync(hostHandler, timeout, ttl, useSsl, sslContext, messageStore);
+		public VstConnectionAsync build() {
+			return new VstConnectionAsync(host, timeout, ttl, useSsl, sslContext, messageStore);
 		}
 	}
 
-	private ConnectionAsync(final HostHandler hostHandler, final Integer timeout, final Long ttl, final Boolean useSsl,
+	private VstConnectionAsync(final HostDescription host, final Integer timeout, final Long ttl, final Boolean useSsl,
 		final SSLContext sslContext, final MessageStore messageStore) {
-		super(hostHandler, timeout, ttl, useSsl, sslContext, messageStore);
+		super(host, timeout, ttl, useSsl, sslContext, messageStore);
 	}
 
 	public synchronized CompletableFuture<Message> write(final Message message, final Collection<Chunk> chunks) {

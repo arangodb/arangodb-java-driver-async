@@ -47,7 +47,7 @@ import com.arangodb.internal.velocystream.VstCommunication;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
 import com.arangodb.internal.velocystream.VstCommunicationSync;
 import com.arangodb.internal.velocystream.VstProtocol;
-import com.arangodb.internal.velocystream.internal.ConnectionSync;
+import com.arangodb.internal.velocystream.internal.VstConnectionSync;
 import com.arangodb.model.LogOptions;
 import com.arangodb.model.UserCreateOptions;
 import com.arangodb.model.UserUpdateOptions;
@@ -69,7 +69,7 @@ public class ArangoDBAsyncImpl extends InternalArangoDB<ArangoExecutorAsync> imp
 		final VstCommunicationSync.Builder syncbuilder, final HostResolver hostResolver, final ArangoContext context) {
 		super(new ArangoExecutorAsync(commBuilder.build(util.get(Serializer.INTERNAL)), util, new DocumentCache()),
 				util, context);
-		final VstCommunication<Response, ConnectionSync> cacheCom = syncbuilder.build(util.get(Serializer.INTERNAL));
+		final VstCommunication<Response, VstConnectionSync> cacheCom = syncbuilder.build(util.get(Serializer.INTERNAL));
 		cp = new VstProtocol(cacheCom);
 		hostResolver.init(new EndpointResolver() {
 			@Override

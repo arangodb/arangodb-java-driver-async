@@ -31,14 +31,9 @@ import org.slf4j.LoggerFactory;
 
 import com.arangodb.ArangoDBException;
 import com.arangodb.entity.ErrorEntity;
-import com.arangodb.internal.ArangoDefaults;
-import com.arangodb.internal.net.ConnectionPool;
-import com.arangodb.internal.net.DelHostHandler;
-import com.arangodb.internal.net.Host;
 import com.arangodb.internal.net.HostHandler;
 import com.arangodb.internal.velocystream.internal.AuthenticationRequest;
 import com.arangodb.internal.velocystream.internal.Message;
-import com.arangodb.internal.velocystream.internal.MessageStore;
 import com.arangodb.util.ArangoSerialization;
 import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocypack.exception.VPackParserException;
@@ -49,7 +44,7 @@ import com.arangodb.velocystream.Response;
  * @author Mark Vollmary
  *
  */
-public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Response>, ConnectionAsync> {
+public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Response>, VstConnectionAsync> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VstCommunicationAsync.class);
 
@@ -119,22 +114,11 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 	private VstCommunicationAsync(final HostHandler hostHandler, final Integer timeout, final String user,
 		final String password, final Boolean useSsl, final SSLContext sslContext, final ArangoSerialization util,
 		final Integer chunksize, final Integer maxConnections, final Long connectionTtl) {
-		super(timeout, user, password, useSsl, sslContext, util, chunksize, new ConnectionPool<ConnectionAsync>(
-				maxConnections != null ? Math.max(1, maxConnections) : ArangoDefaults.MAX_CONNECTIONS_VST_DEFAULT) {
-			private final ConnectionAsync.Builder builder = new ConnectionAsync.Builder().timeout(timeout)
-					.ttl(connectionTtl).useSsl(useSsl).sslContext(sslContext);
-
-			@Override
-			public ConnectionAsync createConnection(final Host host) {
-				return builder.messageStore(new MessageStore()).hostHandler(new DelHostHandler(hostHandler, host))
-						.build();
-			}
-		});
+		super(timeout, user, password, useSsl, sslContext, util, chunksize, hostHandler);
 	}
 
 	@Override
-	protected CompletableFuture<Response> execute(final Request request, final ConnectionAsync connection) {
-		connect(connection);
+	protected CompletableFuture<Response> execute(final Request request, final VstConnectionAsync connection) {
 		final CompletableFuture<Response> rfuture = new CompletableFuture<>();
 		try {
 			final Message message = createMessage(request);
@@ -171,7 +155,7 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 		return rfuture;
 	}
 
-	private CompletableFuture<Message> send(final Message message, final ConnectionAsync connection)
+	private CompletableFuture<Message> send(final Message message, final VstConnectionAsync connection)
 			throws IOException {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug(String.format("Send Message (id=%s, head=%s, body=%s)", message.getId(), message.getHead(),
@@ -181,7 +165,7 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 	}
 
 	@Override
-	protected void authenticate(final ConnectionAsync connection) {
+	protected void authenticate(final VstConnectionAsync connection) {
 		Response response = null;
 		try {
 			response = execute(new AuthenticationRequest(user, password != null ? password : "", ENCRYPTION_PLAIN),
