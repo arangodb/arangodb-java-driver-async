@@ -61,7 +61,7 @@ public class ArangoGraphTest extends BaseTest {
 	private static final Integer NUMBER_OF_SHARDS = 2;
 
 	@BeforeClass
-	public void setup() throws InterruptedException, ExecutionException {
+	public static void setup() throws InterruptedException, ExecutionException {
 		try {
 			db.graph(GRAPH_NAME).drop().get();
 		} catch (final ArangoDBException e1) {
