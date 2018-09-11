@@ -212,6 +212,22 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	<T> CompletableFuture<MultiDocumentEntity<T>> getDocuments(final Collection<String> keys, final Class<T> type);
 
 	/**
+	 * Reads multiple documents
+	 * 
+	 * @param keys
+	 *            The keys of the documents
+	 * @param type
+	 *            The type of the documents (POJO class, VPackSlice or String for Json)
+	 * @param options
+	 *            Additional options, can be null
+	 * @return the documents and possible errors
+	 */
+	<T> CompletableFuture<MultiDocumentEntity<T>> getDocuments(
+		final Collection<String> keys,
+		final Class<T> type,
+		DocumentReadOptions options);
+
+	/**
 	 * Replaces the document with key with the one in the body, provided there is such a document and no precondition is
 	 * violated
 	 * 

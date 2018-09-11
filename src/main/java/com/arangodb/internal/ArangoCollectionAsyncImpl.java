@@ -149,7 +149,14 @@ public class ArangoCollectionAsyncImpl
 	public <T> CompletableFuture<MultiDocumentEntity<T>> getDocuments(
 		final Collection<String> keys,
 		final Class<T> type) {
-		final DocumentReadOptions options = new DocumentReadOptions();
+		return getDocuments(keys, type, new DocumentReadOptions());
+	}
+
+	@Override
+	public <T> CompletableFuture<MultiDocumentEntity<T>> getDocuments(
+		final Collection<String> keys,
+		final Class<T> type,
+		final DocumentReadOptions options) {
 		return executor.execute(getDocumentsRequest(keys, options), getDocumentsResponseDeserializer(type, options));
 	}
 
