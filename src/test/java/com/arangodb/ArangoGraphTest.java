@@ -37,10 +37,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.arangodb.entity.ArangoDBVersion.License;
-import com.arangodb.entity.CollectionType;
+import com.arangodb.entity.CollectionPropertiesEntity;
 import com.arangodb.entity.EdgeDefinition;
 import com.arangodb.entity.GraphEntity;
-import com.arangodb.model.CollectionCreateOptions;
+import com.arangodb.entity.ServerRole;
 import com.arangodb.model.GraphCreateOptions;
 
 /**
@@ -57,32 +57,24 @@ public class ArangoGraphTest extends BaseTest {
 	private static final String VERTEX_COL_2 = "db_vertex2_collection_test";
 	private static final String VERTEX_COL_3 = "db_vertex3_collection_test";
 	private static final String VERTEX_COL_4 = "db_vertex4_collection_test";
+	private static final Integer REPLICATION_FACTOR = 2;
+	private static final Integer NUMBER_OF_SHARDS = 2;
 
 	@BeforeClass
-	public static void setup() throws InterruptedException, ExecutionException {
+	public void setup() throws InterruptedException, ExecutionException {
 		try {
 			db.graph(GRAPH_NAME).drop().get();
-		} catch (final Exception e) {
-		}
-		for (final String collection : new String[] { VERTEX_COL_1, VERTEX_COL_2, VERTEX_COL_2, VERTEX_COL_3,
-				VERTEX_COL_4 }) {
-			try {
-				db.createCollection(collection, null).get();
-			} catch (final Exception e) {
-			}
-		}
-		for (final String collection : new String[] { EDGE_COL_1, EDGE_COL_2 }) {
-			try {
-				final CollectionCreateOptions options = new CollectionCreateOptions().type(CollectionType.EDGES);
-				db.createCollection(collection, options).get();
-			} catch (final Exception e) {
-			}
+		} catch (final ArangoDBException e1) {
 		}
 		final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<>();
 		edgeDefinitions.add(new EdgeDefinition().collection(EDGE_COL_1).from(VERTEX_COL_1).to(VERTEX_COL_2));
 		edgeDefinitions
 				.add(new EdgeDefinition().collection(EDGE_COL_2).from(VERTEX_COL_2).to(VERTEX_COL_1, VERTEX_COL_3));
-		db.createGraph(GRAPH_NAME, edgeDefinitions, null).get();
+		final GraphCreateOptions options = new GraphCreateOptions();
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			options.replicationFactor(REPLICATION_FACTOR).numberOfShards(NUMBER_OF_SHARDS);
+		}
+		db.createGraph(GRAPH_NAME, edgeDefinitions, options).get();
 	}
 
 	@After
@@ -130,6 +122,14 @@ public class ArangoGraphTest extends BaseTest {
 		assertThat(e2.getFrom(), hasItem(VERTEX_COL_2));
 		assertThat(e2.getTo(), hasItems(VERTEX_COL_1, VERTEX_COL_3));
 		assertThat(info.getOrphanCollections(), is(empty()));
+
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			for (final String collection : new String[] { EDGE_COL_1, EDGE_COL_2, VERTEX_COL_1, VERTEX_COL_2 }) {
+				final CollectionPropertiesEntity properties = db.collection(collection).getProperties().get();
+				assertThat(properties.getReplicationFactor(), is(REPLICATION_FACTOR));
+				assertThat(properties.getNumberOfShards(), is(NUMBER_OF_SHARDS));
+			}
+		}
 	}
 
 	@Test
@@ -177,6 +177,11 @@ public class ArangoGraphTest extends BaseTest {
 				assertThat(e.getFrom(), hasItem(VERTEX_COL_1));
 				assertThat(e.getTo(), hasItem(VERTEX_COL_2));
 			}
+		}
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			final CollectionPropertiesEntity properties = db.collection(EDGE_COL_3).getProperties().get();
+			assertThat(properties.getReplicationFactor(), is(REPLICATION_FACTOR));
+			assertThat(properties.getNumberOfShards(), is(NUMBER_OF_SHARDS));
 		}
 		setup();
 	}
