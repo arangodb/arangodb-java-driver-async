@@ -64,7 +64,7 @@ public class ArangoGraphTest extends BaseTest {
 	public static void setup() throws InterruptedException, ExecutionException {
 		try {
 			db.graph(GRAPH_NAME).drop().get();
-		} catch (final ArangoDBException e1) {
+		} catch (final Exception e) {
 		}
 		final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<>();
 		edgeDefinitions.add(new EdgeDefinition().collection(EDGE_COL_1).from(VERTEX_COL_1).to(VERTEX_COL_2));
