@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [5.0.0-RC.1] - 2018-09-12
+
 ### Added
 
 - added dirty read support ([reading from followers](https://docs.arangodb.com/current/Manual/Administration/ActiveFailover/#reading-from-follower))
@@ -19,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - changed the internal connection pool and host management. There now exists a connection pool for every configured host. This changes the behavior of `ArangoDBAsync.Builder#maxConnections` which now allows to configure the maximal number of connection per host and not overall.
+- changed `IndexEntity#selectivityEstimate` from `Integer` to `Double`
 
 ## [4.7.2] - 2018-09-03
 
@@ -486,7 +489,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - changed VelocyStream communication (send protocol header)
 
-[unreleased]: https://github.com/arangodb/arangodb-java-driver-async/compare/4.7.2...HEAD
+[unreleased]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.0-RC.1...HEAD
+[5.0.0-rc.1]: https://github.com/arangodb/arangodb-java-driver-async/compare/4.7.2...5.0.0-RC.1
 [4.7.2]: https://github.com/arangodb/arangodb-java-driver-async/compare/4.7.0...4.7.2
 [4.7.0]: https://github.com/arangodb/arangodb-java-driver-async/compare/4.6.1...4.7.0
 [4.6.1]: https://github.com/arangodb/arangodb-java-driver-async/compare/4.6.0...4.6.1
