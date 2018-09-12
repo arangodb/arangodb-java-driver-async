@@ -228,20 +228,20 @@ public class ArangoGraphTest extends BaseTest {
 				} catch (final Exception e) {
 				}
 			}
-			try {
-				db.graph(GRAPH_NAME).drop().get();
-			} catch (final Exception e) {
-			}
 			final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<>();
 			edgeDefinitions.add(new EdgeDefinition().collection(EDGE_COL_1).from(VERTEX_COL_1).to(VERTEX_COL_2));
 			edgeDefinitions
 					.add(new EdgeDefinition().collection(EDGE_COL_2).from(VERTEX_COL_2).to(VERTEX_COL_1, VERTEX_COL_3));
-			final GraphEntity graph = db.createGraph(GRAPH_NAME, edgeDefinitions,
+			final GraphEntity graph = db.createGraph(GRAPH_NAME + "_smart", edgeDefinitions,
 				new GraphCreateOptions().isSmart(true).smartGraphAttribute("test").numberOfShards(2)).get();
 			assertThat(graph, is(notNullValue()));
 			assertThat(graph.getIsSmart(), is(true));
 			assertThat(graph.getSmartGraphAttribute(), is("test"));
 			assertThat(graph.getNumberOfShards(), is(2));
+			try {
+				db.graph(GRAPH_NAME + "_smart").drop().get();
+			} catch (final Exception e) {
+			}
 		}
 	}
 }
