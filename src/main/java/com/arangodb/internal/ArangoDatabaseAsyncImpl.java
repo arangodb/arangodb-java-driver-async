@@ -187,7 +187,7 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 		final HostHandle hostHandle = new HostHandle();
 		final CompletableFuture<CursorEntity> execution = executor.execute(request, CursorEntity.class, hostHandle);
 		return execution.thenApply(result -> {
-			return createCursor(result, type, hostHandle);
+			return createCursor(result, type, options, hostHandle);
 		});
 	}
 
@@ -217,21 +217,22 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	public <T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type)
 			throws ArangoDBException {
 		final HostHandle hostHandle = new HostHandle();
-		final CompletableFuture<CursorEntity> execution = executor.execute(queryNextRequest(cursorId),
+		final CompletableFuture<CursorEntity> execution = executor.execute(queryNextRequest(cursorId, null),
 			CursorEntity.class, hostHandle);
 		return execution.thenApply(result -> {
-			return createCursor(result, type, hostHandle);
+			return createCursor(result, type, null, hostHandle);
 		});
 	}
 
 	private <T> ArangoCursorAsync<T> createCursor(
 		final CursorEntity result,
 		final Class<T> type,
+		final AqlQueryOptions options,
 		final HostHandle hostHandle) {
 		return new ArangoCursorAsyncImpl<>(this, new ArangoCursorExecute() {
 			@Override
 			public CursorEntity next(final String id) {
-				final CompletableFuture<CursorEntity> result = executor.execute(queryNextRequest(id),
+				final CompletableFuture<CursorEntity> result = executor.execute(queryNextRequest(id, options),
 					CursorEntity.class, hostHandle);
 				try {
 					return result.get();
@@ -243,7 +244,7 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 			@Override
 			public void close(final String id) {
 				try {
-					executor.execute(queryCloseRequest(id), Void.class, hostHandle).get();
+					executor.execute(queryCloseRequest(id, options), Void.class, hostHandle).get();
 				} catch (InterruptedException | ExecutionException e) {
 					throw new ArangoDBException(e);
 				}
