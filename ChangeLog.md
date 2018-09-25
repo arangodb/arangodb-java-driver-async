@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [5.0.1] - 2018-09-25
+
 ### Fixed
 
 - fixed `ArangoCursor#next` when performing a dirty read
@@ -499,7 +501,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - changed VelocyStream communication (send protocol header)
 
-[unreleased]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.0...HEAD
+[unreleased]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.1...HEAD
+[5.0.1]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.0...5.0.1
 [5.0.0]: https://github.com/arangodb/arangodb-java-driver-async/compare/4.7.2...5.0.0
 [4.7.2]: https://github.com/arangodb/arangodb-java-driver-async/compare/4.7.0...4.7.2
 [4.7.0]: https://github.com/arangodb/arangodb-java-driver-async/compare/4.6.1...4.7.0
