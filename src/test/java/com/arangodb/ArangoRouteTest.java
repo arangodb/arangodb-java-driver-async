@@ -68,7 +68,7 @@ public class ArangoRouteTest extends BaseTest {
 	public void withParentHeader() throws InterruptedException, ExecutionException {
 		final ArangoCollectionAsync collection = db.collection("route-test-col");
 		try {
-			collection.create().get;
+			collection.create().get();
 			final BaseDocument doc = new BaseDocument();
 			collection.insertDocument(doc).get();
 			db.route("/_api/document").withHeader(ArangoRequestParam.IF_NONE_MATCH, doc.getRevision())
