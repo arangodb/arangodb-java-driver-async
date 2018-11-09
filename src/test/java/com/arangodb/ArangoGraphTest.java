@@ -29,6 +29,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
@@ -239,9 +240,37 @@ public class ArangoGraphTest extends BaseTest {
 			assertThat(graph.getSmartGraphAttribute(), is("test"));
 			assertThat(graph.getNumberOfShards(), is(2));
 			try {
-				db.graph(GRAPH_NAME + "_smart").drop().get();
+				db.graph(GRAPH_NAME + "_smart").drop(true).get();
 			} catch (final Exception e) {
 			}
 		}
+	}
+
+	@Test
+	public void drop() throws InterruptedException, ExecutionException {
+		final String edgeCollection = "edge_drop";
+		final String vertexCollection = "vertex_drop";
+		final String graph = GRAPH_NAME + "_drop";
+		final GraphEntity result = db.graph(graph).create(Collections
+				.singleton(new EdgeDefinition().collection(edgeCollection).from(vertexCollection).to(vertexCollection)))
+				.get();
+		assertThat(result, is(notNullValue()));
+		db.graph(graph).drop().get();
+		assertThat(db.collection(edgeCollection).exists().get(), is(true));
+		assertThat(db.collection(vertexCollection).exists().get(), is(true));
+	}
+
+	@Test
+	public void dropPlusDropCollections() throws InterruptedException, ExecutionException {
+		final String edgeCollection = "edge_dropC";
+		final String vertexCollection = "vertex_dropC";
+		final String graph = GRAPH_NAME + "_dropC";
+		final GraphEntity result = db.graph(graph).create(Collections
+				.singleton(new EdgeDefinition().collection(edgeCollection).from(vertexCollection).to(vertexCollection)))
+				.get();
+		assertThat(result, is(notNullValue()));
+		db.graph(graph).drop(true).get();
+		assertThat(db.collection(edgeCollection).exists().get(), is(false));
+		assertThat(db.collection(vertexCollection).exists().get(), is(false));
 	}
 }

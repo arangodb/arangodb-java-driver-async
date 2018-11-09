@@ -93,6 +93,17 @@ public interface ArangoGraphAsync extends ArangoSerializationAccessor {
 	CompletableFuture<Void> drop();
 
 	/**
+	 * Delete an existing graph including
+	 * 
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Management.html#drop-a-graph">API Documentation</a>
+	 * @param dropCollections
+	 *            Drop collections of this graph as well. Collections will only be dropped if they are not used in other
+	 *            graphs.
+	 * @return void
+	 */
+	CompletableFuture<Void> drop(boolean dropCollection);
+
+	/**
 	 * Get a graph from the graph module
 	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Management.html#get-a-graph">API Documentation</a>

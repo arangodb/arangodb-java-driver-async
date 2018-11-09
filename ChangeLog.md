@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [5.0.1] - 2018-09-25
 
+### Added
+
+- added `ArangoGraphAsync#drop(boolean dropCollections)`
+
 ### Fixed
 
 - fixed `ArangoCursor#next` when performing a dirty read

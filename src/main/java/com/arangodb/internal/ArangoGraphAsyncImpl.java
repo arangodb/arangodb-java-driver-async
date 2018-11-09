@@ -65,6 +65,11 @@ public class ArangoGraphAsyncImpl
 	}
 
 	@Override
+	public CompletableFuture<Void> drop(boolean dropCollection) {
+		return executor.execute(dropRequest(dropCollection), Void.class);
+	}
+
+	@Override
 	public CompletableFuture<GraphEntity> getInfo() {
 		return executor.execute(getInfoRequest(), getInfoResponseDeserializer());
 	}
@@ -109,5 +114,4 @@ public class ArangoGraphAsyncImpl
 		return executor.execute(removeEdgeDefinitionRequest(definitionName),
 			removeEdgeDefinitionResponseDeserializer());
 	}
-
 }
