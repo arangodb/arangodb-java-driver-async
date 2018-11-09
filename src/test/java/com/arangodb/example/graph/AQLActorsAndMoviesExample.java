@@ -72,75 +72,85 @@ public class AQLActorsAndMoviesExample {
 	}
 
 	/**
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html#all-actors-who-acted-in-movie1-or-movie2">AQL
 	 *      Example Queries on an Actors and Movies Database</a>
 	 */
 	@Test
-	public void allActorsActsInMovie1or2() {
+	public void allActorsActsInMovie1or2() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"WITH actors FOR x IN ANY 'movies/TheMatrix' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN x._id",
 			null, null, String.class);
 		f.whenComplete((cursor, ex) -> {
 			assertThat(cursor.asListRemaining(),
 				hasItems("actors/Keanu", "actors/Hugo", "actors/Emil", "actors/Carrie", "actors/Laurence"));
-		});
+		}).get();
 	}
 
 	/**
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html#all-actors-who-acted-in-movie1-or-movie2">AQL
 	 *      Example Queries on an Actors and Movies Database</a>
 	 */
 	@Test
-	public void allActorsActsInMovie1or2UnionDistinct() {
+	public void allActorsActsInMovie1or2UnionDistinct() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"WITH actors FOR x IN UNION_DISTINCT ((FOR y IN ANY 'movies/TheMatrix' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id), (FOR y IN ANY 'movies/TheDevilsAdvocate' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id)) RETURN x",
 			null, null, String.class);
 		f.whenComplete((cursor, ex) -> {
 			assertThat(cursor.asListRemaining(), hasItems("actors/Emil", "actors/Hugo", "actors/Carrie",
 				"actors/Laurence", "actors/Keanu", "actors/Al", "actors/Charlize"));
-		});
+		}).get();
 	}
 
 	/**
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html#all-actors-who-acted-in-both-movie1-and-movie2-">AQL
 	 *      Example Queries on an Actors and Movies Database</a>
 	 */
 	@Test
-	public void allActorsActsInMovie1and2() {
+	public void allActorsActsInMovie1and2() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"WITH actors FOR x IN INTERSECTION ((FOR y IN ANY 'movies/TheMatrix' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id), (FOR y IN ANY 'movies/TheDevilsAdvocate' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id)) RETURN x",
 			null, null, String.class);
 		f.whenComplete((cursor, ex) -> {
 			assertThat(cursor.asListRemaining(), hasItems("actors/Keanu"));
-		});
+		}).get();
 	}
 
 	/**
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html#all-common-movies-between-actor1-and-actor2-">AQL
 	 *      Example Queries on an Actors and Movies Database</a>
 	 */
 	@Test
-	public void allMoviesBetweenActor1andActor2() {
+	public void allMoviesBetweenActor1andActor2() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"WITH movies FOR x IN INTERSECTION ((FOR y IN ANY 'actors/Hugo' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id), (FOR y IN ANY 'actors/Keanu' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id)) RETURN x",
 			null, null, String.class);
 		f.whenComplete((cursor, ex) -> {
 			assertThat(cursor.asListRemaining(),
 				hasItems("movies/TheMatrixRevolutions", "movies/TheMatrixReloaded", "movies/TheMatrix"));
-		});
+		}).get();
 	}
 
 	/**
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html#all-actors-who-acted-in-3-or-more-movies-">AQL
 	 *      Example Queries on an Actors and Movies Database</a>
 	 */
 	@Test
-	public void allActorsWhoActedIn3orMoreMovies() {
+	public void allActorsWhoActedIn3orMoreMovies() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoCursorAsync<Actor>> f = db.query(
 			"FOR x IN actsIn COLLECT actor = x._from WITH COUNT INTO counter FILTER counter >= 3 RETURN {actor: actor, movies: counter}",
 			null, null, Actor.class);
@@ -149,32 +159,36 @@ public class AQLActorsAndMoviesExample {
 				hasItems(new Actor("actors/Carrie", 3), new Actor("actors/CubaG", 4), new Actor("actors/Hugo", 3),
 					new Actor("actors/Keanu", 4), new Actor("actors/Laurence", 3), new Actor("actors/MegR", 5),
 					new Actor("actors/TomC", 3), new Actor("actors/TomH", 3)));
-		});
+		}).get();
 	}
 
 	/**
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html#all-movies-where-exactly-6-actors-acted-in-">AQL
 	 *      Example Queries on an Actors and Movies Database</a>
 	 */
 	@Test
-	public void allMoviesWhereExactly6ActorsActedIn() {
+	public void allMoviesWhereExactly6ActorsActedIn() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
 			"FOR x IN actsIn COLLECT movie = x._to WITH COUNT INTO counter FILTER counter == 6 RETURN movie", null,
 			null, String.class);
 		f.whenComplete((cursor, ex) -> {
 			assertThat(cursor.asListRemaining(),
 				hasItems("movies/SleeplessInSeattle", "movies/TopGun", "movies/YouveGotMail"));
-		});
+		}).get();
 	}
 
 	/**
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html#the-number-of-actors-by-movie-">AQL
 	 *      Example Queries on an Actors and Movies Database</a>
 	 */
 	@Test
-	public void theNumberOfActorsByMovie() {
+	public void theNumberOfActorsByMovie() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoCursorAsync<Movie>> f = db.query(
 			"FOR x IN actsIn COLLECT movie = x._to WITH COUNT INTO counter RETURN {movie: movie, actors: counter}",
 			null, null, Movie.class);
@@ -188,16 +202,18 @@ public class AQLActorsAndMoviesExample {
 					new Movie("movies/TheMatrixRevolutions", 4), new Movie("movies/TopGun", 6),
 					new Movie("movies/WhatDreamsMayCome", 5), new Movie("movies/WhenHarryMetSally", 4),
 					new Movie("movies/YouveGotMail", 6)));
-		});
+		}).get();
 	}
 
 	/**
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html#the-number-of-movies-by-actor-">AQL
 	 *      Example Queries on an Actors and Movies Database</a>
 	 */
 	@Test
-	public void theNumberOfMoviesByActor() {
+	public void theNumberOfMoviesByActor() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoCursorAsync<Actor>> f = db.query(
 			"FOR x IN actsIn COLLECT actor = x._from WITH COUNT INTO counter RETURN {actor: actor, movies: counter}",
 			null, null, Actor.class);
@@ -222,16 +238,18 @@ public class AQLActorsAndMoviesExample {
 					new Actor("actors/SteveZ", 1), new Actor("actors/TomC", 3), new Actor("actors/TomH", 3),
 					new Actor("actors/TomS", 1), new Actor("actors/ValK", 1), new Actor("actors/VictorG", 1),
 					new Actor("actors/WernerH", 1), new Actor("actors/WilW", 1)));
-		});
+		}).get();
 	}
 
 	/**
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html#the-number-of-movies-acted-in-between-2005-and-2010-by-actor-">AQL
 	 *      Example Queries on an Actors and Movies Database</a>
 	 */
 	@Test
-	public void theNumberOfMoviesActedInBetween2005and2010byActor() {
+	public void theNumberOfMoviesActedInBetween2005and2010byActor() throws InterruptedException, ExecutionException {
 		final CompletableFuture<ArangoCursorAsync<Actor>> f = db.query(
 			"FOR x IN actsIn FILTER x.year >= 1990 && x.year <= 1995 COLLECT actor = x._from WITH COUNT INTO counter RETURN {actor: actor, movies: counter}",
 			null, null, Actor.class);
@@ -243,7 +261,7 @@ public class AQLActorsAndMoviesExample {
 					new Actor("actors/KieferS", 1), new Actor("actors/MegR", 2), new Actor("actors/Nathan", 1),
 					new Actor("actors/NoahW", 1), new Actor("actors/RitaW", 1), new Actor("actors/RosieO", 1),
 					new Actor("actors/TomC", 1), new Actor("actors/TomH", 2), new Actor("actors/VictorG", 1)));
-		});
+		}).get();
 	}
 
 	public static class Actor {

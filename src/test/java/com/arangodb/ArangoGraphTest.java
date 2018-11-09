@@ -125,10 +125,14 @@ public class ArangoGraphTest extends BaseTest {
 		assertThat(info.getOrphanCollections(), is(empty()));
 
 		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
-			for (final String collection : new String[] { EDGE_COL_1, EDGE_COL_2, VERTEX_COL_1, VERTEX_COL_2 }) {
+			for (final String collection : new String[] { VERTEX_COL_1, VERTEX_COL_2 }) {
 				final CollectionPropertiesEntity properties = db.collection(collection).getProperties().get();
 				assertThat(properties.getReplicationFactor(), is(REPLICATION_FACTOR));
 				assertThat(properties.getNumberOfShards(), is(NUMBER_OF_SHARDS));
+			}
+			for (final String collection : new String[] { EDGE_COL_1, EDGE_COL_2 }) {
+				final CollectionPropertiesEntity properties = db.collection(collection).getProperties().get();
+				assertThat(properties.getReplicationFactor(), is(REPLICATION_FACTOR));
 			}
 		}
 	}
@@ -234,13 +238,15 @@ public class ArangoGraphTest extends BaseTest {
 			edgeDefinitions
 					.add(new EdgeDefinition().collection(EDGE_COL_2).from(VERTEX_COL_2).to(VERTEX_COL_1, VERTEX_COL_3));
 			final GraphEntity graph = db.createGraph(GRAPH_NAME + "_smart", edgeDefinitions,
-				new GraphCreateOptions().isSmart(true).smartGraphAttribute("test").numberOfShards(2)).get();
+				new GraphCreateOptions().isSmart(true).smartGraphAttribute("test").replicationFactor(REPLICATION_FACTOR)
+						.numberOfShards(NUMBER_OF_SHARDS))
+					.get();
 			assertThat(graph, is(notNullValue()));
 			assertThat(graph.getIsSmart(), is(true));
 			assertThat(graph.getSmartGraphAttribute(), is("test"));
 			assertThat(graph.getNumberOfShards(), is(2));
 			try {
-				db.graph(GRAPH_NAME + "_smart").drop(true).get();
+				db.graph(GRAPH_NAME + "_smart").drop().get();
 			} catch (final Exception e) {
 			}
 		}
