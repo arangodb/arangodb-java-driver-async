@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.ViewEntity;
 import com.arangodb.entity.ViewType;
 
@@ -83,6 +84,9 @@ public class ArangoViewTest extends BaseTest {
 
 	@Test
 	public void rename() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			return;
+		}
 		if (!requireVersion(3, 4)) {
 			return;
 		}
