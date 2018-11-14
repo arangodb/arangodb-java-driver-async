@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.ViewEntity;
 import com.arangodb.entity.ViewType;
 import com.arangodb.entity.arangosearch.ArangoSearchPropertiesEntity;
@@ -92,6 +93,9 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void rename() throws InterruptedException, ExecutionException {
+		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+			return;
+		}
 		if (!requireVersion(3, 4)) {
 			return;
 		}
