@@ -162,7 +162,7 @@ public class ArangoSearchTest extends BaseTest {
 		if (!requireVersion(3, 4)) {
 			return;
 		}
-		db.createCollection("view_update_prop_test_collection");
+		db.createCollection("view_update_prop_test_collection").get();
 		final String name = VIEW_NAME + "_updatepropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
 		view.create(new ArangoSearchCreateOptions()).get();
