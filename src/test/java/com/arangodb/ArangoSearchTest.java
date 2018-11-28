@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.arangodb.entity.ServerRole;
@@ -48,7 +47,7 @@ import com.arangodb.model.arangosearch.ArangoSearchPropertiesOptions;
  * @author Mark Vollmary
  *
  */
-@Ignore // TODO: enable this test-suite as soon as arangosearch is fixed
+
 public class ArangoSearchTest extends BaseTest {
 
 	private static final String VIEW_NAME = "view_test";
