@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [5.0.4] - 2019-18-01
+
+### Fixed
+
+- fixed bug with multi document operations when using parameter `silent` (issue #241)
+
 ## [5.0.3] - 2018-11-12
 
 ### Fixed
@@ -513,7 +519,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - changed VelocyStream communication (send protocol header)
 
-[unreleased]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.3...HEAD
+[unreleased]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.4...HEAD
+[5.0.4]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.3...5.0.4
 [5.0.3]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.2...5.0.3
 [5.0.2]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.1...5.0.2
 [5.0.1]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.0...5.0.1
