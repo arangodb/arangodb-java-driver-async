@@ -129,7 +129,23 @@ public class ArangoCollectionAsyncImpl
 		DocumentUtil.validateDocumentKey(key);
 		final CompletableFuture<T> result = new CompletableFuture<>();
 		final CompletableFuture<T> execute = executor.execute(getDocumentRequest(key, new DocumentReadOptions()), type);
-		execute.whenComplete((response, ex) -> result.complete(response));
+		execute.whenComplete((response, ex) -> {
+			if (ex == null) {
+				result.complete(response);
+			} else if (ex instanceof ArangoDBException) {
+				ArangoDBException aex = (ArangoDBException) ex;
+
+				if ((aex.getResponseCode() == null && "com.arangodb.ArangoDBException: Response Code: 304".equals(ex.toString()))
+						|| (aex.getResponseCode() != null && aex.getResponseCode() == 404 && aex.getErrorNum() == 1202)
+						|| (aex.getResponseCode() != null && aex.getResponseCode() == 412 && aex.getErrorNum() == 1200)) {
+					result.complete(response);
+				} else {
+					result.completeExceptionally(ex);
+				}
+			} else {
+				result.completeExceptionally(ex);
+			}
+		});
 		return result;
 	}
 
@@ -141,7 +157,23 @@ public class ArangoCollectionAsyncImpl
 		DocumentUtil.validateDocumentKey(key);
 		final CompletableFuture<T> result = new CompletableFuture<>();
 		final CompletableFuture<T> execute = executor.execute(getDocumentRequest(key, options), type);
-		execute.whenComplete((response, ex) -> result.complete(response));
+		execute.whenComplete((response, ex) -> {
+			if (ex == null) {
+				result.complete(response);
+			} else if (ex instanceof ArangoDBException) {
+				ArangoDBException aex = (ArangoDBException) ex;
+
+				if ((aex.getResponseCode() == null && "com.arangodb.ArangoDBException: Response Code: 304".equals(ex.toString()))
+						|| (aex.getResponseCode() != null && aex.getResponseCode() == 404 && aex.getErrorNum() == 1202)
+						|| (aex.getResponseCode() != null && aex.getResponseCode() == 412 && aex.getErrorNum() == 1200)) {
+					result.complete(response);
+				} else {
+					result.completeExceptionally(ex);
+				}
+			} else {
+				result.completeExceptionally(ex);
+			}
+		});
 		return result;
 	}
 
