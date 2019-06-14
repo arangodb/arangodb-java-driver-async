@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [5.0.5] - 2019-14-05
+
+### Fixed
+
+- host handling (issue #241)
+- logging extended hostresolver
+
+### Added
+
+- add arangodb.httpCookieSpec
+- added smartJoinAttribute and shardingStrategy collection attributes
+
 ## [5.0.4] - 2019-18-01
 
 ### Fixed
@@ -519,7 +531,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - changed VelocyStream communication (send protocol header)
 
-[unreleased]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.4...HEAD
+[unreleased]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.5...HEAD
+[5.0.5]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.4...5.0.5
 [5.0.4]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.3...5.0.4
 [5.0.3]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.2...5.0.3
 [5.0.2]: https://github.com/arangodb/arangodb-java-driver-async/compare/5.0.1...5.0.2
