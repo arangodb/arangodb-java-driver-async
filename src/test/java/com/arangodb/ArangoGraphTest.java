@@ -37,10 +37,10 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.arangodb.entity.ArangoDBVersion.License;
 import com.arangodb.entity.CollectionPropertiesEntity;
 import com.arangodb.entity.EdgeDefinition;
 import com.arangodb.entity.GraphEntity;
+import com.arangodb.entity.License;
 import com.arangodb.entity.ServerRole;
 import com.arangodb.model.GraphCreateOptions;
 
