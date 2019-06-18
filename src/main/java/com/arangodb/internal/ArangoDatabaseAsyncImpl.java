@@ -214,11 +214,12 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	}
 
 	@Override
-	public <T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type)
-			throws ArangoDBException {
+	public <T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type) throws ArangoDBException {
+		
 		final HostHandle hostHandle = new HostHandle();
-		final CompletableFuture<CursorEntity> execution = executor.execute(queryNextRequest(cursorId, null),
-			CursorEntity.class, hostHandle);
+		
+		final CompletableFuture<CursorEntity> execution = executor.execute(queryNextRequest(cursorId, null, null), CursorEntity.class, hostHandle);
+		
 		return execution.thenApply(result -> {
 			return createCursor(result, type, null, hostHandle);
 		});
@@ -231,8 +232,8 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 		final HostHandle hostHandle) {
 		return new ArangoCursorAsyncImpl<>(this, new ArangoCursorExecute() {
 			@Override
-			public CursorEntity next(final String id) {
-				final CompletableFuture<CursorEntity> result = executor.execute(queryNextRequest(id, options),
+			public CursorEntity next(final String id, Map<String, String> meta) {
+				final CompletableFuture<CursorEntity> result = executor.execute(queryNextRequest(id, options, meta),
 					CursorEntity.class, hostHandle);
 				try {
 					return result.get();
@@ -242,9 +243,9 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 			}
 
 			@Override
-			public void close(final String id) {
+			public void close(final String id, Map<String, String> meta) {
 				try {
-					executor.execute(queryCloseRequest(id, options), Void.class, hostHandle).get();
+					executor.execute(queryCloseRequest(id, options, meta), Void.class, hostHandle).get();
 				} catch (InterruptedException | ExecutionException e) {
 					throw new ArangoDBException(e);
 				}

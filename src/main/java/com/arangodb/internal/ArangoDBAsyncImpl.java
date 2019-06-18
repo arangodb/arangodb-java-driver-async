@@ -21,12 +21,8 @@
 package com.arangodb.internal;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import com.arangodb.ArangoDBAsync;
 import com.arangodb.ArangoDBException;
@@ -37,10 +33,8 @@ import com.arangodb.entity.LogLevelEntity;
 import com.arangodb.entity.Permissions;
 import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.UserEntity;
-import com.arangodb.internal.ArangoExecutor.ResponseDeserializer;
 import com.arangodb.internal.net.CommunicationProtocol;
 import com.arangodb.internal.net.HostResolver;
-import com.arangodb.internal.net.HostResolver.EndpointResolver;
 import com.arangodb.internal.util.ArangoSerializationFactory;
 import com.arangodb.internal.util.ArangoSerializationFactory.Serializer;
 import com.arangodb.internal.velocystream.VstCommunication;
@@ -51,10 +45,7 @@ import com.arangodb.internal.velocystream.internal.VstConnectionSync;
 import com.arangodb.model.LogOptions;
 import com.arangodb.model.UserCreateOptions;
 import com.arangodb.model.UserUpdateOptions;
-import com.arangodb.velocypack.VPackSlice;
-import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.Request;
-import com.arangodb.velocystream.RequestType;
 import com.arangodb.velocystream.Response;
 
 /**
@@ -67,50 +58,16 @@ public class ArangoDBAsyncImpl extends InternalArangoDB<ArangoExecutorAsync> imp
 
 	public ArangoDBAsyncImpl(final VstCommunicationAsync.Builder commBuilder, final ArangoSerializationFactory util,
 		final VstCommunicationSync.Builder syncbuilder, final HostResolver hostResolver, final ArangoContext context) {
-		super(new ArangoExecutorAsync(commBuilder.build(util.get(Serializer.INTERNAL)), util, new DocumentCache()),
-				util, context);
+		
+		super(new ArangoExecutorAsync(commBuilder.build(util.get(Serializer.INTERNAL)), util, new DocumentCache()), util, context);
+		
 		final VstCommunication<Response, VstConnectionSync> cacheCom = syncbuilder.build(util.get(Serializer.INTERNAL));
+		
 		cp = new VstProtocol(cacheCom);
-		hostResolver.init(new EndpointResolver() {
-			@Override
-			public Collection<String> resolve(final boolean closeConnections) throws ArangoDBException {
-				try {
-					return executor.execute(new Request(ArangoRequestParam.SYSTEM, RequestType.GET, PATH_ENDPOINTS),
-						new ResponseDeserializer<Collection<String>>() {
-							@Override
-							public Collection<String> deserialize(final Response response) throws VPackException {
-								final VPackSlice field = response.getBody().get("endpoints");
-								Collection<String> endpoints;
-								if (field.isNone()) {
-									endpoints = Collections.<String> emptyList();
-								} else {
-									final Collection<Map<String, String>> tmp = util().deserialize(field,
-										Collection.class);
-									endpoints = new ArrayList<>();
-									for (final Map<String, String> map : tmp) {
-										for (final String value : map.values()) {
-											endpoints.add(value);
-										}
-									}
-								}
-								return endpoints;
-							}
-						}, null).get();
-				} catch (InterruptedException | ExecutionException e) {
-					throw new ArangoDBException(e);
-					// TODO
-					// if (e.getResponseCode() == 403) {
-					// response = Collections.<String> emptyList();
-					// } else {
-					// throw e;
-					// }
-				} finally {
-					if (closeConnections) {
-						ArangoDBAsyncImpl.this.shutdown();
-					}
-				}
-			}
-		});
+		
+		ArangoExecutorSync arangoExecutorSync = new ArangoExecutorSync(cp, util, new DocumentCache());
+		hostResolver.init(arangoExecutorSync, util.get(Serializer.INTERNAL));
+
 	}
 
 	@Override
