@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
-## [5.0.5] - 2019-14-05
+## [5.0.6] - 2019-18-06
 
 ### Fixed
 
@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - add arangodb.httpCookieSpec
 - added smartJoinAttribute and shardingStrategy collection attributes
+- requests are now storing header information
+- faster test code execution
 
 ## [5.0.4] - 2019-18-01
 
