@@ -42,7 +42,7 @@ public class ImportDocumentExample extends ExampleBase {
     private static final Logger log = LoggerFactory.getLogger(ImportDocumentExample.class);
 
     @Test
-    public void insertBean() {
+    public void importDocument() {
         List<CompletableFuture<DocumentImportEntity>> completableFutures =
                 IntStream.range(0, 100)
                         .mapToObj(i -> IntStream.range(0, 500)
