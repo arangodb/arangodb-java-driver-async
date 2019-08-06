@@ -31,29 +31,53 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
- * @author Mark Vollmary
+ * @author Michele Rastelli
  */
 public class ImportDocumentExample extends ExampleBase {
 
     private static final Logger log = LoggerFactory.getLogger(ImportDocumentExample.class);
+    private static final int MAX_PENDING_REQUESTS = 100;
 
     @Test
     public void importDocument() {
-        List<CompletableFuture<DocumentImportEntity>> completableFutures =
-                IntStream.range(0, 100)
-                        .mapToObj(i -> IntStream.range(0, 500)
-                                .mapToObj(it -> new TestEntity(UUID.randomUUID().toString())).collect(Collectors.toList())
-                        )
-                        .map(p -> collection.importDocuments(p, new DocumentImportOptions()))
-                        .collect(Collectors.toList());
+        AtomicLong pendingReqsCount = new AtomicLong();
+
+        Stream<List<TestEntity>> chunks = IntStream.range(0, 1000)
+                .mapToObj(i -> IntStream.range(0, 500)
+                        .mapToObj(it -> new TestEntity(UUID.randomUUID().toString())).collect(Collectors.toList())
+                );
+
+        List<CompletableFuture<DocumentImportEntity>> completableFutures = chunks
+                .map(p -> {
+                            // wait for pending requests
+                            while (pendingReqsCount.get() > MAX_PENDING_REQUESTS) {
+                                try {
+                                    Thread.sleep(10);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            pendingReqsCount.incrementAndGet();
+                            return collection.importDocuments(p, new DocumentImportOptions())
+                                    .thenApply(it -> {
+                                        pendingReqsCount.decrementAndGet();
+                                        log.info(String.valueOf(it.getCreated()));
+                                        return it;
+                                    });
+                        }
+                )
+                .collect(Collectors.toList());
 
         completableFutures.forEach(cf -> {
             try {
-                log.info(String.valueOf(cf.get().getCreated()));
+                cf.get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
