@@ -20,2120 +20,1957 @@
 
 package com.arangodb;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isOneOf;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
+import com.arangodb.entity.*;
+import com.arangodb.model.*;
+import com.arangodb.model.DocumentImportOptions.OnDuplicate;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.arangodb.entity.BaseDocument;
-import com.arangodb.entity.BaseEdgeDocument;
-import com.arangodb.entity.CollectionEntity;
-import com.arangodb.entity.CollectionPropertiesEntity;
-import com.arangodb.entity.CollectionRevisionEntity;
-import com.arangodb.entity.CollectionType;
-import com.arangodb.entity.DocumentCreateEntity;
-import com.arangodb.entity.DocumentDeleteEntity;
-import com.arangodb.entity.DocumentImportEntity;
-import com.arangodb.entity.DocumentUpdateEntity;
-import com.arangodb.entity.IndexEntity;
-import com.arangodb.entity.IndexType;
-import com.arangodb.entity.MultiDocumentEntity;
-import com.arangodb.entity.Permissions;
-import com.arangodb.entity.ServerRole;
-import com.arangodb.model.CollectionCreateOptions;
-import com.arangodb.model.CollectionPropertiesOptions;
-import com.arangodb.model.DocumentCreateOptions;
-import com.arangodb.model.DocumentDeleteOptions;
-import com.arangodb.model.DocumentExistsOptions;
-import com.arangodb.model.DocumentImportOptions;
-import com.arangodb.model.DocumentImportOptions.OnDuplicate;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.DocumentReplaceOptions;
-import com.arangodb.model.DocumentUpdateOptions;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * @author Mark Vollmary
- *
  */
 public class ArangoCollectionTest extends BaseTest {
 
-	private static final String COLLECTION_NAME = "db_collection_test";
-
-	@BeforeClass
-	public static void setup() throws InterruptedException, ExecutionException {
-		db.createCollection(COLLECTION_NAME, null).get();
-	}
-
-	@After
-	public void teardown() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).truncate().get();
-	}
-
-	@Test
-	public void create() throws InterruptedException, ExecutionException {
-		try {
-			final CollectionEntity result = db.collection(COLLECTION_NAME + "_1").create().get();
-			assertThat(result, is(notNullValue()));
-			assertThat(result.getId(), is(notNullValue()));
-		} finally {
-			db.collection(COLLECTION_NAME + "_1").drop();
-		}
-	}
-
-	@Test
-	public void insertDocument() throws InterruptedException, ExecutionException {
-		final CompletableFuture<DocumentCreateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.insertDocument(new BaseDocument(), null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(ex, is(nullValue()));
-			assertThat(doc.getId(), is(notNullValue()));
-			assertThat(doc.getKey(), is(notNullValue()));
-			assertThat(doc.getRev(), is(notNullValue()));
-			assertThat(doc.getNew(), is(nullValue()));
-			assertThat(doc.getId(), is(COLLECTION_NAME + "/" + doc.getKey()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void insertDocumentReturnNew() throws InterruptedException, ExecutionException {
-		final DocumentCreateOptions options = new DocumentCreateOptions().returnNew(true);
-		final CompletableFuture<DocumentCreateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.insertDocument(new BaseDocument(), options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.getId(), is(notNullValue()));
-			assertThat(doc.getKey(), is(notNullValue()));
-			assertThat(doc.getRev(), is(notNullValue()));
-			assertThat(doc.getNew(), is(notNullValue()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void insertDocumentWaitForSync() throws InterruptedException, ExecutionException {
-		final DocumentCreateOptions options = new DocumentCreateOptions().waitForSync(true);
-		final CompletableFuture<DocumentCreateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.insertDocument(new BaseDocument(), options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.getId(), is(notNullValue()));
-			assertThat(doc.getKey(), is(notNullValue()));
-			assertThat(doc.getRev(), is(notNullValue()));
-			assertThat(doc.getNew(), is(nullValue()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void insertDocumentAsJson() throws InterruptedException, ExecutionException {
-		final CompletableFuture<DocumentCreateEntity<String>> f = db.collection(COLLECTION_NAME)
-				.insertDocument("{\"_key\":\"docRaw\",\"a\":\"test\"}", null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.getId(), is(notNullValue()));
-			assertThat(doc.getKey(), is(notNullValue()));
-			assertThat(doc.getRev(), is(notNullValue()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getDocument() throws InterruptedException, ExecutionException {
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
-				.insertDocument(new BaseDocument(), null).get();
-		assertThat(createResult.getKey(), is(notNullValue()));
-		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
-			BaseDocument.class, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getKey(), is(createResult.getKey()));
-			assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getDocumentIfMatch() throws InterruptedException, ExecutionException {
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
-				.insertDocument(new BaseDocument(), null).get();
-		assertThat(createResult.getKey(), is(notNullValue()));
-		final DocumentReadOptions options = new DocumentReadOptions().ifMatch(createResult.getRev());
-		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
-			BaseDocument.class, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getKey(), is(createResult.getKey()));
-			assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getDocumentIfMatchFail() throws InterruptedException, ExecutionException {
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
-				.insertDocument(new BaseDocument(), null).get();
-		assertThat(createResult.getKey(), is(notNullValue()));
-		final DocumentReadOptions options = new DocumentReadOptions().ifMatch("no");
-		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
-			BaseDocument.class, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(nullValue()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getDocumentIfNoneMatch() throws InterruptedException, ExecutionException {
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
-				.insertDocument(new BaseDocument(), null).get();
-		assertThat(createResult.getKey(), is(notNullValue()));
-		final DocumentReadOptions options = new DocumentReadOptions().ifNoneMatch("no");
-		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
-			BaseDocument.class, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getKey(), is(createResult.getKey()));
-			assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getDocumentIfNoneMatchFail() throws InterruptedException, ExecutionException {
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
-				.insertDocument(new BaseDocument(), null).get();
-		assertThat(createResult.getKey(), is(notNullValue()));
-		final DocumentReadOptions options = new DocumentReadOptions().ifNoneMatch(createResult.getRev());
-		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
-			BaseDocument.class, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(nullValue()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getDocumentAsJson() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"docRaw\",\"a\":\"test\"}", null).get();
-		final CompletableFuture<String> f = db.collection(COLLECTION_NAME).getDocument("docRaw", String.class, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.contains("\"_key\":\"docRaw\""), is(true));
-			assertThat(readResult.contains("\"_id\":\"db_collection_test\\/docRaw\""), is(true));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getDocumentNotFound() throws InterruptedException, ExecutionException {
-		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument("no", BaseDocument.class);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(nullValue()));
-		});
-		f.get();
-	}
-
-	@Test(expected = ArangoDBException.class)
-	public void getDocumentWrongKey() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).getDocument("no/no", BaseDocument.class).get();
-	}
-
-	@Test
-	public void getDocuments() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument("1"));
-		values.add(new BaseDocument("2"));
-		values.add(new BaseDocument("3"));
-		db.collection(COLLECTION_NAME).insertDocuments(values).get();
-		final MultiDocumentEntity<BaseDocument> documents = db.collection(COLLECTION_NAME)
-				.getDocuments(Arrays.asList("1", "2", "3"), BaseDocument.class).get();
-		assertThat(documents, is(notNullValue()));
-		assertThat(documents.getDocuments().size(), is(3));
-		for (final BaseDocument document : documents.getDocuments()) {
-			assertThat(document.getId(),
-				isOneOf(COLLECTION_NAME + "/" + "1", COLLECTION_NAME + "/" + "2", COLLECTION_NAME + "/" + "3"));
-		}
-	}
-
-	@Test
-	public void getDocumentsNotFound() throws InterruptedException, ExecutionException {
-		final MultiDocumentEntity<BaseDocument> readResult = db.collection(COLLECTION_NAME)
-				.getDocuments(Collections.singleton("no"), BaseDocument.class).get();
-		assertThat(readResult, is(notNullValue()));
-		assertThat(readResult.getDocuments().size(), is(0));
-		assertThat(readResult.getErrors().size(), is(1));
-	}
-
-	@Test
-	public void getDocumentsWrongKey() throws InterruptedException, ExecutionException {
-		final MultiDocumentEntity<BaseDocument> readResult = db.collection(COLLECTION_NAME)
-				.getDocuments(Collections.singleton("no/no"), BaseDocument.class).get();
-		assertThat(readResult, is(notNullValue()));
-		assertThat(readResult.getDocuments().size(), is(0));
-		assertThat(readResult.getErrors().size(), is(1));
-	}
-
-	@Test
-	public void updateDocument() throws ArangoDBException, InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		doc.addAttribute("c", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.updateAttribute("a", "test1");
-		doc.addAttribute("b", "test");
-		doc.updateAttribute("c", null);
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.updateDocument(createResult.getKey(), doc, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getNew(), is(nullValue()));
-			assertThat(updateResult.getOld(), is(nullValue()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
-
-		final BaseDocument readResult = db.collection(COLLECTION_NAME)
-				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
-		assertThat(readResult.getKey(), is(createResult.getKey()));
-		assertThat(readResult.getAttribute("a"), is(notNullValue()));
-		assertThat(String.valueOf(readResult.getAttribute("a")), is("test1"));
-		assertThat(readResult.getAttribute("b"), is(notNullValue()));
-		assertThat(String.valueOf(readResult.getAttribute("b")), is("test"));
-		assertThat(readResult.getRevision(), is(updateResult.getRev()));
-		assertThat(readResult.getProperties().keySet(), hasItem("c"));
-	}
-
-	@Test
-	public void updateDocumentIfMatch() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		doc.addAttribute("c", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.updateAttribute("a", "test1");
-		doc.addAttribute("b", "test");
-		doc.updateAttribute("c", null);
-		final DocumentUpdateOptions options = new DocumentUpdateOptions().ifMatch(createResult.getRev());
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.updateDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
-
-		final BaseDocument readResult = db.collection(COLLECTION_NAME)
-				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
-		assertThat(readResult.getKey(), is(createResult.getKey()));
-		assertThat(readResult.getAttribute("a"), is(notNullValue()));
-		assertThat(String.valueOf(readResult.getAttribute("a")), is("test1"));
-		assertThat(readResult.getAttribute("b"), is(notNullValue()));
-		assertThat(String.valueOf(readResult.getAttribute("b")), is("test"));
-		assertThat(readResult.getRevision(), is(updateResult.getRev()));
-		assertThat(readResult.getProperties().keySet(), hasItem("c"));
-	}
-
-	@Test
-	public void updateDocumentIfMatchFail() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		doc.addAttribute("c", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.updateAttribute("a", "test1");
-		doc.addAttribute("b", "test");
-		doc.updateAttribute("c", null);
-		try {
-			final DocumentUpdateOptions options = new DocumentUpdateOptions().ifMatch("no");
-			db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options).get();
-			fail();
-		} catch (final Exception e) {
-		}
-	}
-
-	@Test
-	public void updateDocumentReturnNew() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.updateAttribute("a", "test1");
-		doc.addAttribute("b", "test");
-		final DocumentUpdateOptions options = new DocumentUpdateOptions().returnNew(true);
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.updateDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-			assertThat(updateResult.getNew(), is(notNullValue()));
-			assertThat(updateResult.getNew().getKey(), is(createResult.getKey()));
-			assertThat(updateResult.getNew().getRevision(), is(not(createResult.getRev())));
-			assertThat(updateResult.getNew().getAttribute("a"), is(notNullValue()));
-			assertThat(String.valueOf(updateResult.getNew().getAttribute("a")), is("test1"));
-			assertThat(updateResult.getNew().getAttribute("b"), is(notNullValue()));
-			assertThat(String.valueOf(updateResult.getNew().getAttribute("b")), is("test"));
-		});
-		f.get();
-	}
-
-	@Test
-	public void updateDocumentReturnOld() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.updateAttribute("a", "test1");
-		doc.addAttribute("b", "test");
-		final DocumentUpdateOptions options = new DocumentUpdateOptions().returnOld(true);
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.updateDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-			assertThat(updateResult.getOld(), is(notNullValue()));
-			assertThat(updateResult.getOld().getKey(), is(createResult.getKey()));
-			assertThat(updateResult.getOld().getRevision(), is(createResult.getRev()));
-			assertThat(updateResult.getOld().getAttribute("a"), is(notNullValue()));
-			assertThat(String.valueOf(updateResult.getOld().getAttribute("a")), is("test"));
-			assertThat(updateResult.getOld().getProperties().keySet(), not(hasItem("b")));
-		});
-		f.get();
-	}
-
-	@Test
-	public void updateDocumentKeepNullTrue() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.updateAttribute("a", null);
-		final DocumentUpdateOptions options = new DocumentUpdateOptions().keepNull(true);
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.updateDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		f.get();
-
-		final BaseDocument readResult = db.collection(COLLECTION_NAME)
-				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
-		assertThat(readResult.getKey(), is(createResult.getKey()));
-		assertThat(readResult.getProperties().keySet(), hasItem("a"));
-	}
-
-	@Test
-	public void updateDocumentKeepNullFalse() throws ArangoDBException, InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.updateAttribute("a", null);
-		final DocumentUpdateOptions options = new DocumentUpdateOptions().keepNull(false);
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.updateDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		f.get();
-
-		final BaseDocument readResult = db.collection(COLLECTION_NAME)
-				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
-		assertThat(readResult.getKey(), is(createResult.getKey()));
-		assertThat(readResult.getId(), is(createResult.getId()));
-		assertThat(readResult.getRevision(), is(notNullValue()));
-		assertThat(readResult.getProperties().keySet(), not(hasItem("a")));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void updateDocumentMergeObjectsTrue() throws ArangoDBException, InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		final Map<String, String> a = new HashMap<>();
-		a.put("a", "test");
-		doc.addAttribute("a", a);
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		a.clear();
-		a.put("b", "test");
-		doc.updateAttribute("a", a);
-		final DocumentUpdateOptions options = new DocumentUpdateOptions().mergeObjects(true);
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.updateDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		f.get();
-
-		final BaseDocument readResult = db.collection(COLLECTION_NAME)
-				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
-		assertThat(readResult.getKey(), is(createResult.getKey()));
-		final Object aResult = readResult.getAttribute("a");
-		assertThat(aResult, instanceOf(Map.class));
-		final Map<String, String> aMap = (Map<String, String>) aResult;
-		assertThat(aMap.keySet(), hasItem("a"));
-		assertThat(aMap.keySet(), hasItem("b"));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void updateDocumentMergeObjectsFalse() throws ArangoDBException, InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		final Map<String, String> a = new HashMap<>();
-		a.put("a", "test");
-		doc.addAttribute("a", a);
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		a.clear();
-		a.put("b", "test");
-		doc.updateAttribute("a", a);
-		final DocumentUpdateOptions options = new DocumentUpdateOptions().mergeObjects(false);
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.updateDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult, is(notNullValue()));
-			assertThat(updateResult.getId(), is(createResult.getId()));
-			assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
-			assertThat(updateResult.getOldRev(), is(createResult.getRev()));
-		});
-		f.get();
-
-		final BaseDocument readResult = db.collection(COLLECTION_NAME)
-				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
-		assertThat(readResult.getKey(), is(createResult.getKey()));
-		final Object aResult = readResult.getAttribute("a");
-		assertThat(aResult, instanceOf(Map.class));
-		final Map<String, String> aMap = (Map<String, String>) aResult;
-		assertThat(aMap.keySet(), not(hasItem("a")));
-		assertThat(aMap.keySet(), hasItem("b"));
-	}
-
-	@Test
-	public void updateDocumentIgnoreRevsFalse() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.updateAttribute("a", "test1");
-		doc.setRevision("no");
-		try {
-			final DocumentUpdateOptions options = new DocumentUpdateOptions().ignoreRevs(false);
-			db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options).get();
-			fail();
-		} catch (final Exception e) {
-		}
-	}
-
-	@Test
-	public void replaceDocument() throws ArangoDBException, InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.getProperties().clear();
-		doc.addAttribute("b", "test");
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.replaceDocument(createResult.getKey(), doc, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((replaceResult, ex) -> {
-			assertThat(replaceResult, is(notNullValue()));
-			assertThat(replaceResult.getId(), is(createResult.getId()));
-			assertThat(replaceResult.getNew(), is(nullValue()));
-			assertThat(replaceResult.getOld(), is(nullValue()));
-			assertThat(replaceResult.getRev(), is(not(replaceResult.getOldRev())));
-			assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
-		});
-		final DocumentUpdateEntity<BaseDocument> replaceResult = f.get();
-
-		final BaseDocument readResult = db.collection(COLLECTION_NAME)
-				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
-		assertThat(readResult.getKey(), is(createResult.getKey()));
-		assertThat(readResult.getRevision(), is(replaceResult.getRev()));
-		assertThat(readResult.getProperties().keySet(), not(hasItem("a")));
-		assertThat(readResult.getAttribute("b"), is(notNullValue()));
-		assertThat(String.valueOf(readResult.getAttribute("b")), is("test"));
-	}
-
-	@Test
-	public void replaceDocumentIfMatch() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.getProperties().clear();
-		doc.addAttribute("b", "test");
-		final DocumentReplaceOptions options = new DocumentReplaceOptions().ifMatch(createResult.getRev());
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.replaceDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((replaceResult, ex) -> {
-			assertThat(replaceResult, is(notNullValue()));
-			assertThat(replaceResult.getId(), is(createResult.getId()));
-			assertThat(replaceResult.getRev(), is(not(replaceResult.getOldRev())));
-			assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
-		});
-		final DocumentUpdateEntity<BaseDocument> replaceResult = f.get();
-
-		final BaseDocument readResult = db.collection(COLLECTION_NAME)
-				.getDocument(createResult.getKey(), BaseDocument.class, null).get();
-		assertThat(readResult.getKey(), is(createResult.getKey()));
-		assertThat(readResult.getRevision(), is(replaceResult.getRev()));
-		assertThat(readResult.getProperties().keySet(), not(hasItem("a")));
-		assertThat(readResult.getAttribute("b"), is(notNullValue()));
-		assertThat(String.valueOf(readResult.getAttribute("b")), is("test"));
-	}
-
-	@Test
-	public void replaceDocumentIfMatchFail() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.getProperties().clear();
-		doc.addAttribute("b", "test");
-		try {
-			final DocumentReplaceOptions options = new DocumentReplaceOptions().ifMatch("no");
-			db.collection(COLLECTION_NAME).replaceDocument(createResult.getKey(), doc, options).get();
-			fail();
-		} catch (final Exception e) {
-		}
-	}
-
-	@Test
-	public void replaceDocumentIgnoreRevsFalse() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.getProperties().clear();
-		doc.addAttribute("b", "test");
-		doc.setRevision("no");
-		try {
-			final DocumentReplaceOptions options = new DocumentReplaceOptions().ignoreRevs(false);
-			db.collection(COLLECTION_NAME).replaceDocument(createResult.getKey(), doc, options).get();
-			fail();
-		} catch (final Exception e) {
-		}
-	}
-
-	@Test
-	public void replaceDocumentReturnNew() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.getProperties().clear();
-		doc.addAttribute("b", "test");
-		final DocumentReplaceOptions options = new DocumentReplaceOptions().returnNew(true);
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.replaceDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((replaceResult, ex) -> {
-			assertThat(replaceResult, is(notNullValue()));
-			assertThat(replaceResult.getId(), is(createResult.getId()));
-			assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
-			assertThat(replaceResult.getNew(), is(notNullValue()));
-			assertThat(replaceResult.getNew().getKey(), is(createResult.getKey()));
-			assertThat(replaceResult.getNew().getRevision(), is(not(createResult.getRev())));
-			assertThat(replaceResult.getNew().getProperties().keySet(), not(hasItem("a")));
-			assertThat(replaceResult.getNew().getAttribute("b"), is(notNullValue()));
-			assertThat(String.valueOf(replaceResult.getNew().getAttribute("b")), is("test"));
-		});
-		f.get();
-	}
-
-	@Test
-	public void replaceDocumentReturnOld() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		doc.getProperties().clear();
-		doc.addAttribute("b", "test");
-		final DocumentReplaceOptions options = new DocumentReplaceOptions().returnOld(true);
-		final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.replaceDocument(createResult.getKey(), doc, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((replaceResult, ex) -> {
-			assertThat(replaceResult, is(notNullValue()));
-			assertThat(replaceResult.getId(), is(createResult.getId()));
-			assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
-			assertThat(replaceResult.getOld(), is(notNullValue()));
-			assertThat(replaceResult.getOld().getKey(), is(createResult.getKey()));
-			assertThat(replaceResult.getOld().getRevision(), is(createResult.getRev()));
-			assertThat(replaceResult.getOld().getAttribute("a"), is(notNullValue()));
-			assertThat(String.valueOf(replaceResult.getOld().getAttribute("a")), is("test"));
-			assertThat(replaceResult.getOld().getProperties().keySet(), not(hasItem("b")));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocument() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, null).get();
-		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
-			BaseDocument.class, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((document, ex) -> {
-			assertThat(document, is(nullValue()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocumentReturnOld() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		doc.addAttribute("a", "test");
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		final DocumentDeleteOptions options = new DocumentDeleteOptions().returnOld(true);
-		final CompletableFuture<DocumentDeleteEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
-				.deleteDocument(createResult.getKey(), BaseDocument.class, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult.getOld(), is(notNullValue()));
-			assertThat(deleteResult.getOld(), instanceOf(BaseDocument.class));
-			assertThat(deleteResult.getOld().getAttribute("a"), is(notNullValue()));
-			assertThat(String.valueOf(deleteResult.getOld().getAttribute("a")), is("test"));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocumentIfMatch() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		final DocumentDeleteOptions options = new DocumentDeleteOptions().ifMatch(createResult.getRev());
-		db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, options).get();
-		final CompletableFuture<BaseDocument> f = db.collection(COLLECTION_NAME).getDocument(createResult.getKey(),
-			BaseDocument.class, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((document, ex) -> {
-			assertThat(document, is(nullValue()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocumentIfMatchFail() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
-				.get();
-		final DocumentDeleteOptions options = new DocumentDeleteOptions().ifMatch("no");
-		try {
-			db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, options).get();
-			fail();
-		} catch (final Exception e) {
-		}
-	}
-
-	@Test
-	public void getIndex() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).getIndex(createResult.getId());
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getId(), is(createResult.getId()));
-			assertThat(readResult.getType(), is(createResult.getType()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getIndexByKey() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME)
-				.getIndex(createResult.getId().split("/")[1]);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((readResult, ex) -> {
-			assertThat(readResult.getId(), is(createResult.getId()));
-			assertThat(readResult.getType(), is(createResult.getType()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteIndex() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
-		final CompletableFuture<String> f = db.collection(COLLECTION_NAME).deleteIndex(createResult.getId());
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((id, ex) -> {
-			assertThat(id, is(createResult.getId()));
-			try {
-				db.getIndex(id);
-				fail();
-			} catch (final ArangoDBException e) {
-			}
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteIndexByKey() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
-		final CompletableFuture<String> f = db.collection(COLLECTION_NAME)
-				.deleteIndex(createResult.getId().split("/")[1]);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((id, ex) -> {
-			assertThat(id, is(createResult.getId()));
-			try {
-				db.getIndex(id);
-				fail();
-			} catch (final ArangoDBException e) {
-			}
-		});
-		f.get();
-	}
-
-	@Test
-	public void createHashIndex() throws InterruptedException, ExecutionException {
-		final boolean singleServer = arangoDB.getRole().get() == ServerRole.SINGLE;
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		fields.add("b");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(nullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getFields(), hasItem("b"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			if (singleServer) {
-				assertThat(indexResult.getSelectivityEstimate(), is(1));
-			}
-			assertThat(indexResult.getSparse(), is(false));
-			assertThat(indexResult.getType(), is(IndexType.hash));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
-	}
-
-	@Test
-	public void createGeoIndex() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureGeoIndex(fields, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getGeoJson(), is(false));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(true));
-			assertThat(indexResult.getType(), anyOf(is(IndexType.geo), is(IndexType.geo1)));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
-	}
-
-	@Test
-	public void createGeo2Index() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		fields.add("b");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureGeoIndex(fields, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getFields(), hasItem("b"));
-			assertThat(indexResult.getGeoJson(), is(false));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(true));
-			assertThat(indexResult.getType(), anyOf(is(IndexType.geo), is(IndexType.geo2)));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
-	}
-
-	@Test
-	public void createSkiplistIndex() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		fields.add("b");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureSkiplistIndex(fields, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(nullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getFields(), hasItem("b"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(false));
-			assertThat(indexResult.getType(), is(IndexType.skiplist));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
-	}
-
-	@Test
-	public void createPersistentIndex() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		fields.add("b");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensurePersistentIndex(fields, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(nullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getFields(), hasItem("b"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getMinLength(), is(nullValue()));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(false));
-			assertThat(indexResult.getType(), is(IndexType.persistent));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
-	}
-
-	@Test
-	public void createFulltextIndex() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		final CompletableFuture<IndexEntity> f = db.collection(COLLECTION_NAME).ensureFulltextIndex(fields, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexResult, ex) -> {
-			assertThat(indexResult, is(notNullValue()));
-			assertThat(indexResult.getConstraint(), is(nullValue()));
-			assertThat(indexResult.getFields(), hasItem("a"));
-			assertThat(indexResult.getGeoJson(), is(nullValue()));
-			assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-			assertThat(indexResult.getIsNewlyCreated(), is(true));
-			assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-			assertThat(indexResult.getSparse(), is(true));
-			assertThat(indexResult.getType(), is(IndexType.fulltext));
-			assertThat(indexResult.getUnique(), is(false));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getIndexes() throws InterruptedException, ExecutionException {
-		final Collection<String> fields = new ArrayList<>();
-		fields.add("a");
-		db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
-		final CompletableFuture<Collection<IndexEntity>> f = db.collection(COLLECTION_NAME).getIndexes();
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((indexes, ex) -> {
-			assertThat(indexes, is(notNullValue()));
-			assertThat(indexes.size(), is(2));
-			for (final IndexEntity i : indexes) {
-				assertThat(i.getType(), anyOf(is(IndexType.primary), is(IndexType.hash)));
-				if (i.getType() == IndexType.hash) {
-					assertThat(i.getFields().size(), is(1));
-					assertThat(i.getFields(), hasItem("a"));
-				}
-			}
-		});
-		f.get();
-	}
-
-	@Test
-	public void exists() throws InterruptedException, ExecutionException {
-		assertThat(db.collection(COLLECTION_NAME).exists().get(), is(true));
-		assertThat(db.collection(COLLECTION_NAME + "no").exists().get(), is(false));
-	}
-
-	@Test
-	public void truncate() throws InterruptedException, ExecutionException {
-		final BaseDocument doc = new BaseDocument();
-		db.collection(COLLECTION_NAME).insertDocument(doc, null).get();
-		final BaseDocument readResult = db.collection(COLLECTION_NAME)
-				.getDocument(doc.getKey(), BaseDocument.class, null).get();
-		assertThat(readResult.getKey(), is(doc.getKey()));
-		final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).truncate();
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((truncateResult, ex) -> {
-			assertThat(truncateResult, is(notNullValue()));
-			assertThat(truncateResult.getId(), is(notNullValue()));
-		});
-		f.get();
-		final BaseDocument document = db.collection(COLLECTION_NAME).getDocument(doc.getKey(), BaseDocument.class, null)
-				.get();
-		assertThat(document, is(nullValue()));
-	}
-
-	@Test
-	public void getCount() throws InterruptedException, ExecutionException {
-		{
-			final CompletableFuture<CollectionPropertiesEntity> f = db.collection(COLLECTION_NAME).count();
-			assertThat(f, is(notNullValue()));
-			f.whenComplete((countEmpty, ex) -> {
-				assertThat(countEmpty, is(notNullValue()));
-				assertThat(countEmpty.getCount(), is(0L));
-			});
-			f.get();
-		}
-		db.collection(COLLECTION_NAME).insertDocument("{}", null).get();
-		{
-			final CompletableFuture<CollectionPropertiesEntity> f = db.collection(COLLECTION_NAME).count();
-			assertThat(f, is(notNullValue()));
-			f.whenComplete((count, ex) -> {
-				assertThat(count.getCount(), is(1L));
-			});
-			f.get();
-
-		}
-	}
-
-	@Test
-	public void documentExists() throws InterruptedException, ExecutionException {
-		{
-			final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("no", null);
-			assertThat(f, is(notNullValue()));
-			f.whenComplete((existsNot, ex) -> {
-				assertThat(existsNot, is(false));
-			});
-			f.get();
-		}
-		db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"abc\"}", null).get();
-		{
-			final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", null);
-			assertThat(f, is(notNullValue()));
-			f.whenComplete((exists, ex) -> {
-				assertThat(exists, is(true));
-			});
-			f.get();
-		}
-	}
-
-	@Test
-	public void documentExistsIfMatch() throws InterruptedException, ExecutionException {
-		final DocumentCreateEntity<String> createResult = db.collection(COLLECTION_NAME)
-				.insertDocument("{\"_key\":\"abc\"}", null).get();
-		final DocumentExistsOptions options = new DocumentExistsOptions().ifMatch(createResult.getRev());
-		final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((exists, ex) -> {
-			assertThat(exists, is(true));
-		});
-		f.get();
-	}
-
-	@Test
-	public void documentExistsIfMatchFail() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"abc\"}", null).get();
-		final DocumentExistsOptions options = new DocumentExistsOptions().ifMatch("no");
-		final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((exists, ex) -> {
-			assertThat(exists, is(false));
-		});
-		f.get();
-	}
-
-	@Test
-	public void documentExistsIfNoneMatch() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"abc\"}", null).get();
-		final DocumentExistsOptions options = new DocumentExistsOptions().ifNoneMatch("no");
-		final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((exists, ex) -> {
-			assertThat(exists, is(true));
-		});
-		f.get();
-	}
-
-	@Test
-	public void documentExistsIfNoneMatchFail() throws InterruptedException, ExecutionException {
-		final DocumentCreateEntity<String> createResult = db.collection(COLLECTION_NAME)
-				.insertDocument("{\"_key\":\"abc\"}", null).get();
-		final DocumentExistsOptions options = new DocumentExistsOptions().ifNoneMatch(createResult.getRev());
-		final CompletableFuture<Boolean> f = db.collection(COLLECTION_NAME).documentExists("abc", options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((exists, ex) -> {
-			assertThat(exists, is(false));
-		});
-		f.get();
-	}
-
-	@Test
-	public void insertDocuments() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument());
-		values.add(new BaseDocument());
-		values.add(new BaseDocument());
-		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).insertDocuments(values, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(3));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void insertDocumentsOne() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument());
-		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).insertDocuments(values, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(1));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void insertDocumentsEmpty() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).insertDocuments(values, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(0));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void insertDocumentsReturnNew() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument());
-		values.add(new BaseDocument());
-		values.add(new BaseDocument());
-		final DocumentCreateOptions options = new DocumentCreateOptions().returnNew(true);
-		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).insertDocuments(values, options);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(3));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(0));
-			for (final DocumentCreateEntity<BaseDocument> doc : docs.getDocuments()) {
-				assertThat(doc.getNew(), is(notNullValue()));
-				final BaseDocument baseDocument = doc.getNew();
-				assertThat(baseDocument.getKey(), is(notNullValue()));
-			}
-		});
-		f.get();
-	}
-
-	@Test
-	public void insertDocumentsFail() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument("1"));
-		values.add(new BaseDocument("2"));
-		values.add(new BaseDocument("2"));
-		final CompletableFuture<MultiDocumentEntity<DocumentCreateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).insertDocuments(values);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getDocuments(), is(notNullValue()));
-			assertThat(docs.getDocuments().size(), is(2));
-			assertThat(docs.getErrors(), is(notNullValue()));
-			assertThat(docs.getErrors().size(), is(1));
-			assertThat(docs.getErrors().iterator().next().getErrorNum(), is(1210));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocuments() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument());
-		values.add(new BaseDocument());
-		values.add(new BaseDocument());
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(values.size()));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsDuplicateDefaultError() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument("1"));
-		values.add(new BaseDocument("2"));
-		values.add(new BaseDocument("2"));
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsDuplicateError() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument("1"));
-		values.add(new BaseDocument("2"));
-		values.add(new BaseDocument("2"));
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().onDuplicate(OnDuplicate.error));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsDuplicateIgnore() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument("1"));
-		values.add(new BaseDocument("2"));
-		values.add(new BaseDocument("2"));
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().onDuplicate(OnDuplicate.ignore));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(1));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsDuplicateReplace() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument("1"));
-		values.add(new BaseDocument("2"));
-		values.add(new BaseDocument("2"));
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().onDuplicate(OnDuplicate.replace));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(1));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsDuplicateUpdate() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument("1"));
-		values.add(new BaseDocument("2"));
-		values.add(new BaseDocument("2"));
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().onDuplicate(OnDuplicate.update));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(1));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsCompleteFail() {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument("1"));
-		values.add(new BaseDocument("2"));
-		values.add(new BaseDocument("2"));
-		try {
-			db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().complete(true)).get();
-			fail();
-		} catch (InterruptedException | ExecutionException e) {
-			assertThat(e.getMessage(), containsString("1210"));
-		}
-	}
-
-	@Test
-	public void importDocumentsDetails() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument("1"));
-		values.add(new BaseDocument("2"));
-		values.add(new BaseDocument("2"));
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().details(true));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails().size(), is(1));
-			assertThat(docs.getDetails().iterator().next(), containsString("unique constraint violated"));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsOverwriteFalse() throws InterruptedException, ExecutionException {
-		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument()).get();
-		assertThat(collection.count().get().getCount(), is(1L));
-
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument());
-		values.add(new BaseDocument());
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(false)).get();
-		assertThat(collection.count().get().getCount(), is(3L));
-	}
-
-	@Test
-	public void importDocumentsOverwriteTrue() throws InterruptedException, ExecutionException {
-		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument()).get();
-		assertThat(collection.count().get().getCount(), is(1L));
-
-		final Collection<BaseDocument> values = new ArrayList<>();
-		values.add(new BaseDocument());
-		values.add(new BaseDocument());
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(true)).get();
-		assertThat(collection.count().get().getCount(), is(2L));
-	}
-
-	@Test
-	public void importDocumentsFromToPrefix() throws InterruptedException, ExecutionException {
-		db.createCollection(COLLECTION_NAME + "_edge", new CollectionCreateOptions().type(CollectionType.EDGES)).get();
-		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME + "_edge");
-		try {
-			final Collection<BaseEdgeDocument> values = new ArrayList<>();
-			final String[] keys = { "1", "2" };
-			for (int i = 0; i < keys.length; i++) {
-				values.add(new BaseEdgeDocument(keys[i], "from", "to"));
-			}
-			assertThat(values.size(), is(keys.length));
-
-			final DocumentImportEntity importResult = collection
-					.importDocuments(values, new DocumentImportOptions().fromPrefix("foo").toPrefix("bar")).get();
-			assertThat(importResult, is(notNullValue()));
-			assertThat(importResult.getCreated(), is(values.size()));
-			for (int i = 0; i < keys.length; i++) {
-				BaseEdgeDocument doc;
-				try {
-					doc = collection.getDocument(keys[i], BaseEdgeDocument.class).get();
-					assertThat(doc, is(notNullValue()));
-					assertThat(doc.getFrom(), is("foo/from"));
-					assertThat(doc.getTo(), is("bar/to"));
-				} catch (ArangoDBException | InterruptedException | ExecutionException e) {
-					fail();
-				}
-			}
-		} finally {
-			collection.drop().get();
-		}
-	}
-
-	@Test
-	public void importDocumentsJson() throws InterruptedException, ExecutionException {
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsJsonDuplicateDefaultError() throws InterruptedException, ExecutionException {
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsJsonDuplicateError() throws InterruptedException, ExecutionException {
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().onDuplicate(OnDuplicate.error));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsJsonDuplicateIgnore() throws InterruptedException, ExecutionException {
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().onDuplicate(OnDuplicate.ignore));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(1));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsJsonDuplicateReplace() throws InterruptedException, ExecutionException {
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().onDuplicate(OnDuplicate.replace));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(1));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsJsonDuplicateUpdate() throws InterruptedException, ExecutionException {
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().onDuplicate(OnDuplicate.update));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(0));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(1));
-			assertThat(docs.getDetails(), is(empty()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsJsonCompleteFail() {
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
-		try {
-			db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().complete(true)).get();
-			fail();
-		} catch (InterruptedException | ExecutionException e) {
-			assertThat(e.getMessage(), containsString("1210"));
-		}
-	}
-
-	@Test
-	public void importDocumentsJsonDetails() throws InterruptedException, ExecutionException {
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
-		final CompletableFuture<DocumentImportEntity> f = db.collection(COLLECTION_NAME).importDocuments(values,
-			new DocumentImportOptions().details(true));
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((docs, ex) -> {
-			assertThat(docs, is(notNullValue()));
-			assertThat(docs.getCreated(), is(2));
-			assertThat(docs.getEmpty(), is(0));
-			assertThat(docs.getErrors(), is(1));
-			assertThat(docs.getIgnored(), is(0));
-			assertThat(docs.getUpdated(), is(0));
-			assertThat(docs.getDetails().size(), is(1));
-			assertThat(docs.getDetails().iterator().next(), containsString("unique constraint violated"));
-		});
-		f.get();
-	}
-
-	@Test
-	public void importDocumentsJsonOverwriteFalse() throws InterruptedException, ExecutionException {
-		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument()).get();
-		assertThat(collection.count().get().getCount(), is(1L));
-
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(false)).get();
-		assertThat(collection.count().get().getCount(), is(3L));
-	}
-
-	@Test
-	public void importDocumentsJsonOverwriteTrue() throws InterruptedException, ExecutionException {
-		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
-		collection.insertDocument(new BaseDocument()).get();
-		assertThat(collection.count().get().getCount(), is(1L));
-
-		final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
-		collection.importDocuments(values, new DocumentImportOptions().overwrite(true)).get();
-		assertThat(collection.count().get().getCount(), is(2L));
-	}
-
-	@Test
-	public void importDocumentsJsonFromToPrefix() throws InterruptedException, ExecutionException {
-		db.createCollection(COLLECTION_NAME + "_edge", new CollectionCreateOptions().type(CollectionType.EDGES)).get();
-		final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME + "_edge");
-		try {
-			final String[] keys = { "1", "2" };
-			final String values = "[{\"_key\":\"1\",\"_from\":\"from\",\"_to\":\"to\"},{\"_key\":\"2\",\"_from\":\"from\",\"_to\":\"to\"}]";
-
-			final DocumentImportEntity importResult = collection
-					.importDocuments(values, new DocumentImportOptions().fromPrefix("foo").toPrefix("bar")).get();
-			assertThat(importResult, is(notNullValue()));
-			assertThat(importResult.getCreated(), is(2));
-			for (int i = 0; i < keys.length; i++) {
-				BaseEdgeDocument doc;
-				try {
-					doc = collection.getDocument(keys[i], BaseEdgeDocument.class).get();
-					assertThat(doc, is(notNullValue()));
-					assertThat(doc.getFrom(), is("foo/from"));
-					assertThat(doc.getTo(), is("bar/to"));
-				} catch (ArangoDBException | InterruptedException | ExecutionException e) {
-					fail();
-				}
-			}
-		} finally {
-			collection.drop().get();
-		}
-	}
-
-	@Test
-	public void deleteDocumentsByKey() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("1");
-			values.add(e);
-		}
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("2");
-			values.add(e);
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final Collection<String> keys = new ArrayList<>();
-		keys.add("1");
-		keys.add("2");
-		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
-				.deleteDocuments(keys, null, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(2));
-			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
-				assertThat(i.getKey(), anyOf(is("1"), is("2")));
-			}
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocumentsByDocuments() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("1");
-			values.add(e);
-		}
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("2");
-			values.add(e);
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
-				.deleteDocuments(values, null, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(2));
-			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
-				assertThat(i.getKey(), anyOf(is("1"), is("2")));
-			}
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocumentsByKeyOne() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("1");
-			values.add(e);
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final Collection<String> keys = new ArrayList<>();
-		keys.add("1");
-		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
-				.deleteDocuments(keys, null, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(1));
-			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
-				assertThat(i.getKey(), is("1"));
-			}
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocumentsByDocumentOne() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("1");
-			values.add(e);
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
-				.deleteDocuments(values, null, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(1));
-			for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
-				assertThat(i.getKey(), is("1"));
-			}
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocumentsEmpty() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final Collection<String> keys = new ArrayList<>();
-		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
-				.deleteDocuments(keys, null, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(0));
-			assertThat(deleteResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocumentsByKeyNotExisting() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final Collection<String> keys = new ArrayList<>();
-		keys.add("1");
-		keys.add("2");
-		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
-				.deleteDocuments(keys, null, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(0));
-			assertThat(deleteResult.getErrors().size(), is(2));
-		});
-		f.get();
-	}
-
-	@Test
-	public void deleteDocumentsByDocumentsNotExisting() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("1");
-			values.add(e);
-		}
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("2");
-			values.add(e);
-		}
-		final CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Object>>> f = db.collection(COLLECTION_NAME)
-				.deleteDocuments(values, null, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((deleteResult, ex) -> {
-			assertThat(deleteResult, is(notNullValue()));
-			assertThat(deleteResult.getDocuments().size(), is(0));
-			assertThat(deleteResult.getErrors().size(), is(2));
-		});
-		f.get();
-	}
-
-	@Test
-	public void updateDocuments() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("1");
-			values.add(e);
-		}
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("2");
-			values.add(e);
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null);
-		final Collection<BaseDocument> updatedValues = new ArrayList<>();
-		for (final BaseDocument i : values) {
-			i.addAttribute("a", "test");
-			updatedValues.add(i);
-		}
-		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(2));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void updateDocumentsOne() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("1");
-			values.add(e);
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final Collection<BaseDocument> updatedValues = new ArrayList<>();
-		final BaseDocument first = values.iterator().next();
-		first.addAttribute("a", "test");
-		updatedValues.add(first);
-		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(1));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void updateDocumentsEmpty() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).updateDocuments(values, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(0));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void updateDocumentsWithoutKey() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			values.add(new BaseDocument("1"));
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final Collection<BaseDocument> updatedValues = new ArrayList<>();
-		for (final BaseDocument i : values) {
-			i.addAttribute("a", "test");
-			updatedValues.add(i);
-		}
-		updatedValues.add(new BaseDocument());
-		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(1));
-			assertThat(updateResult.getErrors().size(), is(1));
-		});
-		f.get();
-	}
-
-	@Test
-	public void replaceDocuments() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			values.add(new BaseDocument("1"));
-			values.add(new BaseDocument("2"));
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final Collection<BaseDocument> updatedValues = new ArrayList<>();
-		for (final BaseDocument i : values) {
-			i.addAttribute("a", "test");
-			updatedValues.add(i);
-		}
-		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).replaceDocuments(updatedValues, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(2));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void replaceDocumentsOne() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			final BaseDocument e = new BaseDocument();
-			e.setKey("1");
-			values.add(e);
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final Collection<BaseDocument> updatedValues = new ArrayList<>();
-		final BaseDocument first = values.iterator().next();
-		first.addAttribute("a", "test");
-		updatedValues.add(first);
-		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(1));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void replaceDocumentsEmpty() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).updateDocuments(values, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(0));
-			assertThat(updateResult.getErrors().size(), is(0));
-		});
-		f.get();
-	}
-
-	@Test
-	public void replaceDocumentsWithoutKey() throws InterruptedException, ExecutionException {
-		final Collection<BaseDocument> values = new ArrayList<>();
-		{
-			values.add(new BaseDocument("1"));
-		}
-		db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
-		final Collection<BaseDocument> updatedValues = new ArrayList<>();
-		for (final BaseDocument i : values) {
-			i.addAttribute("a", "test");
-			updatedValues.add(i);
-		}
-		updatedValues.add(new BaseDocument());
-		final CompletableFuture<MultiDocumentEntity<DocumentUpdateEntity<BaseDocument>>> f = db
-				.collection(COLLECTION_NAME).updateDocuments(updatedValues, null);
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((updateResult, ex) -> {
-			assertThat(updateResult.getDocuments().size(), is(1));
-			assertThat(updateResult.getErrors().size(), is(1));
-		});
-		f.get();
-	}
-
-	@Test
-	public void load() throws InterruptedException, ExecutionException {
-		final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).load();
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result.getName(), is(COLLECTION_NAME));
-		});
-		f.get();
-	}
-
-	@Test
-	public void unload() throws InterruptedException, ExecutionException {
-		final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).unload();
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result.getName(), is(COLLECTION_NAME));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getInfo() throws InterruptedException, ExecutionException {
-		final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).getInfo();
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result.getName(), is(COLLECTION_NAME));
-		});
-		f.get();
-	}
-
-	@Test
-	public void getPropeties() throws InterruptedException, ExecutionException {
-		final CompletableFuture<CollectionPropertiesEntity> f = db.collection(COLLECTION_NAME).getProperties();
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result.getName(), is(COLLECTION_NAME));
-			assertThat(result.getCount(), is(nullValue()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void changeProperties() throws InterruptedException, ExecutionException {
-		final String collection = COLLECTION_NAME + "_prop";
-		try {
-			db.createCollection(collection).get();
-			final CollectionPropertiesEntity properties = db.collection(collection).getProperties().get();
-			assertThat(properties.getWaitForSync(), is(notNullValue()));
-			final CollectionPropertiesOptions options = new CollectionPropertiesOptions();
-			options.waitForSync(!properties.getWaitForSync());
-			options.journalSize(2000000L);
-			final CompletableFuture<CollectionPropertiesEntity> f = db.collection(collection).changeProperties(options);
-			assertThat(f, is(notNullValue()));
-			f.whenComplete((changedProperties, ex) -> {
-				assertThat(changedProperties.getWaitForSync(), is(notNullValue()));
-				assertThat(changedProperties.getWaitForSync(), is(not(properties.getWaitForSync())));
-				assertThat(changedProperties.getJournalSize(), is(options.getJournalSize()));
-			});
-			f.get();
-		} finally {
-			db.collection(collection).drop();
-		}
-	}
-
-	@Test
-	public void rename() throws InterruptedException, ExecutionException {
-		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
-			return;
-		}
-		try {
-			final CompletableFuture<CollectionEntity> f = db.collection(COLLECTION_NAME).rename(COLLECTION_NAME + "1");
-			assertThat(f, is(notNullValue()));
-			f.whenComplete((result, ex) -> {
-				assertThat(result, is(notNullValue()));
-				assertThat(result.getName(), is(COLLECTION_NAME + "1"));
-			});
-			f.get();
-			final CollectionEntity info = db.collection(COLLECTION_NAME + "1").getInfo().get();
-			assertThat(info.getName(), is(COLLECTION_NAME + "1"));
-			try {
-				db.collection(COLLECTION_NAME).getInfo().get();
-				fail();
-			} catch (final Exception e) {
-			}
-		} finally {
-			db.collection(COLLECTION_NAME + "1").rename(COLLECTION_NAME).get();
-		}
-	}
-
-	@Test
-	public void getRevision() throws InterruptedException, ExecutionException {
-		final CompletableFuture<CollectionRevisionEntity> f = db.collection(COLLECTION_NAME).getRevision();
-		assertThat(f, is(notNullValue()));
-		f.whenComplete((result, ex) -> {
-			assertThat(result, is(notNullValue()));
-			assertThat(result.getName(), is(COLLECTION_NAME));
-			assertThat(result.getRevision(), is(notNullValue()));
-		});
-		f.get();
-	}
-
-	@Test
-	public void grantAccessRW() throws InterruptedException, ExecutionException {
-		try {
-			arangoDB.createUser("user1", "1234", null).get();
-			db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.RW).get();
-		} finally {
-			arangoDB.deleteUser("user1").get();
-		}
-	}
-
-	@Test
-	public void grantAccessRO() throws InterruptedException, ExecutionException {
-		try {
-			arangoDB.createUser("user1", "1234", null).get();
-			db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.RO).get();
-		} finally {
-			arangoDB.deleteUser("user1").get();
-		}
-	}
-
-	@Test
-	public void grantAccessNONE() throws InterruptedException, ExecutionException {
-		try {
-			arangoDB.createUser("user1", "1234", null).get();
-			db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
-		} finally {
-			arangoDB.deleteUser("user1").get();
-		}
-	}
-
-	@Test(expected = ExecutionException.class)
-	public void grantAccessUserNotFound() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.RW).get();
-	}
-
-	@Test
-	public void revokeAccess() throws InterruptedException, ExecutionException {
-		try {
-			arangoDB.createUser("user1", "1234", null).get();
-			db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
-		} finally {
-			arangoDB.deleteUser("user1").get();
-		}
-	}
-
-	@Test(expected = ExecutionException.class)
-	public void revokeAccessUserNotFound() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
-	}
-
-	@Test
-	public void resetAccess() throws InterruptedException, ExecutionException {
-		try {
-			arangoDB.createUser("user1", "1234", null).get();
-			db.collection(COLLECTION_NAME).resetAccess("user1").get();
-		} finally {
-			arangoDB.deleteUser("user1").get();
-		}
-	}
-
-	@Test(expected = ExecutionException.class)
-	public void resetAccessUserNotFound() throws InterruptedException, ExecutionException {
-		db.collection(COLLECTION_NAME).resetAccess("user1").get();
-	}
-
-	@Test
-	public void getPermissions() throws ArangoDBException, InterruptedException, ExecutionException {
-		assertThat(Permissions.RW, is(db.collection(COLLECTION_NAME).getPermissions("root").get()));
-	}
+    private static final String COLLECTION_NAME = "db_collection_test";
+
+    @BeforeClass
+    public static void setup() throws InterruptedException, ExecutionException {
+        db.createCollection(COLLECTION_NAME, null).get();
+    }
+
+    @After
+    public void teardown() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).truncate().get();
+    }
+
+    @Test
+    public void create() throws InterruptedException, ExecutionException {
+        try {
+            final CollectionEntity result = db.collection(COLLECTION_NAME + "_1").create().get();
+            assertThat(result, is(notNullValue()));
+            assertThat(result.getId(), is(notNullValue()));
+        } finally {
+            db.collection(COLLECTION_NAME + "_1").drop();
+        }
+    }
+
+    @Test
+    public void insertDocument() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME)
+                .insertDocument(new BaseDocument(), null)
+                .whenComplete((doc, ex) -> {
+                    assertThat(ex, is(nullValue()));
+                    assertThat(doc.getId(), is(notNullValue()));
+                    assertThat(doc.getKey(), is(notNullValue()));
+                    assertThat(doc.getRev(), is(notNullValue()));
+                    assertThat(doc.getNew(), is(nullValue()));
+                    assertThat(doc.getId(), is(COLLECTION_NAME + "/" + doc.getKey()));
+                })
+                .get();
+    }
+
+    @Test
+    public void insertDocumentReturnNew() throws InterruptedException, ExecutionException {
+        final DocumentCreateOptions options = new DocumentCreateOptions().returnNew(true);
+        db.collection(COLLECTION_NAME)
+                .insertDocument(new BaseDocument(), options)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(notNullValue()));
+                    assertThat(doc.getId(), is(notNullValue()));
+                    assertThat(doc.getKey(), is(notNullValue()));
+                    assertThat(doc.getRev(), is(notNullValue()));
+                    assertThat(doc.getNew(), is(notNullValue()));
+                })
+                .get();
+    }
+
+    @Test
+    public void insertDocumentWaitForSync() throws InterruptedException, ExecutionException {
+        final DocumentCreateOptions options = new DocumentCreateOptions().waitForSync(true);
+        db.collection(COLLECTION_NAME)
+                .insertDocument(new BaseDocument(), options)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(notNullValue()));
+                    assertThat(doc.getId(), is(notNullValue()));
+                    assertThat(doc.getKey(), is(notNullValue()));
+                    assertThat(doc.getRev(), is(notNullValue()));
+                    assertThat(doc.getNew(), is(nullValue()));
+                })
+                .get();
+    }
+
+    @Test
+    public void insertDocumentAsJson() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME)
+                .insertDocument("{\"_key\":\"docRaw\",\"a\":\"test\"}", null)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(notNullValue()));
+                    assertThat(doc.getId(), is(notNullValue()));
+                    assertThat(doc.getKey(), is(notNullValue()));
+                    assertThat(doc.getRev(), is(notNullValue()));
+                })
+                .get();
+    }
+
+    @Test
+    public void getDocument() throws InterruptedException, ExecutionException {
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
+                .insertDocument(new BaseDocument(), null).get();
+        assertThat(createResult.getKey(), is(notNullValue()));
+        db.collection(COLLECTION_NAME).getDocument(createResult.getKey(), BaseDocument.class, null)
+                .whenComplete((readResult, ex) -> {
+                    assertThat(readResult.getKey(), is(createResult.getKey()));
+                    assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
+                })
+                .get();
+    }
+
+    @Test
+    public void getDocumentIfMatch() throws InterruptedException, ExecutionException {
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
+                .insertDocument(new BaseDocument(), null).get();
+        assertThat(createResult.getKey(), is(notNullValue()));
+        final DocumentReadOptions options = new DocumentReadOptions().ifMatch(createResult.getRev());
+        db.collection(COLLECTION_NAME).getDocument(createResult.getKey(), BaseDocument.class, options)
+                .whenComplete((readResult, ex) -> {
+                    assertThat(readResult.getKey(), is(createResult.getKey()));
+                    assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
+                })
+                .get();
+    }
+
+    @Test
+    public void getDocumentIfMatchFail() throws InterruptedException, ExecutionException {
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
+                .insertDocument(new BaseDocument(), null).get();
+        assertThat(createResult.getKey(), is(notNullValue()));
+        final DocumentReadOptions options = new DocumentReadOptions().ifMatch("no");
+        db.collection(COLLECTION_NAME).getDocument(createResult.getKey(), BaseDocument.class, options)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(nullValue()));
+                })
+                .get();
+    }
+
+    @Test
+    public void getDocumentIfNoneMatch() throws InterruptedException, ExecutionException {
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
+                .insertDocument(new BaseDocument(), null).get();
+        assertThat(createResult.getKey(), is(notNullValue()));
+        final DocumentReadOptions options = new DocumentReadOptions().ifNoneMatch("no");
+        db.collection(COLLECTION_NAME).getDocument(createResult.getKey(), BaseDocument.class, options)
+                .whenComplete((readResult, ex) -> {
+                    assertThat(readResult.getKey(), is(createResult.getKey()));
+                    assertThat(readResult.getId(), is(COLLECTION_NAME + "/" + createResult.getKey()));
+                })
+                .get();
+    }
+
+    @Test
+    public void getDocumentIfNoneMatchFail() throws InterruptedException, ExecutionException {
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME)
+                .insertDocument(new BaseDocument(), null).get();
+        assertThat(createResult.getKey(), is(notNullValue()));
+        final DocumentReadOptions options = new DocumentReadOptions().ifNoneMatch(createResult.getRev());
+        db.collection(COLLECTION_NAME).getDocument(createResult.getKey(), BaseDocument.class, options)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(nullValue()));
+                })
+                .get();
+    }
+
+    @Test
+    public void getDocumentAsJson() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"docRaw\",\"a\":\"test\"}", null).get();
+        db.collection(COLLECTION_NAME).getDocument("docRaw", String.class, null)
+                .whenComplete((readResult, ex) -> {
+                    assertThat(readResult.contains("\"_key\":\"docRaw\""), is(true));
+                    assertThat(readResult.contains("\"_id\":\"db_collection_test\\/docRaw\""), is(true));
+                })
+                .get();
+    }
+
+    @Test
+    public void getDocumentNotFound() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).getDocument("no", BaseDocument.class)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(nullValue()));
+                })
+                .get();
+    }
+
+    @Test(expected = ArangoDBException.class)
+    public void getDocumentWrongKey() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).getDocument("no/no", BaseDocument.class).get();
+    }
+
+    @Test
+    public void getDocuments() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument("1"));
+        values.add(new BaseDocument("2"));
+        values.add(new BaseDocument("3"));
+        db.collection(COLLECTION_NAME).insertDocuments(values).get();
+        final MultiDocumentEntity<BaseDocument> documents = db.collection(COLLECTION_NAME)
+                .getDocuments(Arrays.asList("1", "2", "3"), BaseDocument.class).get();
+        assertThat(documents, is(notNullValue()));
+        assertThat(documents.getDocuments().size(), is(3));
+        for (final BaseDocument document : documents.getDocuments()) {
+            assertThat(document.getId(),
+                    isOneOf(COLLECTION_NAME + "/" + "1", COLLECTION_NAME + "/" + "2", COLLECTION_NAME + "/" + "3"));
+        }
+    }
+
+    @Test
+    public void getDocumentsNotFound() throws InterruptedException, ExecutionException {
+        final MultiDocumentEntity<BaseDocument> readResult = db.collection(COLLECTION_NAME)
+                .getDocuments(Collections.singleton("no"), BaseDocument.class).get();
+        assertThat(readResult, is(notNullValue()));
+        assertThat(readResult.getDocuments().size(), is(0));
+        assertThat(readResult.getErrors().size(), is(1));
+    }
+
+    @Test
+    public void getDocumentsWrongKey() throws InterruptedException, ExecutionException {
+        final MultiDocumentEntity<BaseDocument> readResult = db.collection(COLLECTION_NAME)
+                .getDocuments(Collections.singleton("no/no"), BaseDocument.class).get();
+        assertThat(readResult, is(notNullValue()));
+        assertThat(readResult.getDocuments().size(), is(0));
+        assertThat(readResult.getErrors().size(), is(1));
+    }
+
+    @Test
+    public void updateDocument() throws ArangoDBException, InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        doc.addAttribute("c", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.updateAttribute("a", "test1");
+        doc.addAttribute("b", "test");
+        doc.updateAttribute("c", null);
+
+        final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
+                .updateDocument(createResult.getKey(), doc, null);
+        f.whenComplete((updateResult, ex) -> {
+            assertThat(updateResult, is(notNullValue()));
+            assertThat(updateResult.getId(), is(createResult.getId()));
+            assertThat(updateResult.getNew(), is(nullValue()));
+            assertThat(updateResult.getOld(), is(nullValue()));
+            assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+            assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+        }).get();
+        final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+
+        final BaseDocument readResult = db.collection(COLLECTION_NAME)
+                .getDocument(createResult.getKey(), BaseDocument.class, null).get();
+        assertThat(readResult.getKey(), is(createResult.getKey()));
+        assertThat(readResult.getAttribute("a"), is(notNullValue()));
+        assertThat(String.valueOf(readResult.getAttribute("a")), is("test1"));
+        assertThat(readResult.getAttribute("b"), is(notNullValue()));
+        assertThat(String.valueOf(readResult.getAttribute("b")), is("test"));
+        assertThat(readResult.getRevision(), is(updateResult.getRev()));
+        assertThat(readResult.getProperties().keySet(), hasItem("c"));
+    }
+
+    @Test
+    public void updateDocumentIfMatch() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        doc.addAttribute("c", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.updateAttribute("a", "test1");
+        doc.addAttribute("b", "test");
+        doc.updateAttribute("c", null);
+        final DocumentUpdateOptions options = new DocumentUpdateOptions().ifMatch(createResult.getRev());
+        final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
+                .updateDocument(createResult.getKey(), doc, options);
+        assertThat(f, is(notNullValue()));
+        f.whenComplete((updateResult, ex) -> {
+            assertThat(updateResult, is(notNullValue()));
+            assertThat(updateResult.getId(), is(createResult.getId()));
+            assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+            assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+        }).get();
+        final DocumentUpdateEntity<BaseDocument> updateResult = f.get();
+
+        final BaseDocument readResult = db.collection(COLLECTION_NAME)
+                .getDocument(createResult.getKey(), BaseDocument.class, null).get();
+        assertThat(readResult.getKey(), is(createResult.getKey()));
+        assertThat(readResult.getAttribute("a"), is(notNullValue()));
+        assertThat(String.valueOf(readResult.getAttribute("a")), is("test1"));
+        assertThat(readResult.getAttribute("b"), is(notNullValue()));
+        assertThat(String.valueOf(readResult.getAttribute("b")), is("test"));
+        assertThat(readResult.getRevision(), is(updateResult.getRev()));
+        assertThat(readResult.getProperties().keySet(), hasItem("c"));
+    }
+
+    @Test
+    public void updateDocumentIfMatchFail() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        doc.addAttribute("c", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.updateAttribute("a", "test1");
+        doc.addAttribute("b", "test");
+        doc.updateAttribute("c", null);
+        try {
+            final DocumentUpdateOptions options = new DocumentUpdateOptions().ifMatch("no");
+            db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options).get();
+            fail();
+        } catch (final Exception e) {
+        }
+    }
+
+    @Test
+    public void updateDocumentReturnNew() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.updateAttribute("a", "test1");
+        doc.addAttribute("b", "test");
+        final DocumentUpdateOptions options = new DocumentUpdateOptions().returnNew(true);
+        db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult, is(notNullValue()));
+                    assertThat(updateResult.getId(), is(createResult.getId()));
+                    assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+                    assertThat(updateResult.getNew(), is(notNullValue()));
+                    assertThat(updateResult.getNew().getKey(), is(createResult.getKey()));
+                    assertThat(updateResult.getNew().getRevision(), is(not(createResult.getRev())));
+                    assertThat(updateResult.getNew().getAttribute("a"), is(notNullValue()));
+                    assertThat(String.valueOf(updateResult.getNew().getAttribute("a")), is("test1"));
+                    assertThat(updateResult.getNew().getAttribute("b"), is(notNullValue()));
+                    assertThat(String.valueOf(updateResult.getNew().getAttribute("b")), is("test"));
+                })
+                .get();
+    }
+
+    @Test
+    public void updateDocumentReturnOld() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.updateAttribute("a", "test1");
+        doc.addAttribute("b", "test");
+        final DocumentUpdateOptions options = new DocumentUpdateOptions().returnOld(true);
+        db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult, is(notNullValue()));
+                    assertThat(updateResult.getId(), is(createResult.getId()));
+                    assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+                    assertThat(updateResult.getOld(), is(notNullValue()));
+                    assertThat(updateResult.getOld().getKey(), is(createResult.getKey()));
+                    assertThat(updateResult.getOld().getRevision(), is(createResult.getRev()));
+                    assertThat(updateResult.getOld().getAttribute("a"), is(notNullValue()));
+                    assertThat(String.valueOf(updateResult.getOld().getAttribute("a")), is("test"));
+                    assertThat(updateResult.getOld().getProperties().keySet(), not(hasItem("b")));
+                })
+                .get();
+    }
+
+    @Test
+    public void updateDocumentKeepNullTrue() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.updateAttribute("a", null);
+        final DocumentUpdateOptions options = new DocumentUpdateOptions().keepNull(true);
+        db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult, is(notNullValue()));
+                    assertThat(updateResult.getId(), is(createResult.getId()));
+                    assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+                    assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+                })
+                .get();
+
+        final BaseDocument readResult = db.collection(COLLECTION_NAME)
+                .getDocument(createResult.getKey(), BaseDocument.class, null).get();
+        assertThat(readResult.getKey(), is(createResult.getKey()));
+        assertThat(readResult.getProperties().keySet(), hasItem("a"));
+    }
+
+    @Test
+    public void updateDocumentKeepNullFalse() throws ArangoDBException, InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.updateAttribute("a", null);
+        final DocumentUpdateOptions options = new DocumentUpdateOptions().keepNull(false);
+        db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult, is(notNullValue()));
+                    assertThat(updateResult.getId(), is(createResult.getId()));
+                    assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+                    assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+                })
+                .get();
+
+        final BaseDocument readResult = db.collection(COLLECTION_NAME)
+                .getDocument(createResult.getKey(), BaseDocument.class, null).get();
+        assertThat(readResult.getKey(), is(createResult.getKey()));
+        assertThat(readResult.getId(), is(createResult.getId()));
+        assertThat(readResult.getRevision(), is(notNullValue()));
+        assertThat(readResult.getProperties().keySet(), not(hasItem("a")));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void updateDocumentMergeObjectsTrue() throws ArangoDBException, InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        final Map<String, String> a = new HashMap<>();
+        a.put("a", "test");
+        doc.addAttribute("a", a);
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        a.clear();
+        a.put("b", "test");
+        doc.updateAttribute("a", a);
+        final DocumentUpdateOptions options = new DocumentUpdateOptions().mergeObjects(true);
+        db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult, is(notNullValue()));
+                    assertThat(updateResult.getId(), is(createResult.getId()));
+                    assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+                    assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+                })
+                .get();
+
+        final BaseDocument readResult = db.collection(COLLECTION_NAME)
+                .getDocument(createResult.getKey(), BaseDocument.class, null).get();
+        assertThat(readResult.getKey(), is(createResult.getKey()));
+        final Object aResult = readResult.getAttribute("a");
+        assertThat(aResult, instanceOf(Map.class));
+        final Map<String, String> aMap = (Map<String, String>) aResult;
+        assertThat(aMap.keySet(), hasItem("a"));
+        assertThat(aMap.keySet(), hasItem("b"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void updateDocumentMergeObjectsFalse() throws ArangoDBException, InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        final Map<String, String> a = new HashMap<>();
+        a.put("a", "test");
+        doc.addAttribute("a", a);
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        a.clear();
+        a.put("b", "test");
+        doc.updateAttribute("a", a);
+        final DocumentUpdateOptions options = new DocumentUpdateOptions().mergeObjects(false);
+        db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult, is(notNullValue()));
+                    assertThat(updateResult.getId(), is(createResult.getId()));
+                    assertThat(updateResult.getRev(), is(not(updateResult.getOldRev())));
+                    assertThat(updateResult.getOldRev(), is(createResult.getRev()));
+                })
+                .get();
+
+        final BaseDocument readResult = db.collection(COLLECTION_NAME)
+                .getDocument(createResult.getKey(), BaseDocument.class, null).get();
+        assertThat(readResult.getKey(), is(createResult.getKey()));
+        final Object aResult = readResult.getAttribute("a");
+        assertThat(aResult, instanceOf(Map.class));
+        final Map<String, String> aMap = (Map<String, String>) aResult;
+        assertThat(aMap.keySet(), not(hasItem("a")));
+        assertThat(aMap.keySet(), hasItem("b"));
+    }
+
+    @Test
+    public void updateDocumentIgnoreRevsFalse() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.updateAttribute("a", "test1");
+        doc.setRevision("no");
+        try {
+            final DocumentUpdateOptions options = new DocumentUpdateOptions().ignoreRevs(false);
+            db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options).get();
+            fail();
+        } catch (final Exception e) {
+        }
+    }
+
+    @Test
+    public void replaceDocument() throws ArangoDBException, InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.getProperties().clear();
+        doc.addAttribute("b", "test");
+        final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
+                .replaceDocument(createResult.getKey(), doc, null);
+        f.whenComplete((replaceResult, ex) -> {
+            assertThat(replaceResult, is(notNullValue()));
+            assertThat(replaceResult.getId(), is(createResult.getId()));
+            assertThat(replaceResult.getNew(), is(nullValue()));
+            assertThat(replaceResult.getOld(), is(nullValue()));
+            assertThat(replaceResult.getRev(), is(not(replaceResult.getOldRev())));
+            assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
+        }).get();
+        final DocumentUpdateEntity<BaseDocument> replaceResult = f.get();
+
+        final BaseDocument readResult = db.collection(COLLECTION_NAME)
+                .getDocument(createResult.getKey(), BaseDocument.class, null).get();
+        assertThat(readResult.getKey(), is(createResult.getKey()));
+        assertThat(readResult.getRevision(), is(replaceResult.getRev()));
+        assertThat(readResult.getProperties().keySet(), not(hasItem("a")));
+        assertThat(readResult.getAttribute("b"), is(notNullValue()));
+        assertThat(String.valueOf(readResult.getAttribute("b")), is("test"));
+    }
+
+    @Test
+    public void replaceDocumentIfMatch() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.getProperties().clear();
+        doc.addAttribute("b", "test");
+        final DocumentReplaceOptions options = new DocumentReplaceOptions().ifMatch(createResult.getRev());
+        final CompletableFuture<DocumentUpdateEntity<BaseDocument>> f = db.collection(COLLECTION_NAME)
+                .replaceDocument(createResult.getKey(), doc, options);
+        f.whenComplete((replaceResult, ex) -> {
+            assertThat(replaceResult, is(notNullValue()));
+            assertThat(replaceResult.getId(), is(createResult.getId()));
+            assertThat(replaceResult.getRev(), is(not(replaceResult.getOldRev())));
+            assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
+        }).get();
+        final DocumentUpdateEntity<BaseDocument> replaceResult = f.get();
+
+        final BaseDocument readResult = db.collection(COLLECTION_NAME)
+                .getDocument(createResult.getKey(), BaseDocument.class, null).get();
+        assertThat(readResult.getKey(), is(createResult.getKey()));
+        assertThat(readResult.getRevision(), is(replaceResult.getRev()));
+        assertThat(readResult.getProperties().keySet(), not(hasItem("a")));
+        assertThat(readResult.getAttribute("b"), is(notNullValue()));
+        assertThat(String.valueOf(readResult.getAttribute("b")), is("test"));
+    }
+
+    @Test
+    public void replaceDocumentIfMatchFail() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.getProperties().clear();
+        doc.addAttribute("b", "test");
+        try {
+            final DocumentReplaceOptions options = new DocumentReplaceOptions().ifMatch("no");
+            db.collection(COLLECTION_NAME).replaceDocument(createResult.getKey(), doc, options).get();
+            fail();
+        } catch (final Exception e) {
+        }
+    }
+
+    @Test
+    public void replaceDocumentIgnoreRevsFalse() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.getProperties().clear();
+        doc.addAttribute("b", "test");
+        doc.setRevision("no");
+        try {
+            final DocumentReplaceOptions options = new DocumentReplaceOptions().ignoreRevs(false);
+            db.collection(COLLECTION_NAME).replaceDocument(createResult.getKey(), doc, options).get();
+            fail();
+        } catch (final Exception e) {
+        }
+    }
+
+    @Test
+    public void replaceDocumentReturnNew() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.getProperties().clear();
+        doc.addAttribute("b", "test");
+        final DocumentReplaceOptions options = new DocumentReplaceOptions().returnNew(true);
+        db.collection(COLLECTION_NAME).replaceDocument(createResult.getKey(), doc, options)
+                .whenComplete((replaceResult, ex) -> {
+                    assertThat(replaceResult, is(notNullValue()));
+                    assertThat(replaceResult.getId(), is(createResult.getId()));
+                    assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
+                    assertThat(replaceResult.getNew(), is(notNullValue()));
+                    assertThat(replaceResult.getNew().getKey(), is(createResult.getKey()));
+                    assertThat(replaceResult.getNew().getRevision(), is(not(createResult.getRev())));
+                    assertThat(replaceResult.getNew().getProperties().keySet(), not(hasItem("a")));
+                    assertThat(replaceResult.getNew().getAttribute("b"), is(notNullValue()));
+                    assertThat(String.valueOf(replaceResult.getNew().getAttribute("b")), is("test"));
+                })
+                .get();
+    }
+
+    @Test
+    public void replaceDocumentReturnOld() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        doc.getProperties().clear();
+        doc.addAttribute("b", "test");
+        final DocumentReplaceOptions options = new DocumentReplaceOptions().returnOld(true);
+        db.collection(COLLECTION_NAME).replaceDocument(createResult.getKey(), doc, options)
+                .whenComplete((replaceResult, ex) -> {
+                    assertThat(replaceResult, is(notNullValue()));
+                    assertThat(replaceResult.getId(), is(createResult.getId()));
+                    assertThat(replaceResult.getOldRev(), is(createResult.getRev()));
+                    assertThat(replaceResult.getOld(), is(notNullValue()));
+                    assertThat(replaceResult.getOld().getKey(), is(createResult.getKey()));
+                    assertThat(replaceResult.getOld().getRevision(), is(createResult.getRev()));
+                    assertThat(replaceResult.getOld().getAttribute("a"), is(notNullValue()));
+                    assertThat(String.valueOf(replaceResult.getOld().getAttribute("a")), is("test"));
+                    assertThat(replaceResult.getOld().getProperties().keySet(), not(hasItem("b")));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocument() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, null).get();
+        db.collection(COLLECTION_NAME).getDocument(createResult.getKey(), BaseDocument.class, null)
+                .whenComplete((document, ex) -> {
+                    assertThat(document, is(nullValue()));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocumentReturnOld() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        doc.addAttribute("a", "test");
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        final DocumentDeleteOptions options = new DocumentDeleteOptions().returnOld(true);
+        db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), BaseDocument.class, options)
+                .whenComplete((deleteResult, ex) -> {
+                    assertThat(deleteResult.getOld(), is(notNullValue()));
+                    assertThat(deleteResult.getOld(), instanceOf(BaseDocument.class));
+                    assertThat(deleteResult.getOld().getAttribute("a"), is(notNullValue()));
+                    assertThat(String.valueOf(deleteResult.getOld().getAttribute("a")), is("test"));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocumentIfMatch() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        final DocumentDeleteOptions options = new DocumentDeleteOptions().ifMatch(createResult.getRev());
+        db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, options).get();
+        db.collection(COLLECTION_NAME).getDocument(createResult.getKey(), BaseDocument.class, null)
+                .whenComplete((document, ex) -> {
+                    assertThat(document, is(nullValue()));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocumentIfMatchFail() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
+                .get();
+        final DocumentDeleteOptions options = new DocumentDeleteOptions().ifMatch("no");
+        try {
+            db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, options).get();
+            fail();
+        } catch (final Exception e) {
+        }
+    }
+
+    @Test
+    public void getIndex() throws InterruptedException, ExecutionException {
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
+        db.collection(COLLECTION_NAME).getIndex(createResult.getId())
+                .whenComplete((readResult, ex) -> {
+                    assertThat(readResult.getId(), is(createResult.getId()));
+                    assertThat(readResult.getType(), is(createResult.getType()));
+                })
+                .get();
+    }
+
+    @Test
+    public void getIndexByKey() throws InterruptedException, ExecutionException {
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
+        db.collection(COLLECTION_NAME).getIndex(createResult.getId().split("/")[1])
+                .whenComplete((readResult, ex) -> {
+                    assertThat(readResult.getId(), is(createResult.getId()));
+                    assertThat(readResult.getType(), is(createResult.getType()));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteIndex() throws InterruptedException, ExecutionException {
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("deleteIndexField");
+        final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
+        db.collection(COLLECTION_NAME).deleteIndex(createResult.getId())
+                .whenComplete((id, ex) -> {
+                    assertThat(id, is(createResult.getId()));
+                    try {
+                        db.getIndex(id).get();
+                        fail();
+                    } catch (final InterruptedException exception) {
+                        exception.printStackTrace();
+                        fail();
+                    } catch (final ExecutionException exception) {
+                        assertThat(exception.getCause(), instanceOf(ArangoDBException.class));
+                    }
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteIndexByKey() throws InterruptedException, ExecutionException {
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("deleteIndexByKeyField");
+        final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
+        db.collection(COLLECTION_NAME).deleteIndex(createResult.getId().split("/")[1])
+                .whenComplete((id, ex) -> {
+                    assertThat(id, is(createResult.getId()));
+                    try {
+                        db.getIndex(id).get();
+                        fail();
+                    } catch (final InterruptedException exception) {
+                        exception.printStackTrace();
+                        fail();
+                    } catch (final ExecutionException exception) {
+                        assertThat(exception.getCause(), instanceOf(ArangoDBException.class));
+                    }
+                })
+                .get();
+    }
+
+    @Test
+    public void createHashIndex() throws InterruptedException, ExecutionException {
+        final boolean singleServer = arangoDB.getRole().get() == ServerRole.SINGLE;
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        fields.add("b");
+        db.collection(COLLECTION_NAME).ensureHashIndex(fields, null)
+                .whenComplete((indexResult, ex) -> {
+                    assertThat(indexResult, is(notNullValue()));
+                    assertThat(indexResult.getConstraint(), is(nullValue()));
+                    assertThat(indexResult.getFields(), hasItem("a"));
+                    assertThat(indexResult.getFields(), hasItem("b"));
+                    assertThat(indexResult.getGeoJson(), is(nullValue()));
+                    assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+                    assertThat(indexResult.getIsNewlyCreated(), is(true));
+                    assertThat(indexResult.getMinLength(), is(nullValue()));
+                    if (singleServer) {
+                        assertThat(indexResult.getSelectivityEstimate(), is(1.0));
+                    }
+                    assertThat(indexResult.getSparse(), is(false));
+                    assertThat(indexResult.getType(), is(IndexType.hash));
+                    assertThat(indexResult.getUnique(), is(false));
+                })
+                .get();
+    }
+
+    @Test
+    public void createGeoIndex() throws InterruptedException, ExecutionException {
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        db.collection(COLLECTION_NAME).ensureGeoIndex(fields, null)
+                .whenComplete((indexResult, ex) -> {
+                    assertThat(indexResult, is(notNullValue()));
+                    assertThat(indexResult.getFields(), hasItem("a"));
+                    assertThat(indexResult.getGeoJson(), is(false));
+                    assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+                    assertThat(indexResult.getIsNewlyCreated(), is(true));
+                    assertThat(indexResult.getMinLength(), is(nullValue()));
+                    assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
+                    assertThat(indexResult.getSparse(), is(true));
+                    assertThat(indexResult.getType(), anyOf(is(IndexType.geo), is(IndexType.geo1)));
+                    assertThat(indexResult.getUnique(), is(false));
+                })
+                .get();
+    }
+
+    @Test
+    public void createGeo2Index() throws InterruptedException, ExecutionException {
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        fields.add("b");
+        db.collection(COLLECTION_NAME).ensureGeoIndex(fields, null)
+                .whenComplete((indexResult, ex) -> {
+                    assertThat(indexResult, is(notNullValue()));
+                    assertThat(indexResult.getFields(), hasItem("a"));
+                    assertThat(indexResult.getFields(), hasItem("b"));
+                    assertThat(indexResult.getGeoJson(), is(false));
+                    assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+                    assertThat(indexResult.getIsNewlyCreated(), is(true));
+                    assertThat(indexResult.getMinLength(), is(nullValue()));
+                    assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
+                    assertThat(indexResult.getSparse(), is(true));
+                    assertThat(indexResult.getType(), anyOf(is(IndexType.geo), is(IndexType.geo2)));
+                    assertThat(indexResult.getUnique(), is(false));
+                })
+                .get();
+    }
+
+    @Test
+    public void createSkiplistIndex() throws InterruptedException, ExecutionException {
+        final boolean singleServer = arangoDB.getRole().get() == ServerRole.SINGLE;
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        fields.add("b");
+        db.collection(COLLECTION_NAME).ensureSkiplistIndex(fields, null)
+                .whenComplete((indexResult, ex) -> {
+                    assertThat(indexResult, is(notNullValue()));
+                    assertThat(indexResult.getConstraint(), is(nullValue()));
+                    assertThat(indexResult.getFields(), hasItem("a"));
+                    assertThat(indexResult.getFields(), hasItem("b"));
+                    assertThat(indexResult.getGeoJson(), is(nullValue()));
+                    assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+                    assertThat(indexResult.getIsNewlyCreated(), is(true));
+                    assertThat(indexResult.getMinLength(), is(nullValue()));
+                    if (singleServer) {
+                        assertThat(indexResult.getSelectivityEstimate(), is(1.0));
+                    }
+                    assertThat(indexResult.getSparse(), is(false));
+                    assertThat(indexResult.getType(), is(IndexType.skiplist));
+                    assertThat(indexResult.getUnique(), is(false));
+                })
+                .get();
+    }
+
+    @Test
+    public void createPersistentIndex() throws InterruptedException, ExecutionException {
+        final boolean singleServer = arangoDB.getRole().get() == ServerRole.SINGLE;
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        fields.add("b");
+        db.collection(COLLECTION_NAME).ensurePersistentIndex(fields, null)
+                .whenComplete((indexResult, ex) -> {
+                    assertThat(indexResult, is(notNullValue()));
+                    assertThat(indexResult.getConstraint(), is(nullValue()));
+                    assertThat(indexResult.getFields(), hasItem("a"));
+                    assertThat(indexResult.getFields(), hasItem("b"));
+                    assertThat(indexResult.getGeoJson(), is(nullValue()));
+                    assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+                    assertThat(indexResult.getIsNewlyCreated(), is(true));
+                    assertThat(indexResult.getMinLength(), is(nullValue()));
+                    if (singleServer) {
+                        assertThat(indexResult.getSelectivityEstimate(), is(1.0));
+                    }
+                    assertThat(indexResult.getSparse(), is(false));
+                    assertThat(indexResult.getType(), is(IndexType.persistent));
+                    assertThat(indexResult.getUnique(), is(false));
+                })
+                .get();
+    }
+
+    @Test
+    public void createFulltextIndex() throws InterruptedException, ExecutionException {
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        db.collection(COLLECTION_NAME).ensureFulltextIndex(fields, null)
+                .whenComplete((indexResult, ex) -> {
+                    assertThat(indexResult, is(notNullValue()));
+                    assertThat(indexResult.getConstraint(), is(nullValue()));
+                    assertThat(indexResult.getFields(), hasItem("a"));
+                    assertThat(indexResult.getGeoJson(), is(nullValue()));
+                    assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+                    assertThat(indexResult.getIsNewlyCreated(), is(true));
+                    assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
+                    assertThat(indexResult.getSparse(), is(true));
+                    assertThat(indexResult.getType(), is(IndexType.fulltext));
+                    assertThat(indexResult.getUnique(), is(false));
+                })
+                .get();
+    }
+
+    @Test
+    public void getIndexes() throws InterruptedException, ExecutionException {
+        final int initialIndexCount = db.collection(COLLECTION_NAME).getIndexes().get().size();
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
+        db.collection(COLLECTION_NAME).getIndexes()
+                .whenComplete((indexes, ex) -> {
+                    assertThat(indexes, is(notNullValue()));
+                    assertThat(indexes.size(), is(initialIndexCount + 1));
+                    for (final IndexEntity i : indexes) {
+                        if (i.getType() == IndexType.hash) {
+                            assertThat(i.getFields().size(), is(1));
+                            assertThat(i.getFields(), hasItem("a"));
+                        }
+                    }
+                })
+                .get();
+    }
+
+    @Test
+    public void exists() throws InterruptedException, ExecutionException {
+        assertThat(db.collection(COLLECTION_NAME).exists().get(), is(true));
+        assertThat(db.collection(COLLECTION_NAME + "no").exists().get(), is(false));
+    }
+
+    @Test
+    public void truncate() throws InterruptedException, ExecutionException {
+        final BaseDocument doc = new BaseDocument();
+        db.collection(COLLECTION_NAME).insertDocument(doc, null).get();
+        final BaseDocument readResult = db.collection(COLLECTION_NAME)
+                .getDocument(doc.getKey(), BaseDocument.class, null).get();
+        assertThat(readResult.getKey(), is(doc.getKey()));
+        db.collection(COLLECTION_NAME).truncate()
+                .whenComplete((truncateResult, ex) -> {
+                    assertThat(truncateResult, is(notNullValue()));
+                    assertThat(truncateResult.getId(), is(notNullValue()));
+                })
+                .get();
+        final BaseDocument document = db.collection(COLLECTION_NAME).getDocument(doc.getKey(), BaseDocument.class, null)
+                .get();
+        assertThat(document, is(nullValue()));
+    }
+
+    @Test
+    public void getCount() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).count()
+                .whenComplete((countEmpty, ex) -> {
+                    assertThat(countEmpty, is(notNullValue()));
+                    assertThat(countEmpty.getCount(), is(0L));
+                })
+                .get();
+
+        db.collection(COLLECTION_NAME).insertDocument("{}", null).get();
+
+        db.collection(COLLECTION_NAME).count()
+                .whenComplete((count, ex) -> {
+                    assertThat(count.getCount(), is(1L));
+                })
+                .get();
+    }
+
+    @Test
+    public void documentExists() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).documentExists("no", null)
+                .whenComplete((existsNot, ex) -> {
+                    assertThat(existsNot, is(false));
+                })
+                .get();
+
+        db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"abc\"}", null).get();
+
+        db.collection(COLLECTION_NAME).documentExists("abc", null)
+                .whenComplete((exists, ex) -> {
+                    assertThat(exists, is(true));
+                })
+                .get();
+    }
+
+    @Test
+    public void documentExistsIfMatch() throws InterruptedException, ExecutionException {
+        final DocumentCreateEntity<String> createResult = db.collection(COLLECTION_NAME)
+                .insertDocument("{\"_key\":\"abc\"}", null).get();
+        final DocumentExistsOptions options = new DocumentExistsOptions().ifMatch(createResult.getRev());
+        db.collection(COLLECTION_NAME).documentExists("abc", options)
+                .whenComplete((exists, ex) -> {
+                    assertThat(exists, is(true));
+                })
+                .get();
+    }
+
+    @Test
+    public void documentExistsIfMatchFail() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"abc\"}", null).get();
+        final DocumentExistsOptions options = new DocumentExistsOptions().ifMatch("no");
+        db.collection(COLLECTION_NAME).documentExists("abc", options)
+                .whenComplete((exists, ex) -> {
+                    assertThat(exists, is(false));
+                })
+                .get();
+    }
+
+    @Test
+    public void documentExistsIfNoneMatch() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).insertDocument("{\"_key\":\"abc\"}", null).get();
+        final DocumentExistsOptions options = new DocumentExistsOptions().ifNoneMatch("no");
+        db.collection(COLLECTION_NAME).documentExists("abc", options)
+                .whenComplete((exists, ex) -> {
+                    assertThat(exists, is(true));
+                })
+                .get();
+    }
+
+    @Test
+    public void documentExistsIfNoneMatchFail() throws InterruptedException, ExecutionException {
+        final DocumentCreateEntity<String> createResult = db.collection(COLLECTION_NAME)
+                .insertDocument("{\"_key\":\"abc\"}", null).get();
+        final DocumentExistsOptions options = new DocumentExistsOptions().ifNoneMatch(createResult.getRev());
+        db.collection(COLLECTION_NAME).documentExists("abc", options)
+                .whenComplete((exists, ex) -> {
+                    assertThat(exists, is(false));
+                })
+                .get();
+    }
+
+    @Test
+    public void insertDocuments() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument());
+        values.add(new BaseDocument());
+        values.add(new BaseDocument());
+        db.collection(COLLECTION_NAME).insertDocuments(values, null)
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getDocuments(), is(notNullValue()));
+                    assertThat(docs.getDocuments().size(), is(3));
+                    assertThat(docs.getErrors(), is(notNullValue()));
+                    assertThat(docs.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void insertDocumentsOne() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument());
+        db.collection(COLLECTION_NAME).insertDocuments(values, null)
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getDocuments(), is(notNullValue()));
+                    assertThat(docs.getDocuments().size(), is(1));
+                    assertThat(docs.getErrors(), is(notNullValue()));
+                    assertThat(docs.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void insertDocumentsEmpty() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        db.collection(COLLECTION_NAME).insertDocuments(values, null)
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getDocuments(), is(notNullValue()));
+                    assertThat(docs.getDocuments().size(), is(0));
+                    assertThat(docs.getErrors(), is(notNullValue()));
+                    assertThat(docs.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void insertDocumentsReturnNew() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument());
+        values.add(new BaseDocument());
+        values.add(new BaseDocument());
+        final DocumentCreateOptions options = new DocumentCreateOptions().returnNew(true);
+        db.collection(COLLECTION_NAME).insertDocuments(values, options)
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getDocuments(), is(notNullValue()));
+                    assertThat(docs.getDocuments().size(), is(3));
+                    assertThat(docs.getErrors(), is(notNullValue()));
+                    assertThat(docs.getErrors().size(), is(0));
+                    for (final DocumentCreateEntity<BaseDocument> doc : docs.getDocuments()) {
+                        assertThat(doc.getNew(), is(notNullValue()));
+                        final BaseDocument baseDocument = doc.getNew();
+                        assertThat(baseDocument.getKey(), is(notNullValue()));
+                    }
+                })
+                .get();
+    }
+
+    @Test
+    public void insertDocumentsFail() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument("1"));
+        values.add(new BaseDocument("2"));
+        values.add(new BaseDocument("2"));
+        db.collection(COLLECTION_NAME).insertDocuments(values)
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getDocuments(), is(notNullValue()));
+                    assertThat(docs.getDocuments().size(), is(2));
+                    assertThat(docs.getErrors(), is(notNullValue()));
+                    assertThat(docs.getErrors().size(), is(1));
+                    assertThat(docs.getErrors().iterator().next().getErrorNum(), is(1210));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocuments() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument());
+        values.add(new BaseDocument());
+        values.add(new BaseDocument());
+        db.collection(COLLECTION_NAME).importDocuments(values)
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(values.size()));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(0));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsDuplicateDefaultError() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument("1"));
+        values.add(new BaseDocument("2"));
+        values.add(new BaseDocument("2"));
+        db.collection(COLLECTION_NAME).importDocuments(values)
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(1));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsDuplicateError() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument("1"));
+        values.add(new BaseDocument("2"));
+        values.add(new BaseDocument("2"));
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().onDuplicate(OnDuplicate.error))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(1));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsDuplicateIgnore() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument("1"));
+        values.add(new BaseDocument("2"));
+        values.add(new BaseDocument("2"));
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().onDuplicate(OnDuplicate.ignore))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(0));
+                    assertThat(docs.getIgnored(), is(1));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsDuplicateReplace() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument("1"));
+        values.add(new BaseDocument("2"));
+        values.add(new BaseDocument("2"));
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().onDuplicate(OnDuplicate.replace))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(0));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(1));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsDuplicateUpdate() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument("1"));
+        values.add(new BaseDocument("2"));
+        values.add(new BaseDocument("2"));
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().onDuplicate(OnDuplicate.update))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(0));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(1));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsCompleteFail() {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument("1"));
+        values.add(new BaseDocument("2"));
+        values.add(new BaseDocument("2"));
+        try {
+            db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().complete(true)).get();
+            fail();
+        } catch (InterruptedException | ExecutionException e) {
+            assertThat(e.getMessage(), containsString("1210"));
+        }
+    }
+
+    @Test
+    public void importDocumentsDetails() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument("1"));
+        values.add(new BaseDocument("2"));
+        values.add(new BaseDocument("2"));
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().details(true))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(1));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails().size(), is(1));
+                    assertThat(docs.getDetails().iterator().next(), containsString("unique constraint violated"));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsOverwriteFalse() throws InterruptedException, ExecutionException {
+        final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
+        collection.insertDocument(new BaseDocument()).get();
+        assertThat(collection.count().get().getCount(), is(1L));
+
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument());
+        values.add(new BaseDocument());
+        collection.importDocuments(values, new DocumentImportOptions().overwrite(false)).get();
+        assertThat(collection.count().get().getCount(), is(3L));
+    }
+
+    @Test
+    public void importDocumentsOverwriteTrue() throws InterruptedException, ExecutionException {
+        final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
+        collection.insertDocument(new BaseDocument()).get();
+        assertThat(collection.count().get().getCount(), is(1L));
+
+        final Collection<BaseDocument> values = new ArrayList<>();
+        values.add(new BaseDocument());
+        values.add(new BaseDocument());
+        collection.importDocuments(values, new DocumentImportOptions().overwrite(true)).get();
+        assertThat(collection.count().get().getCount(), is(2L));
+    }
+
+    @Test
+    public void importDocumentsFromToPrefix() throws InterruptedException, ExecutionException {
+        db.createCollection(COLLECTION_NAME + "_edge", new CollectionCreateOptions().type(CollectionType.EDGES)).get();
+        final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME + "_edge");
+        try {
+            final Collection<BaseEdgeDocument> values = new ArrayList<>();
+            final String[] keys = {"1", "2"};
+            for (int i = 0; i < keys.length; i++) {
+                values.add(new BaseEdgeDocument(keys[i], "from", "to"));
+            }
+            assertThat(values.size(), is(keys.length));
+
+            final DocumentImportEntity importResult = collection
+                    .importDocuments(values, new DocumentImportOptions().fromPrefix("foo").toPrefix("bar")).get();
+            assertThat(importResult, is(notNullValue()));
+            assertThat(importResult.getCreated(), is(values.size()));
+            for (int i = 0; i < keys.length; i++) {
+                BaseEdgeDocument doc;
+                try {
+                    doc = collection.getDocument(keys[i], BaseEdgeDocument.class).get();
+                    assertThat(doc, is(notNullValue()));
+                    assertThat(doc.getFrom(), is("foo/from"));
+                    assertThat(doc.getTo(), is("bar/to"));
+                } catch (ArangoDBException | InterruptedException | ExecutionException e) {
+                    fail();
+                }
+            }
+        } finally {
+            collection.drop().get();
+        }
+    }
+
+    @Test
+    public void importDocumentsJson() throws InterruptedException, ExecutionException {
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
+        db.collection(COLLECTION_NAME).importDocuments(values)
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(0));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsJsonDuplicateDefaultError() throws InterruptedException, ExecutionException {
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
+        db.collection(COLLECTION_NAME).importDocuments(values)
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(1));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsJsonDuplicateError() throws InterruptedException, ExecutionException {
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().onDuplicate(OnDuplicate.error))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(1));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsJsonDuplicateIgnore() throws InterruptedException, ExecutionException {
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().onDuplicate(OnDuplicate.ignore))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(0));
+                    assertThat(docs.getIgnored(), is(1));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsJsonDuplicateReplace() throws InterruptedException, ExecutionException {
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().onDuplicate(OnDuplicate.replace))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(0));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(1));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsJsonDuplicateUpdate() throws InterruptedException, ExecutionException {
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().onDuplicate(OnDuplicate.update))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(0));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(1));
+                    assertThat(docs.getDetails(), is(empty()));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsJsonCompleteFail() {
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
+        try {
+            db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().complete(true)).get();
+            fail();
+        } catch (InterruptedException | ExecutionException e) {
+            assertThat(e.getMessage(), containsString("1210"));
+        }
+    }
+
+    @Test
+    public void importDocumentsJsonDetails() throws InterruptedException, ExecutionException {
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
+        db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().details(true))
+                .whenComplete((docs, ex) -> {
+                    assertThat(docs, is(notNullValue()));
+                    assertThat(docs.getCreated(), is(2));
+                    assertThat(docs.getEmpty(), is(0));
+                    assertThat(docs.getErrors(), is(1));
+                    assertThat(docs.getIgnored(), is(0));
+                    assertThat(docs.getUpdated(), is(0));
+                    assertThat(docs.getDetails().size(), is(1));
+                    assertThat(docs.getDetails().iterator().next(), containsString("unique constraint violated"));
+                })
+                .get();
+    }
+
+    @Test
+    public void importDocumentsJsonOverwriteFalse() throws InterruptedException, ExecutionException {
+        final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
+        collection.insertDocument(new BaseDocument()).get();
+        assertThat(collection.count().get().getCount(), is(1L));
+
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
+        collection.importDocuments(values, new DocumentImportOptions().overwrite(false)).get();
+        assertThat(collection.count().get().getCount(), is(3L));
+    }
+
+    @Test
+    public void importDocumentsJsonOverwriteTrue() throws InterruptedException, ExecutionException {
+        final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
+        collection.insertDocument(new BaseDocument()).get();
+        assertThat(collection.count().get().getCount(), is(1L));
+
+        final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"}]";
+        collection.importDocuments(values, new DocumentImportOptions().overwrite(true)).get();
+        assertThat(collection.count().get().getCount(), is(2L));
+    }
+
+    @Test
+    public void importDocumentsJsonFromToPrefix() throws InterruptedException, ExecutionException {
+        db.createCollection(COLLECTION_NAME + "_edge", new CollectionCreateOptions().type(CollectionType.EDGES)).get();
+        final ArangoCollectionAsync collection = db.collection(COLLECTION_NAME + "_edge");
+        try {
+            final String[] keys = {"1", "2"};
+            final String values = "[{\"_key\":\"1\",\"_from\":\"from\",\"_to\":\"to\"},{\"_key\":\"2\",\"_from\":\"from\",\"_to\":\"to\"}]";
+
+            final DocumentImportEntity importResult = collection
+                    .importDocuments(values, new DocumentImportOptions().fromPrefix("foo").toPrefix("bar")).get();
+            assertThat(importResult, is(notNullValue()));
+            assertThat(importResult.getCreated(), is(2));
+            for (int i = 0; i < keys.length; i++) {
+                BaseEdgeDocument doc;
+                try {
+                    doc = collection.getDocument(keys[i], BaseEdgeDocument.class).get();
+                    assertThat(doc, is(notNullValue()));
+                    assertThat(doc.getFrom(), is("foo/from"));
+                    assertThat(doc.getTo(), is("bar/to"));
+                } catch (ArangoDBException | InterruptedException | ExecutionException e) {
+                    fail();
+                }
+            }
+        } finally {
+            collection.drop().get();
+        }
+    }
+
+    @Test
+    public void deleteDocumentsByKey() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("1");
+            values.add(e);
+        }
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("2");
+            values.add(e);
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        final Collection<String> keys = new ArrayList<>();
+        keys.add("1");
+        keys.add("2");
+        db.collection(COLLECTION_NAME).deleteDocuments(keys, null, null)
+                .whenComplete((deleteResult, ex) -> {
+                    assertThat(deleteResult, is(notNullValue()));
+                    assertThat(deleteResult.getDocuments().size(), is(2));
+                    for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+                        assertThat(i.getKey(), anyOf(is("1"), is("2")));
+                    }
+                    assertThat(deleteResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocumentsByDocuments() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("1");
+            values.add(e);
+        }
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("2");
+            values.add(e);
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        db.collection(COLLECTION_NAME).deleteDocuments(values, null, null)
+                .whenComplete((deleteResult, ex) -> {
+                    assertThat(deleteResult, is(notNullValue()));
+                    assertThat(deleteResult.getDocuments().size(), is(2));
+                    for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+                        assertThat(i.getKey(), anyOf(is("1"), is("2")));
+                    }
+                    assertThat(deleteResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocumentsByKeyOne() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("1");
+            values.add(e);
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        final Collection<String> keys = new ArrayList<>();
+        keys.add("1");
+        db.collection(COLLECTION_NAME).deleteDocuments(keys, null, null)
+                .whenComplete((deleteResult, ex) -> {
+                    assertThat(deleteResult, is(notNullValue()));
+                    assertThat(deleteResult.getDocuments().size(), is(1));
+                    for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+                        assertThat(i.getKey(), is("1"));
+                    }
+                    assertThat(deleteResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocumentsByDocumentOne() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("1");
+            values.add(e);
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        db.collection(COLLECTION_NAME).deleteDocuments(values, null, null)
+                .whenComplete((deleteResult, ex) -> {
+                    assertThat(deleteResult, is(notNullValue()));
+                    assertThat(deleteResult.getDocuments().size(), is(1));
+                    for (final DocumentDeleteEntity<Object> i : deleteResult.getDocuments()) {
+                        assertThat(i.getKey(), is("1"));
+                    }
+                    assertThat(deleteResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocumentsEmpty() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        final Collection<String> keys = new ArrayList<>();
+        db.collection(COLLECTION_NAME).deleteDocuments(keys, null, null)
+                .whenComplete((deleteResult, ex) -> {
+                    assertThat(deleteResult, is(notNullValue()));
+                    assertThat(deleteResult.getDocuments().size(), is(0));
+                    assertThat(deleteResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocumentsByKeyNotExisting() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        final Collection<String> keys = new ArrayList<>();
+        keys.add("1");
+        keys.add("2");
+        db.collection(COLLECTION_NAME).deleteDocuments(keys, null, null)
+                .whenComplete((deleteResult, ex) -> {
+                    assertThat(deleteResult, is(notNullValue()));
+                    assertThat(deleteResult.getDocuments().size(), is(0));
+                    assertThat(deleteResult.getErrors().size(), is(2));
+                })
+                .get();
+    }
+
+    @Test
+    public void deleteDocumentsByDocumentsNotExisting() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("1");
+            values.add(e);
+        }
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("2");
+            values.add(e);
+        }
+        db.collection(COLLECTION_NAME).deleteDocuments(values, null, null)
+                .whenComplete((deleteResult, ex) -> {
+                    assertThat(deleteResult, is(notNullValue()));
+                    assertThat(deleteResult.getDocuments().size(), is(0));
+                    assertThat(deleteResult.getErrors().size(), is(2));
+                })
+                .get();
+    }
+
+    @Test
+    public void updateDocuments() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("1");
+            values.add(e);
+        }
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("2");
+            values.add(e);
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null);
+        final Collection<BaseDocument> updatedValues = new ArrayList<>();
+        for (final BaseDocument i : values) {
+            i.addAttribute("a", "test");
+            updatedValues.add(i);
+        }
+        db.collection(COLLECTION_NAME).updateDocuments(updatedValues, null)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult.getDocuments().size(), is(2));
+                    assertThat(updateResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void updateDocumentsOne() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("1");
+            values.add(e);
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        final Collection<BaseDocument> updatedValues = new ArrayList<>();
+        final BaseDocument first = values.iterator().next();
+        first.addAttribute("a", "test");
+        updatedValues.add(first);
+        db.collection(COLLECTION_NAME).updateDocuments(updatedValues, null)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult.getDocuments().size(), is(1));
+                    assertThat(updateResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void updateDocumentsEmpty() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        db.collection(COLLECTION_NAME).updateDocuments(values, null)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult.getDocuments().size(), is(0));
+                    assertThat(updateResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void updateDocumentsWithoutKey() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            values.add(new BaseDocument("1"));
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        final Collection<BaseDocument> updatedValues = new ArrayList<>();
+        for (final BaseDocument i : values) {
+            i.addAttribute("a", "test");
+            updatedValues.add(i);
+        }
+        updatedValues.add(new BaseDocument());
+        db.collection(COLLECTION_NAME).updateDocuments(updatedValues, null)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult.getDocuments().size(), is(1));
+                    assertThat(updateResult.getErrors().size(), is(1));
+                })
+                .get();
+    }
+
+    @Test
+    public void replaceDocuments() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            values.add(new BaseDocument("1"));
+            values.add(new BaseDocument("2"));
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        final Collection<BaseDocument> updatedValues = new ArrayList<>();
+        for (final BaseDocument i : values) {
+            i.addAttribute("a", "test");
+            updatedValues.add(i);
+        }
+        db.collection(COLLECTION_NAME).replaceDocuments(updatedValues, null)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult.getDocuments().size(), is(2));
+                    assertThat(updateResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void replaceDocumentsOne() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            final BaseDocument e = new BaseDocument();
+            e.setKey("1");
+            values.add(e);
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        final Collection<BaseDocument> updatedValues = new ArrayList<>();
+        final BaseDocument first = values.iterator().next();
+        first.addAttribute("a", "test");
+        updatedValues.add(first);
+        db.collection(COLLECTION_NAME).updateDocuments(updatedValues, null)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult.getDocuments().size(), is(1));
+                    assertThat(updateResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void replaceDocumentsEmpty() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        db.collection(COLLECTION_NAME).updateDocuments(values, null)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult.getDocuments().size(), is(0));
+                    assertThat(updateResult.getErrors().size(), is(0));
+                })
+                .get();
+    }
+
+    @Test
+    public void replaceDocumentsWithoutKey() throws InterruptedException, ExecutionException {
+        final Collection<BaseDocument> values = new ArrayList<>();
+        {
+            values.add(new BaseDocument("1"));
+        }
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
+        final Collection<BaseDocument> updatedValues = new ArrayList<>();
+        for (final BaseDocument i : values) {
+            i.addAttribute("a", "test");
+            updatedValues.add(i);
+        }
+        updatedValues.add(new BaseDocument());
+        db.collection(COLLECTION_NAME).updateDocuments(updatedValues, null)
+                .whenComplete((updateResult, ex) -> {
+                    assertThat(updateResult.getDocuments().size(), is(1));
+                    assertThat(updateResult.getErrors().size(), is(1));
+                })
+                .get();
+    }
+
+    @Test
+    public void load() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).load()
+                .whenComplete((result, ex) -> {
+                    assertThat(result.getName(), is(COLLECTION_NAME));
+                })
+                .get();
+    }
+
+    @Test
+    public void unload() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).unload()
+                .whenComplete((result, ex) -> {
+                    assertThat(result.getName(), is(COLLECTION_NAME));
+                })
+                .get();
+    }
+
+    @Test
+    public void getInfo() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).getInfo()
+                .whenComplete((result, ex) -> {
+                    assertThat(result.getName(), is(COLLECTION_NAME));
+                })
+                .get();
+    }
+
+    @Test
+    public void getPropeties() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).getProperties()
+                .whenComplete((result, ex) -> {
+                    assertThat(result.getName(), is(COLLECTION_NAME));
+                    assertThat(result.getCount(), is(nullValue()));
+                })
+                .get();
+    }
+
+    @Test
+    public void changeProperties() throws InterruptedException, ExecutionException {
+        final String collection = COLLECTION_NAME + "_prop";
+        try {
+            db.createCollection(collection).get();
+            final CollectionPropertiesEntity properties = db.collection(collection).getProperties().get();
+            assertThat(properties.getWaitForSync(), is(notNullValue()));
+            final CollectionPropertiesOptions options = new CollectionPropertiesOptions();
+            options.waitForSync(!properties.getWaitForSync());
+            options.journalSize(2000000L);
+            db.collection(collection).changeProperties(options)
+                    .whenComplete((changedProperties, ex) -> {
+                        assertThat(changedProperties.getWaitForSync(), is(notNullValue()));
+                        assertThat(changedProperties.getWaitForSync(), is(not(properties.getWaitForSync())));
+                    })
+                    .get();
+        } finally {
+            db.collection(collection).drop();
+        }
+    }
+
+    @Test
+    public void rename() throws InterruptedException, ExecutionException {
+        if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+            return;
+        }
+        try {
+            db.collection(COLLECTION_NAME).rename(COLLECTION_NAME + "1")
+                    .whenComplete((result, ex) -> {
+                        assertThat(result, is(notNullValue()));
+                        assertThat(result.getName(), is(COLLECTION_NAME + "1"));
+                    })
+                    .get();
+            final CollectionEntity info = db.collection(COLLECTION_NAME + "1").getInfo().get();
+            assertThat(info.getName(), is(COLLECTION_NAME + "1"));
+            try {
+                db.collection(COLLECTION_NAME).getInfo().get();
+                fail();
+            } catch (final Exception e) {
+            }
+        } finally {
+            db.collection(COLLECTION_NAME + "1").rename(COLLECTION_NAME).get();
+        }
+    }
+
+    @Test
+    public void getRevision() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).getRevision()
+                .whenComplete((result, ex) -> {
+                    assertThat(result, is(notNullValue()));
+                    assertThat(result.getName(), is(COLLECTION_NAME));
+                    assertThat(result.getRevision(), is(notNullValue()));
+                })
+                .get();
+    }
+
+    @Test
+    public void grantAccessRW() throws InterruptedException, ExecutionException {
+        try {
+            arangoDB.createUser("user1", "1234", null).get();
+            db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.RW).get();
+        } finally {
+            arangoDB.deleteUser("user1").get();
+        }
+    }
+
+    @Test
+    public void grantAccessRO() throws InterruptedException, ExecutionException {
+        try {
+            arangoDB.createUser("user1", "1234", null).get();
+            db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.RO).get();
+        } finally {
+            arangoDB.deleteUser("user1").get();
+        }
+    }
+
+    @Test
+    public void grantAccessNONE() throws InterruptedException, ExecutionException {
+        try {
+            arangoDB.createUser("user1", "1234", null).get();
+            db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
+        } finally {
+            arangoDB.deleteUser("user1").get();
+        }
+    }
+
+    @Test(expected = ExecutionException.class)
+    public void grantAccessUserNotFound() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.RW).get();
+    }
+
+    @Test
+    public void revokeAccess() throws InterruptedException, ExecutionException {
+        try {
+            arangoDB.createUser("user1", "1234", null).get();
+            db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
+        } finally {
+            arangoDB.deleteUser("user1").get();
+        }
+    }
+
+    @Test(expected = ExecutionException.class)
+    public void revokeAccessUserNotFound() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).grantAccess("user1", Permissions.NONE).get();
+    }
+
+    @Test
+    public void resetAccess() throws InterruptedException, ExecutionException {
+        try {
+            arangoDB.createUser("user1", "1234", null).get();
+            db.collection(COLLECTION_NAME).resetAccess("user1").get();
+        } finally {
+            arangoDB.deleteUser("user1").get();
+        }
+    }
+
+    @Test(expected = ExecutionException.class)
+    public void resetAccessUserNotFound() throws InterruptedException, ExecutionException {
+        db.collection(COLLECTION_NAME).resetAccess("user1").get();
+    }
+
+    @Test
+    public void getPermissions() throws ArangoDBException, InterruptedException, ExecutionException {
+        assertThat(Permissions.RW, is(db.collection(COLLECTION_NAME).getPermissions("root").get()));
+    }
 }
