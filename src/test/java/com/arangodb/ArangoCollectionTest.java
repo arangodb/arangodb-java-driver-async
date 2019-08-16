@@ -38,6 +38,7 @@ import static org.junit.Assert.fail;
 
 /**
  * @author Mark Vollmary
+ * @author Michele Rastelli
  */
 public class ArangoCollectionTest extends BaseTest {
 
