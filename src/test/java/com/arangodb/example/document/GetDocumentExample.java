@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.BeforeClass;
@@ -37,61 +36,60 @@ import com.arangodb.velocypack.VPackSlice;
 
 /**
  * @author Mark Vollmary
- *
  */
 public class GetDocumentExample extends ExampleBase {
 
-	private static String key = null;
+    private static String key = null;
 
-	@BeforeClass
-	public static void before() throws InterruptedException, ExecutionException {
-		final BaseDocument value = new BaseDocument();
-		value.addAttribute("foo", "bar");
-		final DocumentCreateEntity<BaseDocument> doc = collection.insertDocument(value).get();
-		key = doc.getKey();
-	}
+    @BeforeClass
+    public static void before() throws InterruptedException, ExecutionException {
+        final BaseDocument value = new BaseDocument();
+        value.addAttribute("foo", "bar");
+        final DocumentCreateEntity<BaseDocument> doc = collection.insertDocument(value).get();
+        key = doc.getKey();
+    }
 
-	@Test
-	public void getAsBean() throws InterruptedException, ExecutionException {
-		final CompletableFuture<TestEntity> f = collection.getDocument(key, TestEntity.class);
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.getFoo(), is("bar"));
-		});
-		f.get();
-	}
+    @Test
+    public void getAsBean() throws InterruptedException, ExecutionException {
+        collection.getDocument(key, TestEntity.class)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(notNullValue()));
+                    assertThat(doc.getFoo(), is("bar"));
+                })
+                .get();
+    }
 
-	@Test
-	public void getAsBaseDocument() throws InterruptedException, ExecutionException {
-		final CompletableFuture<BaseDocument> f = collection.getDocument(key, BaseDocument.class);
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.getAttribute("foo"), is(notNullValue()));
-			assertThat(String.valueOf(doc.getAttribute("foo")), is("bar"));
-		});
-		f.get();
-	}
+    @Test
+    public void getAsBaseDocument() throws InterruptedException, ExecutionException {
+        collection.getDocument(key, BaseDocument.class)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(notNullValue()));
+                    assertThat(doc.getAttribute("foo"), is(notNullValue()));
+                    assertThat(String.valueOf(doc.getAttribute("foo")), is("bar"));
+                })
+                .get();
+    }
 
-	@Test
-	public void getAsVPack() throws InterruptedException, ExecutionException {
-		final CompletableFuture<VPackSlice> f = collection.getDocument(key, VPackSlice.class);
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.get("foo").isString(), is(true));
-			assertThat(doc.get("foo").getAsString(), is("bar"));
-		});
-		f.get();
-	}
+    @Test
+    public void getAsVPack() throws InterruptedException, ExecutionException {
+        collection.getDocument(key, VPackSlice.class)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(notNullValue()));
+                    assertThat(doc.get("foo").isString(), is(true));
+                    assertThat(doc.get("foo").getAsString(), is("bar"));
+                })
+                .get();
+    }
 
-	@Test
-	public void getAsJson() throws InterruptedException, ExecutionException {
-		final CompletableFuture<String> f = collection.getDocument(key, String.class);
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc, is(notNullValue()));
-			assertThat(doc.contains("foo"), is(true));
-			assertThat(doc.contains("bar"), is(true));
-		});
-		f.get();
-	}
+    @Test
+    public void getAsJson() throws InterruptedException, ExecutionException {
+        collection.getDocument(key, String.class)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc, is(notNullValue()));
+                    assertThat(doc.contains("foo"), is(true));
+                    assertThat(doc.contains("bar"), is(true));
+                })
+                .get();
+    }
 
 }

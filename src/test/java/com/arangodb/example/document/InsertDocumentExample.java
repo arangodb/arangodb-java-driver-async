@@ -20,61 +20,61 @@
 
 package com.arangodb.example.document;
 
+import com.arangodb.entity.BaseDocument;
+import com.arangodb.example.ExampleBase;
+import com.arangodb.velocypack.VPackBuilder;
+import com.arangodb.velocypack.ValueType;
+import org.junit.Test;
+
+import java.util.concurrent.ExecutionException;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import java.util.concurrent.CompletableFuture;
-
-import org.junit.Test;
-
-import com.arangodb.entity.BaseDocument;
-import com.arangodb.entity.DocumentCreateEntity;
-import com.arangodb.example.ExampleBase;
-import com.arangodb.velocypack.VPackBuilder;
-import com.arangodb.velocypack.VPackSlice;
-import com.arangodb.velocypack.ValueType;
-
 /**
  * @author Mark Vollmary
- *
  */
 public class InsertDocumentExample extends ExampleBase {
 
-	@Test
-	public void insertBean() {
-		final CompletableFuture<DocumentCreateEntity<TestEntity>> f = collection.insertDocument(new TestEntity("bar"));
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc.getKey(), is(notNullValue()));
-		});
-	}
+    @Test
+    public void insertBean() throws ExecutionException, InterruptedException {
+        collection.insertDocument(new TestEntity("bar"))
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc.getKey(), is(notNullValue()));
+                })
+                .get();
+    }
 
-	@Test
-	public void insertBaseDocument() {
-		final BaseDocument value = new BaseDocument();
-		value.addAttribute("foo", "bar");
-		final CompletableFuture<DocumentCreateEntity<BaseDocument>> f = collection.insertDocument(value);
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc.getKey(), is(notNullValue()));
-		});
-	}
+    @Test
+    public void insertBaseDocument() throws ExecutionException, InterruptedException {
+        final BaseDocument value = new BaseDocument();
+        value.addAttribute("foo", "bar");
+        collection.insertDocument(value)
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc.getKey(), is(notNullValue()));
+                })
+                .get();
+    }
 
-	@Test
-	public void insertVPack() {
-		final VPackBuilder builder = new VPackBuilder();
-		builder.add(ValueType.OBJECT).add("foo", "bar").close();
-		final CompletableFuture<DocumentCreateEntity<VPackSlice>> f = collection.insertDocument(builder.slice());
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc.getKey(), is(notNullValue()));
-		});
-	}
+    @Test
+    public void insertVPack() throws ExecutionException, InterruptedException {
+        final VPackBuilder builder = new VPackBuilder();
+        builder.add(ValueType.OBJECT).add("foo", "bar").close();
+        collection.insertDocument(builder.slice())
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc.getKey(), is(notNullValue()));
+                })
+                .get();
+    }
 
-	@Test
-	public void insertJson() {
-		final CompletableFuture<DocumentCreateEntity<String>> f = collection.insertDocument("{\"foo\":\"bar\"}");
-		f.whenComplete((doc, ex) -> {
-			assertThat(doc.getKey(), is(notNullValue()));
-		});
-	}
+    @Test
+    public void insertJson() throws ExecutionException, InterruptedException {
+        collection.insertDocument("{\"foo\":\"bar\"}")
+                .whenComplete((doc, ex) -> {
+                    assertThat(doc.getKey(), is(notNullValue()));
+                })
+                .get();
+    }
 
 }
