@@ -763,7 +763,12 @@ public class ArangoCollectionTest extends BaseTest {
                 .whenComplete((id, ex) -> {
                     assertThat(id, is(createResult.getId()));
                     try {
-                        db.getIndex(id).get();
+                        CompletableFuture<IndexEntity> index = db.getIndex(id);
+                        while (!index.isDone()) {
+                            System.out.println("waiting...");
+                            Thread.sleep(1000);
+                        }
+                        index.get();
                         fail();
                     } catch (final InterruptedException exception) {
                         exception.printStackTrace();
