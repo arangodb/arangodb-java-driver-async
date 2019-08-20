@@ -738,11 +738,17 @@ public class ArangoCollectionTest extends BaseTest {
         final Collection<String> fields = new ArrayList<>();
         fields.add("deleteIndexField");
         final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
+        db.getIndex(createResult.getId()).get();
         db.collection(COLLECTION_NAME).deleteIndex(createResult.getId())
                 .whenComplete((id, ex) -> {
                     assertThat(id, is(createResult.getId()));
                     try {
-                        db.getIndex(id).get();
+                        CompletableFuture<IndexEntity> index = db.getIndex(id);
+                        while (!index.isDone()) {
+                            System.out.println("waiting...");
+                            Thread.sleep(1000);
+                        }
+                        index.get();
                         fail();
                     } catch (final InterruptedException exception) {
                         exception.printStackTrace();
@@ -759,6 +765,7 @@ public class ArangoCollectionTest extends BaseTest {
         final Collection<String> fields = new ArrayList<>();
         fields.add("deleteIndexByKeyField");
         final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
+        db.getIndex(createResult.getId()).get();
         db.collection(COLLECTION_NAME).deleteIndex(createResult.getId().split("/")[1])
                 .whenComplete((id, ex) -> {
                     assertThat(id, is(createResult.getId()));
