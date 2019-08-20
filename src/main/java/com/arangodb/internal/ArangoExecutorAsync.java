@@ -20,65 +20,49 @@
 
 package com.arangodb.internal;
 
+import com.arangodb.internal.net.HostHandle;
+import com.arangodb.internal.util.ArangoSerializationFactory;
+import com.arangodb.internal.velocystream.VstCommunicationAsync;
+import com.arangodb.velocystream.Request;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
 
-import com.arangodb.ArangoDBException;
-import com.arangodb.internal.net.HostHandle;
-import com.arangodb.internal.util.ArangoSerializationFactory;
-import com.arangodb.internal.velocystream.VstCommunicationAsync;
-import com.arangodb.velocypack.exception.VPackException;
-import com.arangodb.velocystream.Request;
-
 /**
  * @author Mark Vollmary
- *
+ * @author Michele Rastelli
  */
 public class ArangoExecutorAsync extends ArangoExecutor {
 
-	private final VstCommunicationAsync communication;
+    private final VstCommunicationAsync communication;
 
-	public ArangoExecutorAsync(final VstCommunicationAsync communication, final ArangoSerializationFactory util,
-		final DocumentCache documentCache) {
-		super(util, documentCache);
-		this.communication = communication;
-	}
+    public ArangoExecutorAsync(final VstCommunicationAsync communication, final ArangoSerializationFactory util,
+                               final DocumentCache documentCache) {
+        super(util, documentCache);
+        this.communication = communication;
+    }
 
-	public <T> CompletableFuture<T> execute(final Request request, final Type type) {
-		return execute(request, (response) -> createResult(type, response));
-	}
+    public <T> CompletableFuture<T> execute(final Request request, final Type type) {
+        return execute(request, (response) -> createResult(type, response));
+    }
 
-	public <T> CompletableFuture<T> execute(final Request request, final Type type, final HostHandle hostHandle) {
-		return execute(request, (response) -> createResult(type, response), hostHandle);
-	}
+    public <T> CompletableFuture<T> execute(final Request request, final Type type, final HostHandle hostHandle) {
+        return execute(request, (response) -> createResult(type, response), hostHandle);
+    }
 
-	public <T> CompletableFuture<T> execute(final Request request, final ResponseDeserializer<T> responseDeserializer) {
-		return execute(request, responseDeserializer, null);
-	}
+    public <T> CompletableFuture<T> execute(final Request request, final ResponseDeserializer<T> responseDeserializer) {
+        return execute(request, responseDeserializer, null);
+    }
 
-	public <T> CompletableFuture<T> execute(
-		final Request request,
-		final ResponseDeserializer<T> responseDeserializer,
-		final HostHandle hostHandle) {
-		final CompletableFuture<T> result = new CompletableFuture<>();
-		communication.execute(request, hostHandle).whenComplete((response, ex) -> {
-			if (response != null) {
-				try {
-					result.complete(responseDeserializer.deserialize(response));
-				} catch (final VPackException | ArangoDBException e) {
-					result.completeExceptionally(e);
-				}
-			} else if (ex != null) {
-				result.completeExceptionally(ex);
-			} else {
-				result.cancel(true);
-			}
-		});
-		return result;
-	}
+    public <T> CompletableFuture<T> execute(
+            final Request request,
+            final ResponseDeserializer<T> responseDeserializer,
+            final HostHandle hostHandle) {
+        return communication.execute(request, hostHandle).thenApply(responseDeserializer::deserialize);
+    }
 
-	public void disconnect() throws IOException {
-		communication.close();
-	}
+    public void disconnect() throws IOException {
+        communication.close();
+    }
 }
