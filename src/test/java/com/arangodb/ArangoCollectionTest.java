@@ -824,25 +824,31 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
-    public void createGeo2Index() throws InterruptedException, ExecutionException {
-        final Collection<String> fields = new ArrayList<>();
+    public void createGeo2Index() throws ExecutionException, InterruptedException {
+        final Collection<String> fields = new ArrayList<String>();
         fields.add("a");
         fields.add("b");
-        db.collection(COLLECTION_NAME).ensureGeoIndex(fields, null)
-                .whenComplete((indexResult, ex) -> {
-                    assertThat(indexResult, is(notNullValue()));
-                    assertThat(indexResult.getFields(), hasItem("a"));
-                    assertThat(indexResult.getFields(), hasItem("b"));
-                    assertThat(indexResult.getGeoJson(), is(false));
-                    assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
-                    assertThat(indexResult.getIsNewlyCreated(), is(true));
-                    assertThat(indexResult.getMinLength(), is(nullValue()));
-                    assertThat(indexResult.getSelectivityEstimate(), is(nullValue()));
-                    assertThat(indexResult.getSparse(), is(true));
-                    assertThat(indexResult.getType(), anyOf(is(IndexType.geo), is(IndexType.geo2)));
-                    assertThat(indexResult.getUnique(), is(false));
-                })
-                .get();
+        db.collection(COLLECTION_NAME).ensureGeoIndex(fields, null).whenComplete((indexResult, ex) -> {
+            assertThat(indexResult, is(notNullValue()));
+            assertThat(indexResult.getFields(), hasItem("a"));
+            assertThat(indexResult.getFields(), hasItem("b"));
+            assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+            assertThat(indexResult.getIsNewlyCreated(), is(true));
+            assertThat(indexResult.getMinLength(), is(nullValue()));
+            assertThat(indexResult.getSparse(), is(true));
+            assertThat(indexResult.getUnique(), is(false));
+            try {
+                if (requireVersion(3, 4)) {
+                    assertThat(indexResult.getType(), is(IndexType.geo));
+                } else {
+                    assertThat(indexResult.getType(), is(IndexType.geo2));
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }).get();
     }
 
     @Test
