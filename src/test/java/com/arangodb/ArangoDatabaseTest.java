@@ -740,19 +740,16 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void explainQuery() throws InterruptedException, ExecutionException {
-        arangoDB.db().explainQuery("for i in _apps return i", null, null)
+        arangoDB.db().explainQuery("for i in 1..1 return i", null, null)
                 .whenComplete((explain, ex) -> {
                     assertThat(explain, is(notNullValue()));
                     assertThat(explain.getPlan(), is(notNullValue()));
                     assertThat(explain.getPlans(), is(nullValue()));
                     final ExecutionPlan plan = explain.getPlan();
-                    assertThat(plan.getCollections().size(), is(1));
-                    assertThat(plan.getCollections().iterator().next().getName(), is("_apps"));
-                    assertThat(plan.getCollections().iterator().next().getType(), is("read"));
+                    assertThat(plan.getCollections().size(), is(0));
                     assertThat(plan.getEstimatedCost(), greaterThan(0));
                     assertThat(plan.getEstimatedNrItems(), greaterThan(0));
-                    assertThat(plan.getVariables().size(), is(1));
-                    assertThat(plan.getVariables().iterator().next().getName(), is("i"));
+                    assertThat(plan.getVariables().size(), is(2));
                     assertThat(plan.getNodes().size(), is(greaterThan(0)));
                 })
                 .get();
