@@ -59,7 +59,7 @@ public class ArangoExecutorAsync extends ArangoExecutor {
             final Request request,
             final ResponseDeserializer<T> responseDeserializer,
             final HostHandle hostHandle) {
-        return communication.execute(request, hostHandle).thenApply(responseDeserializer::deserialize);
+        return communication.execute(request, hostHandle).thenApplyAsync(responseDeserializer::deserialize);
     }
 
     public void disconnect() throws IOException {

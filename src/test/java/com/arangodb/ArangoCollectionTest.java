@@ -734,27 +734,6 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
-    public void deleteIndexWorking() throws InterruptedException, ExecutionException {
-        for (int i = 0; i < 1000; i++) {
-            final Collection<String> fields = new ArrayList<>();
-            fields.add("deleteIndexField");
-            final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
-            db.getIndex(createResult.getId()).get();
-            String id = db.collection(COLLECTION_NAME).deleteIndex(createResult.getId()).get();
-            assertThat(id, is(createResult.getId()));
-            try {
-                db.getIndex(id).get();
-                fail();
-            } catch (final InterruptedException exception) {
-                exception.printStackTrace();
-                fail();
-            } catch (final ExecutionException exception) {
-                assertThat(exception.getCause(), instanceOf(ArangoDBException.class));
-            }
-        }
-    }
-
-    @Test
     public void deleteIndex() throws InterruptedException, ExecutionException {
         final Collection<String> fields = new ArrayList<>();
         fields.add("deleteIndexField");
@@ -764,12 +743,7 @@ public class ArangoCollectionTest extends BaseTest {
                 .whenComplete((id, ex) -> {
                     assertThat(id, is(createResult.getId()));
                     try {
-                        CompletableFuture<IndexEntity> index = db.getIndex(id);
-                        while (!index.isDone()) {
-                            System.out.println("waiting...");
-                            Thread.sleep(1000);
-                        }
-                        index.get();
+                        db.getIndex(id).get();
                         fail();
                     } catch (final InterruptedException exception) {
                         exception.printStackTrace();
@@ -791,12 +765,7 @@ public class ArangoCollectionTest extends BaseTest {
                 .whenComplete((id, ex) -> {
                     assertThat(id, is(createResult.getId()));
                     try {
-                        CompletableFuture<IndexEntity> index = db.getIndex(id);
-                        while (!index.isDone()) {
-                            System.out.println("waiting...");
-                            Thread.sleep(1000);
-                        }
-                        index.get();
+                        db.getIndex(id).get();
                         fail();
                     } catch (final InterruptedException exception) {
                         exception.printStackTrace();
