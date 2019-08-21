@@ -61,6 +61,49 @@ public class ArangoDBTest {
                 .get();
     }
 
+    @Test(timeout = 2000)
+    public void nestedGetVersion() {
+        final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
+        for (int i = 0; i < 100; i++) {
+            try {
+                arangoDB.getVersion()
+                        .whenComplete((v1, ex1) -> {
+                            assertThat(v1, is(notNullValue()));
+                            assertThat(v1.getServer(), is(notNullValue()));
+                            assertThat(v1.getVersion(), is(notNullValue()));
+                            try {
+                                arangoDB.getVersion()
+                                        .whenComplete((v2, ex2) -> {
+                                            assertThat(v2, is(notNullValue()));
+                                            assertThat(v2.getServer(), is(notNullValue()));
+                                            assertThat(v2.getVersion(), is(notNullValue()));
+                                            try {
+                                                arangoDB.getVersion()
+                                                        .whenComplete((v3, ex3) -> {
+                                                            assertThat(v3, is(notNullValue()));
+                                                            assertThat(v3.getServer(), is(notNullValue()));
+                                                            assertThat(v3.getVersion(), is(notNullValue()));
+                                                        })
+                                                        .get();
+                                            } catch (InterruptedException | ExecutionException e) {
+                                                e.printStackTrace();
+                                                fail();
+                                            }
+                                        })
+                                        .get();
+                            } catch (InterruptedException | ExecutionException e) {
+                                e.printStackTrace();
+                                fail();
+                            }
+                        })
+                        .get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                fail();
+            }
+        }
+    }
+
     @Test
     public void createDatabase() throws InterruptedException, ExecutionException {
         final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
