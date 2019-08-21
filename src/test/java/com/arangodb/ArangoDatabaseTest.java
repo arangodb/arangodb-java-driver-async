@@ -252,12 +252,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     .whenComplete((id, ex) -> {
                         assertThat(id, is(createResult.getId()));
                         try {
-                            CompletableFuture<IndexEntity> index = db.getIndex(id);
-                            while (!index.isDone()) {
-                                System.out.println("waiting...");
-                                Thread.sleep(1000);
-                            }
-                            index.get();
+                            db.getIndex(id).get();
                             fail();
                         } catch (InterruptedException e) {
                             fail();
