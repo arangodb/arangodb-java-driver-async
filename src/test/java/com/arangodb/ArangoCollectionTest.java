@@ -1679,7 +1679,7 @@ public class ArangoCollectionTest extends BaseTest {
             e.setKey("2");
             values.add(e);
         }
-        db.collection(COLLECTION_NAME).insertDocuments(values, null);
+        db.collection(COLLECTION_NAME).insertDocuments(values, null).get();
         final Collection<BaseDocument> updatedValues = new ArrayList<>();
         for (final BaseDocument i : values) {
             i.addAttribute("a", "test");
