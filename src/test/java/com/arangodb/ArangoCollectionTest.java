@@ -867,9 +867,9 @@ public class ArangoCollectionTest extends BaseTest {
                     assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
                     assertThat(indexResult.getIsNewlyCreated(), is(true));
                     assertThat(indexResult.getMinLength(), is(nullValue()));
-                    if (singleServer) {
-                        assertThat(indexResult.getSelectivityEstimate(), is(1.0));
-                    }
+//                    if (singleServer) {
+//                        assertThat(indexResult.getSelectivityEstimate(), is(1.0));
+//                    }
                     assertThat(indexResult.getSparse(), is(false));
                     assertThat(indexResult.getType(), is(IndexType.skiplist));
                     assertThat(indexResult.getUnique(), is(false));
@@ -893,9 +893,9 @@ public class ArangoCollectionTest extends BaseTest {
                     assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
                     assertThat(indexResult.getIsNewlyCreated(), is(true));
                     assertThat(indexResult.getMinLength(), is(nullValue()));
-                    if (singleServer) {
-                        assertThat(indexResult.getSelectivityEstimate(), is(1.0));
-                    }
+//                    if (singleServer) {
+//                        assertThat(indexResult.getSelectivityEstimate(), is(1.0));
+//                    }
                     assertThat(indexResult.getSparse(), is(false));
                     assertThat(indexResult.getType(), is(IndexType.persistent));
                     assertThat(indexResult.getUnique(), is(false));
