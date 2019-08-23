@@ -28,17 +28,12 @@ import com.arangodb.model.UserUpdateOptions;
 import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.Request;
 import com.arangodb.velocystream.RequestType;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -107,34 +102,6 @@ public class ArangoDBTest {
                 fail();
             }
         }
-    }
-
-    // FIXME:   make the user executor configurable in com.arangodb.internal.ArangoExecutorAsync::execute
-    //          (eg. this test passes using a CachedThreadPool)
-    @Ignore
-    @Test(timeout = 2000)
-    public void executorLimit() throws ExecutionException, InterruptedException {
-        final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
-
-        List<CompletableFuture<ArangoDBVersion>> futures = IntStream.range(0, 20)
-                .mapToObj(i -> arangoDB.getVersion()
-                        .whenComplete((dbVersion, ex) -> {
-                            System.out.println(Thread.currentThread().getName());
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }))
-                .collect(Collectors.toList());
-
-        futures.forEach(future -> {
-                    try {
-                        future.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                });
     }
 
     @Test
