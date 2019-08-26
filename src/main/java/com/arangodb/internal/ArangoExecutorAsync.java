@@ -20,14 +20,18 @@
 
 package com.arangodb.internal;
 
+import com.arangodb.ArangoDBException;
 import com.arangodb.internal.net.HostHandle;
 import com.arangodb.internal.util.ArangoSerializationFactory;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
+import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.Request;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Mark Vollmary
@@ -36,6 +40,7 @@ import java.util.concurrent.CompletableFuture;
 public class ArangoExecutorAsync extends ArangoExecutor {
 
     private final VstCommunicationAsync communication;
+    private final ExecutorService outgoingExecutor = Executors.newSingleThreadExecutor();
 
     public ArangoExecutorAsync(final VstCommunicationAsync communication, final ArangoSerializationFactory util,
                                final DocumentCache documentCache) {
@@ -59,7 +64,28 @@ public class ArangoExecutorAsync extends ArangoExecutor {
             final Request request,
             final ResponseDeserializer<T> responseDeserializer,
             final HostHandle hostHandle) {
-        return communication.execute(request, hostHandle).thenApplyAsync(responseDeserializer::deserialize);
+
+        CompletableFuture<T> result = new CompletableFuture<>();
+        outgoingExecutor.execute(() -> {
+                    try {
+                        communication.execute(request, hostHandle)
+                                .whenCompleteAsync((response, ex) -> {
+                                    if (ex != null) {
+                                        result.completeExceptionally(ex);
+                                    } else if (response != null) {
+                                        try {
+                                            result.complete(responseDeserializer.deserialize(response));
+                                        } catch (final VPackException | ArangoDBException e) {
+                                            result.completeExceptionally(e);
+                                        }
+                                    }
+                                });
+                    } catch (ArangoDBException e) {
+                        result.completeExceptionally(e);
+                    }
+                }
+        );
+        return result;
     }
 
     public void disconnect() throws IOException {

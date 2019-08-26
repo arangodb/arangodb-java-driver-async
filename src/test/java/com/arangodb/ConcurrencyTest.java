@@ -22,6 +22,8 @@ package com.arangodb;
 
 
 import com.arangodb.entity.ArangoDBVersion;
+import com.arangodb.internal.ArangoExecutorAsync;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -36,15 +38,20 @@ import java.util.stream.IntStream;
  */
 public class ConcurrencyTest {
 
+    private ArangoDBAsync arangoDB;
+
+    @Before
+    public void initialize() {
+        arangoDB = new ArangoDBAsync.Builder().build();
+    }
+
     /**
      * FIXME:   make the user executor configurable in com.arangodb.internal.ArangoExecutorAsync::execute
-     *          (eg. this test passes using a CachedThreadPool)
+     * (eg. this test passes using a CachedThreadPool)
      */
     @Ignore
     @Test(timeout = 2000)
     public void executorLimit() throws ExecutionException, InterruptedException {
-        final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
-
         List<CompletableFuture<ArangoDBVersion>> futures = IntStream.range(0, 20)
                 .mapToObj(i -> arangoDB.getVersion()
                         .whenComplete((dbVersion, ex) -> {
@@ -66,14 +73,14 @@ public class ConcurrencyTest {
         });
     }
 
+
     /**
-     * FIXME: Outgoing requests should not block the user threads while sending network data.
+     * outgoing requests should be queued in the {@link ArangoExecutorAsync} outgoingExecutor
      */
     @Ignore
-    @Test(timeout = 500)
+    @Test(timeout = 1000)
     public void outgoingRequestsParallelismTest() {
-        final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
-        for (int i = 0; i < 5000; i++) {
+        for (int i = 0; i < 50_000; i++) {
             arangoDB.getVersion();
         }
     }

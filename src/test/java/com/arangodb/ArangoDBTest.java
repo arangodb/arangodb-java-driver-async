@@ -356,8 +356,8 @@ public class ArangoDBTest {
         try {
             arangoDB.getVersion().get();
             fail();
-        } catch (final ArangoDBException e) {
-
+        } catch (final ExecutionException exception) {
+            assertThat(exception.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -367,8 +367,8 @@ public class ArangoDBTest {
         try {
             arangoDB.getVersion().get();
             fail();
-        } catch (final ArangoDBException e) {
-
+        } catch (final ExecutionException exception) {
+            assertThat(exception.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
