@@ -24,8 +24,6 @@ import com.arangodb.entity.DocumentImportEntity;
 import com.arangodb.example.ExampleBase;
 import com.arangodb.model.DocumentImportOptions;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,14 +39,13 @@ import java.util.stream.Stream;
  */
 public class ImportDocumentExample extends ExampleBase {
 
-    private static final Logger log = LoggerFactory.getLogger(ImportDocumentExample.class);
-    private static final int MAX_PENDING_REQUESTS = 100;
+    private static final int MAX_PENDING_REQUESTS = 10;
 
     @Test
     public void importDocument() {
         AtomicLong pendingReqsCount = new AtomicLong();
 
-        Stream<List<TestEntity>> chunks = IntStream.range(0, 1000)
+        Stream<List<TestEntity>> chunks = IntStream.range(0, 100)
                 .mapToObj(i -> IntStream.range(0, 500)
                         .mapToObj(it -> new TestEntity(UUID.randomUUID().toString())).collect(Collectors.toList())
                 );
@@ -68,7 +65,6 @@ public class ImportDocumentExample extends ExampleBase {
                             return collection.importDocuments(p, new DocumentImportOptions())
                                     .thenApply(it -> {
                                         pendingReqsCount.decrementAndGet();
-                                        log.info(String.valueOf(it.getCreated()));
                                         return it;
                                     });
                         }

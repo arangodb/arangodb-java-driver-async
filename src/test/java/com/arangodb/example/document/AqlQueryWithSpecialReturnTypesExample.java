@@ -20,131 +20,119 @@
 
 package com.arangodb.example.document;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isOneOf;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.arangodb.ArangoCursorAsync;
 import com.arangodb.entity.BaseDocument;
 import com.arangodb.example.ExampleBase;
 import com.arangodb.util.MapBuilder;
 import com.arangodb.velocypack.VPackSlice;
-import com.arangodb.velocypack.exception.VPackException;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Mark Vollmary
- *
  */
 public class AqlQueryWithSpecialReturnTypesExample extends ExampleBase {
 
-	@BeforeClass
-	public static void before() throws InterruptedException, ExecutionException {
-		createExamples();
-	}
+    @BeforeClass
+    public static void before() throws InterruptedException, ExecutionException {
+        createExamples();
+    }
 
-	public enum Gender {
-		MALE, FEMALE
-	}
+    public enum Gender {
+        MALE, FEMALE
+    }
 
-	private static void createExamples() throws InterruptedException, ExecutionException {
-		for (int i = 0; i < 100; i++) {
-			final BaseDocument value = new BaseDocument();
-			value.addAttribute("name", "TestUser" + i);
-			value.addAttribute("gender", (i % 2) == 0 ? Gender.MALE : Gender.FEMALE);
-			value.addAttribute("age", i + 10);
-			db.collection(COLLECTION_NAME).insertDocument(value).get();
-		}
-	}
+    private static void createExamples() throws InterruptedException, ExecutionException {
+        for (int i = 0; i < 100; i++) {
+            final BaseDocument value = new BaseDocument();
+            value.addAttribute("name", "TestUser" + i);
+            value.addAttribute("gender", (i % 2) == 0 ? Gender.MALE : Gender.FEMALE);
+            value.addAttribute("age", i + 10);
+            db.collection(COLLECTION_NAME).insertDocument(value).get();
+        }
+    }
 
-	@Test
-	public void aqlWithLimitQueryAsVPackObject() throws InterruptedException, ExecutionException {
-		final String query = "FOR t IN " + COLLECTION_NAME
-				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN t";
-		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
-		final CompletableFuture<ArangoCursorAsync<VPackSlice>> f = db.query(query, bindVars, null, VPackSlice.class);
-		f.whenComplete((cursor, ex) -> {
-			assertThat(cursor, is(notNullValue()));
-			cursor.forEachRemaining(vpack -> {
-				try {
-					assertThat(vpack.get("name").getAsString(),
-						isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
-					assertThat(vpack.get("gender").getAsString(), is(Gender.FEMALE.name()));
-					assertThat(vpack.get("age").getAsInt(), isOneOf(21, 23, 25, 27, 29));
-				} catch (final VPackException e) {
-				}
-			});
-		});
-		f.get();
-	}
+    @Test
+    public void aqlWithLimitQueryAsVPackObject() throws InterruptedException, ExecutionException {
+        final String query = "FOR t IN " + COLLECTION_NAME
+                + " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN t";
+        final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
+        db.query(query, bindVars, null, VPackSlice.class)
+                .whenComplete((cursor, ex) -> {
+                    assertThat(cursor, is(notNullValue()));
+                    cursor.forEachRemaining(vpack -> {
+                        assertThat(vpack.get("name").getAsString(),
+                                isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
+                        assertThat(vpack.get("gender").getAsString(), is(Gender.FEMALE.name()));
+                        assertThat(vpack.get("age").getAsInt(), isOneOf(21, 23, 25, 27, 29));
+                    });
+                })
+                .get();
+    }
 
-	@Test
-	public void aqlWithLimitQueryAsVPackArray() throws InterruptedException, ExecutionException {
-		final String query = "FOR t IN " + COLLECTION_NAME
-				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN [t.name, t.gender, t.age]";
-		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
-		final CompletableFuture<ArangoCursorAsync<VPackSlice>> f = db.query(query, bindVars, null, VPackSlice.class);
-		f.whenComplete((cursor, ex) -> {
-			assertThat(cursor, is(notNullValue()));
-			cursor.forEachRemaining(vpack -> {
-				assertThat(vpack.get(0).getAsString(),
-					isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
-				assertThat(vpack.get(1).getAsString(), is(Gender.FEMALE.name()));
-				assertThat(vpack.get(2).getAsInt(), isOneOf(21, 23, 25, 27, 29));
-			});
-		});
-		f.get();
-	}
+    @Test
+    public void aqlWithLimitQueryAsVPackArray() throws InterruptedException, ExecutionException {
+        final String query = "FOR t IN " + COLLECTION_NAME
+                + " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN [t.name, t.gender, t.age]";
+        final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
+        db.query(query, bindVars, null, VPackSlice.class)
+                .whenComplete((cursor, ex) -> {
+                    assertThat(cursor, is(notNullValue()));
+                    cursor.forEachRemaining(vpack -> {
+                        assertThat(vpack.get(0).getAsString(),
+                                isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
+                        assertThat(vpack.get(1).getAsString(), is(Gender.FEMALE.name()));
+                        assertThat(vpack.get(2).getAsInt(), isOneOf(21, 23, 25, 27, 29));
+                    });
+                })
+                .get();
+    }
 
-	@Test
-	@SuppressWarnings("rawtypes")
-	public void aqlWithLimitQueryAsMap() throws InterruptedException, ExecutionException {
-		final String query = "FOR t IN " + COLLECTION_NAME
-				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN t";
-		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
-		final CompletableFuture<ArangoCursorAsync<Map>> f = db.query(query, bindVars, null, Map.class);
-		f.whenComplete((cursor, ex) -> {
-			assertThat(cursor, is(notNullValue()));
-			cursor.forEachRemaining(map -> {
-				assertThat(map.get("name"), is(notNullValue()));
-				assertThat(String.valueOf(map.get("name")),
-					isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
-				assertThat(map.get("gender"), is(notNullValue()));
-				assertThat(String.valueOf(map.get("gender")), is(Gender.FEMALE.name()));
-				assertThat(map.get("age"), is(notNullValue()));
-				assertThat(Long.valueOf(map.get("age").toString()), isOneOf(21L, 23L, 25L, 27L, 29L));
-			});
-		});
-		f.get();
-	}
+    @Test
+    public void aqlWithLimitQueryAsMap() throws InterruptedException, ExecutionException {
+        final String query = "FOR t IN " + COLLECTION_NAME
+                + " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN t";
+        final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
+        db.query(query, bindVars, null, Map.class)
+                .whenComplete((cursor, ex) -> {
+                    assertThat(cursor, is(notNullValue()));
+                    cursor.forEachRemaining(map -> {
+                        assertThat(map.get("name"), is(notNullValue()));
+                        assertThat(String.valueOf(map.get("name")),
+                                isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
+                        assertThat(map.get("gender"), is(notNullValue()));
+                        assertThat(String.valueOf(map.get("gender")), is(Gender.FEMALE.name()));
+                        assertThat(map.get("age"), is(notNullValue()));
+                        assertThat(Long.valueOf(map.get("age").toString()), isOneOf(21L, 23L, 25L, 27L, 29L));
+                    });
+                })
+                .get();
+    }
 
-	@Test
-	@SuppressWarnings("rawtypes")
-	public void aqlWithLimitQueryAsList() throws InterruptedException, ExecutionException {
-		final String query = "FOR t IN " + COLLECTION_NAME
-				+ " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN [t.name, t.gender, t.age]";
-		final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
-		final CompletableFuture<ArangoCursorAsync<List>> f = db.query(query, bindVars, null, List.class);
-		f.whenComplete((cursor, ex) -> {
-			assertThat(cursor, is(notNullValue()));
-			cursor.forEachRemaining(list -> {
-				assertThat(list.get(0), is(notNullValue()));
-				assertThat(String.valueOf(list.get(0)),
-					isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
-				assertThat(list.get(1), is(notNullValue()));
-				assertThat(Gender.valueOf(String.valueOf(list.get(1))), is(Gender.FEMALE));
-				assertThat(list.get(2), is(notNullValue()));
-				assertThat(Long.valueOf(String.valueOf(list.get(2))), isOneOf(21L, 23L, 25L, 27L, 29L));
-			});
-		});
-		f.get();
-	}
+    @Test
+    public void aqlWithLimitQueryAsList() throws InterruptedException, ExecutionException {
+        final String query = "FOR t IN " + COLLECTION_NAME
+                + " FILTER t.age >= 20 && t.age < 30 && t.gender == @gender RETURN [t.name, t.gender, t.age]";
+        final Map<String, Object> bindVars = new MapBuilder().put("gender", Gender.FEMALE).get();
+        db.query(query, bindVars, null, List.class)
+                .whenComplete((cursor, ex) -> {
+                    assertThat(cursor, is(notNullValue()));
+                    cursor.forEachRemaining(list -> {
+                        assertThat(list.get(0), is(notNullValue()));
+                        assertThat(String.valueOf(list.get(0)),
+                                isOneOf("TestUser11", "TestUser13", "TestUser15", "TestUser17", "TestUser19"));
+                        assertThat(list.get(1), is(notNullValue()));
+                        assertThat(Gender.valueOf(String.valueOf(list.get(1))), is(Gender.FEMALE));
+                        assertThat(list.get(2), is(notNullValue()));
+                        assertThat(Long.valueOf(String.valueOf(list.get(2))), isOneOf(21L, 23L, 25L, 27L, 29L));
+                    });
+                })
+                .get();
+    }
 }
