@@ -254,10 +254,8 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 * @param permissions
 	 *            The permissions the user grant
 	 * @since ArangoDB 3.2.0
-	 * @throws ArangoDBException
 	 */
-	CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions)
-			throws ArangoDBException;
+	CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions);
 
 	/**
 	 * Get specific database access level
@@ -269,7 +267,7 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 * @return permissions of the user
 	 * @since ArangoDB 3.2.0
 	 */
-	CompletableFuture<Permissions> getPermissions(final String user) throws ArangoDBException;
+	CompletableFuture<Permissions> getPermissions(final String user);
 
 	/**
 	 * Performs a database query using the given {@code query} and {@code bindVars}, then returns a new
@@ -286,13 +284,12 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 * @param type
 	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
 	 * @return cursor of the results
-	 * @throws ArangoDBException
 	 */
 	<T> CompletableFuture<ArangoCursorAsync<T>> query(
 		final String query,
 		final Map<String, Object> bindVars,
 		final AqlQueryOptions options,
-		final Class<T> type) throws ArangoDBException;
+		final Class<T> type);
 
 	/**
 	 * Performs a database query using the given {@code query}, then returns a new {@code ArangoCursor} instance for the
@@ -307,12 +304,11 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 * @param type
 	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
 	 * @return cursor of the results
-	 * @throws ArangoDBException
 	 */
 	<T> CompletableFuture<ArangoCursorAsync<T>> query(
 		final String query,
 		final AqlQueryOptions options,
-		final Class<T> type) throws ArangoDBException;
+		final Class<T> type);
 
 	/**
 	 * Performs a database query using the given {@code query} and {@code bindVars}, then returns a new
@@ -327,12 +323,11 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 * @param type
 	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
 	 * @return cursor of the results
-	 * @throws ArangoDBException
 	 */
 	<T> CompletableFuture<ArangoCursorAsync<T>> query(
 		final String query,
 		final Map<String, Object> bindVars,
-		final Class<T> type) throws ArangoDBException;
+		final Class<T> type);
 
 	/**
 	 * Performs a database query using the given {@code query}, then returns a new {@code ArangoCursor} instance for the
@@ -345,9 +340,8 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 * @param type
 	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
 	 * @return cursor of the results
-	 * @throws ArangoDBException
 	 */
-	<T> CompletableFuture<ArangoCursorAsync<T>> query(final String query, final Class<T> type) throws ArangoDBException;
+	<T> CompletableFuture<ArangoCursorAsync<T>> query(final String query, final Class<T> type);
 
 	/**
 	 * Return an cursor from the given cursor-ID if still existing
@@ -360,10 +354,8 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 * @param type
 	 *            The type of the result (POJO class, VPackSlice, String for Json, or Collection/List/Map)
 	 * @return cursor of the results
-	 * @throws ArangoDBException
 	 */
-	<T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type)
-			throws ArangoDBException;
+	<T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type);
 
 	/**
 	 * Explain an AQL query and return information about it
@@ -684,10 +676,9 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Views/Getting.html#reads-all-views">API Documentation</a>
 	 * @return list of information about all views
-	 * @throws ArangoDBException
 	 * @since ArangoDB 3.4.0
 	 */
-	CompletableFuture<Collection<ViewEntity>> getViews() throws ArangoDBException;
+	CompletableFuture<Collection<ViewEntity>> getViews();
 
 	/**
 	 * Returns a {@code ArangoViewAsync} instance for the given view name.
@@ -718,9 +709,8 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 *            The type of the view
 	 * @return information about the view
 	 * @since ArangoDB 3.4.0
-	 * @throws ArangoDBException
 	 */
-	CompletableFuture<ViewEntity> createView(String name, ViewType type) throws ArangoDBException;
+	CompletableFuture<ViewEntity> createView(String name, ViewType type);
 
 	/**
 	 * Creates a ArangoSearch view with the given {@code options}, then returns view information from the server.
@@ -733,9 +723,7 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 *            Additional options, can be null
 	 * @return information about the view
 	 * @since ArangoDB 3.4.0
-	 * @throws ArangoDBException
 	 */
-	CompletableFuture<ViewEntity> createArangoSearch(String name, ArangoSearchCreateOptions options)
-			throws ArangoDBException;
+	CompletableFuture<ViewEntity> createArangoSearch(String name, ArangoSearchCreateOptions options);
 
 }

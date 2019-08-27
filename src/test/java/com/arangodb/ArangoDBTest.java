@@ -112,10 +112,7 @@ public class ArangoDBTest {
                     assertThat(result, is(true));
                 })
                 .get();
-        try {
-            arangoDB.db(BaseTest.TEST_DB).drop().get();
-        } catch (final ArangoDBException e) {
-        }
+        arangoDB.db(BaseTest.TEST_DB).drop().get();
     }
 
     @Test
@@ -351,7 +348,7 @@ public class ArangoDBTest {
     }
 
     @Test
-    public void authenticationFailPassword() throws InterruptedException, ExecutionException {
+    public void authenticationFailPassword() throws InterruptedException {
         final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().password("no").build();
         try {
             arangoDB.getVersion().get();
@@ -362,7 +359,7 @@ public class ArangoDBTest {
     }
 
     @Test
-    public void authenticationFailUser() throws InterruptedException, ExecutionException {
+    public void authenticationFailUser() throws InterruptedException {
         final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().user("no").build();
         try {
             arangoDB.getVersion().get();

@@ -59,10 +59,7 @@ public class ArangoDatabaseTest extends BaseTest {
             final Boolean result = arangoDB.db(BaseTest.TEST_DB + "_1").create().get();
             assertThat(result, is(true));
         } finally {
-            try {
-                arangoDB.db(BaseTest.TEST_DB + "_1").drop();
-            } catch (final ArangoDBException e) {
-            }
+            arangoDB.db(BaseTest.TEST_DB + "_1").drop().get();
         }
     }
 
@@ -390,7 +387,7 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
-    public void getPermissions() throws ArangoDBException, InterruptedException, ExecutionException {
+    public void getPermissions() throws InterruptedException, ExecutionException {
         assertThat(Permissions.RW, is(db.getPermissions("root").get()));
     }
 
@@ -597,7 +594,7 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
-    public void queryWithCache() throws InterruptedException, ArangoDBException, ExecutionException {
+    public void queryWithCache() throws InterruptedException, ExecutionException {
         if (arangoDB.getRole().get() != ServerRole.SINGLE) {
             return;
         }
@@ -636,7 +633,7 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
-    public void queryCursor() throws ArangoDBException, InterruptedException, ExecutionException {
+    public void queryCursor() throws InterruptedException, ExecutionException {
         try {
             db.createCollection(COLLECTION_NAME, null).get();
             final int numbDocs = 10;
@@ -723,7 +720,7 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
-    public void queryClose() throws IOException, ArangoDBException, InterruptedException, ExecutionException {
+    public void queryClose() throws IOException, InterruptedException, ExecutionException {
         final ArangoCursorAsync<String> cursor = arangoDB.db()
                 .query("for i in 1..2 return i", null, new AqlQueryOptions().batchSize(1), String.class).get();
         cursor.close();
@@ -1049,21 +1046,16 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
-    public void shouldIncludeExceptionMessage() throws InterruptedException, ExecutionException {
-        if (!requireVersion(3, 2)) {
-            final String exceptionMessage = "My error context";
-            final String action = "function (params) {" + "throw '" + exceptionMessage + "';" + "}";
-            try {
-                db.transaction(action, VPackSlice.class, null).join();
-                fail();
-            } catch (final CompletionException e) {
-                final Throwable cause = e.getCause();
-                if (cause instanceof ArangoDBException) {
-                    assertTrue(((ArangoDBException) cause).getException().equals(exceptionMessage));
-                } else {
-                    fail("Root cause expected to be an ArangoDBException");
-                }
-            }
+    public void shouldIncludeExceptionMessage() {
+        final String exceptionMessage = "My error context";
+        final String action = "function (params) {" + "throw '" + exceptionMessage + "';" + "}";
+        try {
+            db.transaction(action, VPackSlice.class, null).join();
+            fail();
+        } catch (final CompletionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
+            ArangoDBException cause = ((ArangoDBException) e.getCause());
+            assertThat(cause.getErrorMessage(), is(exceptionMessage));
         }
     }
 

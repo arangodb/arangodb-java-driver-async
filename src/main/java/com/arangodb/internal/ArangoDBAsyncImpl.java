@@ -166,14 +166,12 @@ public class ArangoDBAsyncImpl extends InternalArangoDB<ArangoExecutorAsync> imp
 	}
 
 	@Override
-	public CompletableFuture<Void> grantDefaultDatabaseAccess(final String user, final Permissions permissions)
-			throws ArangoDBException {
+	public CompletableFuture<Void> grantDefaultDatabaseAccess(final String user, final Permissions permissions) {
 		return executor.execute(updateUserDefaultDatabaseAccessRequest(user, permissions), Void.class);
 	}
 
 	@Override
-	public CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions)
-			throws ArangoDBException {
+	public CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions) {
 		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
 	}
 

@@ -22,7 +22,6 @@ package com.arangodb.internal;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.arangodb.ArangoDBException;
 import com.arangodb.ArangoVertexCollectionAsync;
 import com.arangodb.entity.VertexEntity;
 import com.arangodb.entity.VertexUpdateEntity;
@@ -88,8 +87,7 @@ public class ArangoVertexCollectionAsyncImpl extends
 	}
 
 	@Override
-	public <T> CompletableFuture<VertexUpdateEntity> updateVertex(final String key, final T value)
-			throws ArangoDBException {
+	public <T> CompletableFuture<VertexUpdateEntity> updateVertex(final String key, final T value) {
 		return executor.execute(updateVertexRequest(key, value, new VertexUpdateOptions()),
 			updateVertexResponseDeserializer(value));
 	}
@@ -98,7 +96,7 @@ public class ArangoVertexCollectionAsyncImpl extends
 	public <T> CompletableFuture<VertexUpdateEntity> updateVertex(
 		final String key,
 		final T value,
-		final VertexUpdateOptions options) throws ArangoDBException {
+		final VertexUpdateOptions options) {
 		return executor.execute(updateVertexRequest(key, value, options), updateVertexResponseDeserializer(value));
 	}
 

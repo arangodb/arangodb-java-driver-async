@@ -20,11 +20,9 @@
 
 package com.arangodb.internal;
 
-import com.arangodb.ArangoDBException;
 import com.arangodb.internal.net.HostHandle;
 import com.arangodb.internal.util.ArangoSerializationFactory;
 import com.arangodb.internal.velocystream.VstCommunicationAsync;
-import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.Request;
 
 import java.io.IOException;
@@ -32,6 +30,7 @@ import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 /**
  * @author Mark Vollmary
@@ -65,27 +64,9 @@ public class ArangoExecutorAsync extends ArangoExecutor {
             final ResponseDeserializer<T> responseDeserializer,
             final HostHandle hostHandle) {
 
-        CompletableFuture<T> result = new CompletableFuture<>();
-        outgoingExecutor.execute(() -> {
-                    try {
-                        communication.execute(request, hostHandle)
-                                .whenCompleteAsync((response, ex) -> {
-                                    if (ex != null) {
-                                        result.completeExceptionally(ex);
-                                    } else if (response != null) {
-                                        try {
-                                            result.complete(responseDeserializer.deserialize(response));
-                                        } catch (final VPackException | ArangoDBException e) {
-                                            result.completeExceptionally(e);
-                                        }
-                                    }
-                                });
-                    } catch (ArangoDBException e) {
-                        result.completeExceptionally(e);
-                    }
-                }
-        );
-        return result;
+        return CompletableFuture.supplyAsync(() -> communication.execute(request, hostHandle), outgoingExecutor)
+                .thenCompose(Function.identity())
+                .thenApplyAsync(responseDeserializer::deserialize);
     }
 
     public void disconnect() throws IOException {

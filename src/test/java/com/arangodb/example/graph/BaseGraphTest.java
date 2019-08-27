@@ -28,7 +28,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import com.arangodb.ArangoDBAsync;
-import com.arangodb.ArangoDBException;
 import com.arangodb.ArangoDatabaseAsync;
 import com.arangodb.entity.EdgeDefinition;
 import com.arangodb.entity.EdgeEntity;
@@ -78,7 +77,7 @@ public abstract class BaseGraphTest {
 		arangoDB = null;
 	}
 
-	private static void addExampleElements() throws ArangoDBException, InterruptedException, ExecutionException {
+	private static void addExampleElements() throws InterruptedException, ExecutionException {
 
 		// Add circle circles
 		final VertexEntity vA = createVertex(new Circle("A", "1"));
@@ -109,12 +108,12 @@ public abstract class BaseGraphTest {
 	}
 
 	private static EdgeEntity saveEdge(final CircleEdge edge)
-			throws ArangoDBException, InterruptedException, ExecutionException {
+			throws InterruptedException, ExecutionException {
 		return db.graph(GRAPH_NAME).edgeCollection(EDGE_COLLECTION_NAME).insertEdge(edge).get();
 	}
 
 	private static VertexEntity createVertex(final Circle vertex)
-			throws ArangoDBException, InterruptedException, ExecutionException {
+			throws InterruptedException, ExecutionException {
 		return db.graph(GRAPH_NAME).vertexCollection(VERTEXT_COLLECTION_NAME).insertVertex(vertex).get();
 	}
 

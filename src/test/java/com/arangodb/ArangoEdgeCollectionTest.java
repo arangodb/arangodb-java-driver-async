@@ -94,7 +94,7 @@ public class ArangoEdgeCollectionTest extends BaseTest {
 	}
 
 	@Test
-	public void insertEdge() throws ArangoDBException, InterruptedException, ExecutionException {
+	public void insertEdge() throws InterruptedException, ExecutionException {
 		final BaseEdgeDocument value = createEdgeValue();
 		final EdgeEntity edge = db.graph(GRAPH_NAME).edgeCollection(EDGE_COLLECTION_NAME).insertEdge(value, null).get();
 		assertThat(edge, is(notNullValue()));

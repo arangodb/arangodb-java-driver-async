@@ -20,6 +20,7 @@
 
 package com.arangodb;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -75,9 +76,9 @@ public class ArangoRouteTest extends BaseTest {
 					.route(doc.getId()).get().get();
 			fail();
 		} catch (final ExecutionException e) {
-			assertThat(e.getCause() instanceof ArangoDBException, is(true));
+			assertThat(e.getCause(), instanceOf(ArangoDBException.class));
 		} finally {
-			collection.drop();
+			collection.drop().get();
 		}
 	}
 

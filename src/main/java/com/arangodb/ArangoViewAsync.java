@@ -51,7 +51,6 @@ public interface ArangoViewAsync extends ArangoSerializationAccessor {
 	 * Checks whether the view exists.
 	 * 
 	 * @return true if the view exists, otherwise false
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<Boolean> exists();
 
@@ -59,7 +58,6 @@ public interface ArangoViewAsync extends ArangoSerializationAccessor {
 	 * Deletes the view from the database.
 	 * 
 	 * @see <a href= "https://docs.arangodb.com/current/HTTP/Views/Creating.html#drops-a-view">API Documentation</a>
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<Void> drop();
 
@@ -70,7 +68,6 @@ public interface ArangoViewAsync extends ArangoSerializationAccessor {
 	 * @param newName
 	 *            The new name
 	 * @return information about the view
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<ViewEntity> rename(String newName);
 
@@ -80,7 +77,6 @@ public interface ArangoViewAsync extends ArangoSerializationAccessor {
 	 * @see <a href= "https://docs.arangodb.com/current/HTTP/Views/Getting.html#return-information-about-a-view">API
 	 *      Documentation</a>
 	 * @return information about the view
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<ViewEntity> getInfo();
 

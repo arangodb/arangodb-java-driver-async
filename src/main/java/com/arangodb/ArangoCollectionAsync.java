@@ -131,7 +131,6 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 * @param values
 	 *            a list of Objects that will be stored as documents
 	 * @return information about the import
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<DocumentImportEntity> importDocuments(final Collection<?> values);
 
@@ -143,7 +142,6 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 * @param options
 	 *            Additional options, can be null
 	 * @return information about the import
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<DocumentImportEntity> importDocuments(
 		final Collection<?> values,
@@ -155,7 +153,6 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 * @param values
 	 *            JSON-encoded array of objects that will be stored as documents
 	 * @return information about the import
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<DocumentImportEntity> importDocuments(final String values);
 
@@ -167,7 +164,6 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 * @param options
 	 *            Additional options, can be null
 	 * @return information about the import
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<DocumentImportEntity> importDocuments(final String values, final DocumentImportOptions options);
 
@@ -740,5 +736,5 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 * @return permissions of the user
 	 * @since ArangoDB 3.2.0
 	 */
-	CompletableFuture<Permissions> getPermissions(final String user) throws ArangoDBException;
+	CompletableFuture<Permissions> getPermissions(final String user);
 }
