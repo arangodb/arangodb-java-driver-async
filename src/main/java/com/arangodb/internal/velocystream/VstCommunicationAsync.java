@@ -129,7 +129,7 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 								rfuture.completeExceptionally(new ArangoDBException(errorEntity));
 							} else {
 								rfuture.completeExceptionally(new ArangoDBException(
-										String.format("Response Code: %s", response.getResponseCode())));
+										String.format("Response Code: %s", response.getResponseCode()), response.getResponseCode()));
 							}
 						} else {
 							rfuture.complete(response);
