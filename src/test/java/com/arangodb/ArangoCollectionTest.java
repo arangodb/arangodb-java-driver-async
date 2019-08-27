@@ -331,7 +331,8 @@ public class ArangoCollectionTest extends BaseTest {
             final DocumentUpdateOptions options = new DocumentUpdateOptions().ifMatch("no");
             db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options).get();
             fail();
-        } catch (final Exception e) {
+        } catch (final ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -508,7 +509,8 @@ public class ArangoCollectionTest extends BaseTest {
             final DocumentUpdateOptions options = new DocumentUpdateOptions().ignoreRevs(false);
             db.collection(COLLECTION_NAME).updateDocument(createResult.getKey(), doc, options).get();
             fail();
-        } catch (final Exception e) {
+        } catch (final ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -581,7 +583,8 @@ public class ArangoCollectionTest extends BaseTest {
             final DocumentReplaceOptions options = new DocumentReplaceOptions().ifMatch("no");
             db.collection(COLLECTION_NAME).replaceDocument(createResult.getKey(), doc, options).get();
             fail();
-        } catch (final Exception e) {
+        } catch (final ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -598,7 +601,8 @@ public class ArangoCollectionTest extends BaseTest {
             final DocumentReplaceOptions options = new DocumentReplaceOptions().ignoreRevs(false);
             db.collection(COLLECTION_NAME).replaceDocument(createResult.getKey(), doc, options).get();
             fail();
-        } catch (final Exception e) {
+        } catch (final ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -703,7 +707,8 @@ public class ArangoCollectionTest extends BaseTest {
         try {
             db.collection(COLLECTION_NAME).deleteDocument(createResult.getKey(), null, options).get();
             fail();
-        } catch (final Exception e) {
+        } catch (final ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -843,9 +848,7 @@ public class ArangoCollectionTest extends BaseTest {
                 } else {
                     assertThat(indexResult.getType(), is(IndexType.geo2));
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }).get();
@@ -1250,7 +1253,7 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
-    public void importDocumentsCompleteFail() {
+    public void importDocumentsCompleteFail() throws InterruptedException {
         final Collection<BaseDocument> values = new ArrayList<>();
         values.add(new BaseDocument("1"));
         values.add(new BaseDocument("2"));
@@ -1258,8 +1261,9 @@ public class ArangoCollectionTest extends BaseTest {
         try {
             db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().complete(true)).get();
             fail();
-        } catch (InterruptedException | ExecutionException e) {
-            assertThat(e.getMessage(), containsString("1210"));
+        } catch (ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
+            assertThat(((ArangoDBException) e.getCause()).getErrorNum(), is(1210));
         }
     }
 
@@ -1434,13 +1438,14 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
-    public void importDocumentsJsonCompleteFail() {
+    public void importDocumentsJsonCompleteFail() throws InterruptedException {
         final String values = "[{\"_key\":\"1\"},{\"_key\":\"2\"},{\"_key\":\"2\"}]";
         try {
             db.collection(COLLECTION_NAME).importDocuments(values, new DocumentImportOptions().complete(true)).get();
             fail();
-        } catch (InterruptedException | ExecutionException e) {
-            assertThat(e.getMessage(), containsString("1210"));
+        } catch (ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
+            assertThat(((ArangoDBException) e.getCause()).getErrorNum(), is(1210));
         }
     }
 
@@ -1887,7 +1892,8 @@ public class ArangoCollectionTest extends BaseTest {
             try {
                 db.collection(COLLECTION_NAME).getInfo().get();
                 fail();
-            } catch (final Exception e) {
+            } catch (final ExecutionException e) {
+                assertThat(e, instanceOf(ArangoDBException.class));
             }
         } finally {
             db.collection(COLLECTION_NAME + "1").rename(COLLECTION_NAME).get();

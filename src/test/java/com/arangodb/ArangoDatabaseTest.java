@@ -181,7 +181,8 @@ public class ArangoDatabaseTest extends BaseTest {
         try {
             db.collection(COLLECTION_NAME).getInfo().get();
             fail();
-        } catch (final Exception e) {
+        } catch (final ExecutionException e) {
+            assertThat(e, instanceOf(ArangoDBException.class));
         }
     }
 
@@ -196,7 +197,8 @@ public class ArangoDatabaseTest extends BaseTest {
         try {
             db.collection(name).getInfo().get();
             fail();
-        } catch (final Exception e) {
+        } catch (final ExecutionException e) {
+            assertThat(e, instanceOf(ArangoDBException.class));
         }
     }
 
@@ -210,13 +212,15 @@ public class ArangoDatabaseTest extends BaseTest {
         try {
             db.collection(name).drop().get();
             fail();
-        } catch (final Exception e) {
+        } catch (final ExecutionException e) {
+            assertThat(e, instanceOf(ArangoDBException.class));
         }
         db.collection(name).drop(true).get();
         try {
             db.collection(name).getInfo().get();
             fail();
-        } catch (final Exception e) {
+        } catch (final ExecutionException e) {
+            assertThat(e, instanceOf(ArangoDBException.class));
         }
     }
 
@@ -563,9 +567,10 @@ public class ArangoDatabaseTest extends BaseTest {
                     Thread.sleep(wait * 1000);
                 }
             }
-            fail("this should fail");
+            fail();
         } catch (final ArangoDBException ex) {
-            assertThat(ex.getMessage(), is("Response: 404, Error: 1600 - cursor not found"));
+            assertThat(ex.getResponseCode(), is(404));
+            assertThat(ex.getErrorNum(), is(1600));
         } finally {
             db.collection(COLLECTION_NAME).drop().get();
         }
@@ -934,7 +939,8 @@ public class ArangoDatabaseTest extends BaseTest {
                 options.allowImplicit(false);
                 db.transaction(action, VPackSlice.class, options).get();
                 fail();
-            } catch (final Exception e) {
+            } catch (final ExecutionException e) {
+                assertThat(e, instanceOf(ArangoDBException.class));
             }
         } finally {
             db.collection("someCollection").drop().get();

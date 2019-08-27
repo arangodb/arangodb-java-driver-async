@@ -35,7 +35,6 @@ import com.arangodb.velocystream.Response;
 
 /**
  * @author Mark Vollmary
- *
  */
 public class ArangoRouteTest extends BaseTest {
 
@@ -65,21 +64,20 @@ public class ArangoRouteTest extends BaseTest {
 	}
   */
 
-	@Test
-	public void withParentHeader() throws InterruptedException, ExecutionException {
-		final ArangoCollectionAsync collection = db.collection("route-test-col");
-		try {
-			collection.create().get();
-			final BaseDocument doc = new BaseDocument();
-			collection.insertDocument(doc).get();
-			db.route("/_api/document").withHeader(ArangoRequestParam.IF_NONE_MATCH, doc.getRevision())
-					.route(doc.getId()).get().get();
-			fail();
-		} catch (final ExecutionException e) {
-			assertThat(e.getCause(), instanceOf(ArangoDBException.class));
-		} finally {
-			collection.drop().get();
-		}
-	}
+    @Test
+    public void withParentHeader() throws InterruptedException, ExecutionException {
+        final ArangoCollectionAsync collection = db.collection("route-test-col");
+        try {
+            collection.create().get();
+            final BaseDocument doc = new BaseDocument();
+            collection.insertDocument(doc).get();
+            db.route("/_api/document").withHeader(ArangoRequestParam.IF_NONE_MATCH, doc.getRevision())
+                    .route(doc.getId()).get().get();
+            fail();
+        } catch (final ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
+        }
+        collection.drop().get();
+    }
 
 }
