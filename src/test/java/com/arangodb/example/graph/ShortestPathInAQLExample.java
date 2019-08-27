@@ -32,7 +32,6 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 
 import com.arangodb.ArangoCursorAsync;
-import com.arangodb.ArangoDBException;
 
 /**
  * Shortest Path in AQL
@@ -68,7 +67,7 @@ public class ShortestPathInAQLExample extends BaseGraphTest {
 	}
 
 	@Test
-	public void queryShortestPathFromAToD() throws ArangoDBException, InterruptedException, ExecutionException {
+	public void queryShortestPathFromAToD() throws InterruptedException, ExecutionException {
 		String queryString = "FOR v, e IN OUTBOUND SHORTEST_PATH 'circles/A' TO 'circles/D' GRAPH 'traversalGraph' RETURN {'vertex': v._key, 'edge': e._key}";
 		ArangoCursorAsync<Pair> cursor = db.query(queryString, null, null, Pair.class).get();
 		final Collection<String> collection = toVertexCollection(cursor);
@@ -82,7 +81,7 @@ public class ShortestPathInAQLExample extends BaseGraphTest {
 	}
 
 	@Test
-	public void queryShortestPathByFilter() throws ArangoDBException, InterruptedException, ExecutionException {
+	public void queryShortestPathByFilter() throws InterruptedException, ExecutionException {
 		String queryString = "FOR a IN circles FILTER a._key == 'A' FOR d IN circles FILTER d._key == 'D' FOR v, e IN OUTBOUND SHORTEST_PATH a TO d GRAPH 'traversalGraph' RETURN {'vertex':v._key, 'edge':e._key}";
 		ArangoCursorAsync<Pair> cursor = db.query(queryString, null, null, Pair.class).get();
 		final Collection<String> collection = toVertexCollection(cursor);

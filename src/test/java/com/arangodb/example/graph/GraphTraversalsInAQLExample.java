@@ -30,7 +30,6 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 
 import com.arangodb.ArangoCursorAsync;
-import com.arangodb.ArangoDBException;
 
 /**
  * Graph traversals in AQL
@@ -43,7 +42,7 @@ import com.arangodb.ArangoDBException;
 public class GraphTraversalsInAQLExample extends BaseGraphTest {
 
 	@Test
-	public void queryAllVertices() throws ArangoDBException, InterruptedException, ExecutionException {
+	public void queryAllVertices() throws InterruptedException, ExecutionException {
 		String queryString = "FOR v IN 1..3 OUTBOUND 'circles/A' GRAPH 'traversalGraph' RETURN v._key";
 		ArangoCursorAsync<String> cursor = db.query(queryString, null, null, String.class).get();
 		Collection<String> result = cursor.asListRemaining();
@@ -56,7 +55,7 @@ public class GraphTraversalsInAQLExample extends BaseGraphTest {
 	}
 
 	@Test
-	public void queryDepthTwo() throws ArangoDBException, InterruptedException, ExecutionException {
+	public void queryDepthTwo() throws InterruptedException, ExecutionException {
 		String queryString = "FOR v IN 2..2 OUTBOUND 'circles/A' GRAPH 'traversalGraph' return v._key";
 		ArangoCursorAsync<String> cursor = db.query(queryString, null, null, String.class).get();
 		Collection<String> result = cursor.asListRemaining();
@@ -71,7 +70,7 @@ public class GraphTraversalsInAQLExample extends BaseGraphTest {
 	}
 
 	@Test
-	public void queryWithFilter() throws ArangoDBException, InterruptedException, ExecutionException {
+	public void queryWithFilter() throws InterruptedException, ExecutionException {
 		String queryString = "FOR v, e, p IN 1..3 OUTBOUND 'circles/A' GRAPH 'traversalGraph' FILTER p.vertices[1]._key != 'G' RETURN v._key";
 		ArangoCursorAsync<String> cursor = db.query(queryString, null, null, String.class).get();
 		Collection<String> result = cursor.asListRemaining();
@@ -99,7 +98,7 @@ public class GraphTraversalsInAQLExample extends BaseGraphTest {
 	}
 
 	@Test
-	public void queryOutboundInbound() throws ArangoDBException, InterruptedException, ExecutionException {
+	public void queryOutboundInbound() throws InterruptedException, ExecutionException {
 		String queryString = "FOR v IN 1..3 OUTBOUND 'circles/E' GRAPH 'traversalGraph' return v._key";
 		ArangoCursorAsync<String> cursor = db.query(queryString, null, null, String.class).get();
 		Collection<String> result = cursor.asListRemaining();

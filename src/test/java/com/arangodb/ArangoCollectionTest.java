@@ -211,8 +211,8 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test(expected = ArangoDBException.class)
-    public void getDocumentWrongKey() throws InterruptedException, ExecutionException {
-        db.collection(COLLECTION_NAME).getDocument("no/no", BaseDocument.class).get();
+    public void getDocumentWrongKey() {
+        db.collection(COLLECTION_NAME).getDocument("no/no", BaseDocument.class);
     }
 
     @Test
@@ -251,7 +251,7 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
-    public void updateDocument() throws ArangoDBException, InterruptedException, ExecutionException {
+    public void updateDocument() throws InterruptedException, ExecutionException {
         final BaseDocument doc = new BaseDocument();
         doc.addAttribute("a", "test");
         doc.addAttribute("c", "test");
@@ -408,7 +408,7 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
-    public void updateDocumentKeepNullFalse() throws ArangoDBException, InterruptedException, ExecutionException {
+    public void updateDocumentKeepNullFalse() throws InterruptedException, ExecutionException {
         final BaseDocument doc = new BaseDocument();
         doc.addAttribute("a", "test");
         final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
@@ -434,7 +434,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void updateDocumentMergeObjectsTrue() throws ArangoDBException, InterruptedException, ExecutionException {
+    public void updateDocumentMergeObjectsTrue() throws InterruptedException, ExecutionException {
         final BaseDocument doc = new BaseDocument();
         final Map<String, String> a = new HashMap<>();
         a.put("a", "test");
@@ -466,7 +466,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void updateDocumentMergeObjectsFalse() throws ArangoDBException, InterruptedException, ExecutionException {
+    public void updateDocumentMergeObjectsFalse() throws InterruptedException, ExecutionException {
         final BaseDocument doc = new BaseDocument();
         final Map<String, String> a = new HashMap<>();
         a.put("a", "test");
@@ -513,7 +513,7 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
-    public void replaceDocument() throws ArangoDBException, InterruptedException, ExecutionException {
+    public void replaceDocument() throws InterruptedException, ExecutionException {
         final BaseDocument doc = new BaseDocument();
         doc.addAttribute("a", "test");
         final DocumentCreateEntity<BaseDocument> createResult = db.collection(COLLECTION_NAME).insertDocument(doc, null)
@@ -1327,14 +1327,10 @@ public class ArangoCollectionTest extends BaseTest {
             assertThat(importResult.getCreated(), is(values.size()));
             for (int i = 0; i < keys.length; i++) {
                 BaseEdgeDocument doc;
-                try {
-                    doc = collection.getDocument(keys[i], BaseEdgeDocument.class).get();
-                    assertThat(doc, is(notNullValue()));
-                    assertThat(doc.getFrom(), is("foo/from"));
-                    assertThat(doc.getTo(), is("bar/to"));
-                } catch (ArangoDBException | InterruptedException | ExecutionException e) {
-                    fail();
-                }
+                doc = collection.getDocument(keys[i], BaseEdgeDocument.class).get();
+                assertThat(doc, is(notNullValue()));
+                assertThat(doc.getFrom(), is("foo/from"));
+                assertThat(doc.getTo(), is("bar/to"));
             }
         } finally {
             collection.drop().get();
@@ -1501,14 +1497,10 @@ public class ArangoCollectionTest extends BaseTest {
             assertThat(importResult.getCreated(), is(2));
             for (int i = 0; i < keys.length; i++) {
                 BaseEdgeDocument doc;
-                try {
-                    doc = collection.getDocument(keys[i], BaseEdgeDocument.class).get();
-                    assertThat(doc, is(notNullValue()));
-                    assertThat(doc.getFrom(), is("foo/from"));
-                    assertThat(doc.getTo(), is("bar/to"));
-                } catch (ArangoDBException | InterruptedException | ExecutionException e) {
-                    fail();
-                }
+                doc = collection.getDocument(keys[i], BaseEdgeDocument.class).get();
+                assertThat(doc, is(notNullValue()));
+                assertThat(doc.getFrom(), is("foo/from"));
+                assertThat(doc.getTo(), is("bar/to"));
             }
         } finally {
             collection.drop().get();
@@ -1979,7 +1971,7 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
-    public void getPermissions() throws ArangoDBException, InterruptedException, ExecutionException {
+    public void getPermissions() throws InterruptedException, ExecutionException {
         assertThat(Permissions.RW, is(db.collection(COLLECTION_NAME).getPermissions("root").get()));
     }
 }
