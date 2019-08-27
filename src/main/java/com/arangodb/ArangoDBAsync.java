@@ -655,7 +655,6 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 	 * @param user
 	 *            The name of the user for which you want to query the databases
 	 * @return
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<Collection<String>> getAccessibleDatabasesFor(final String user);
 
@@ -672,7 +671,6 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 	 * Returns the server role.
 	 * 
 	 * @return the server role
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<ServerRole> getRole();
 
@@ -772,8 +770,7 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 	 * @since ArangoDB 3.2.0
 	 * @return void
 	 */
-	CompletableFuture<Void> grantDefaultDatabaseAccess(final String user, final Permissions permissions)
-			throws ArangoDBException;
+	CompletableFuture<Void> grantDefaultDatabaseAccess(final String user, final Permissions permissions);
 
 	/**
 	 * Sets the default access level for collections for the user <code>user</code>. You need permission to the _system
@@ -786,8 +783,7 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 	 * @since ArangoDB 3.2.0
 	 * @return void
 	 */
-	CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions)
-			throws ArangoDBException;
+	CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions);
 
 	/**
 	 * Generic Execute. Use this method to execute custom FOXX services.
@@ -795,7 +791,6 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 	 * @param request
 	 *            VelocyStream request
 	 * @return VelocyStream response
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<Response> execute(final Request request);
 
@@ -815,7 +810,6 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 	 * Returns the server's current loglevel settings.
 	 * 
 	 * @return the server's current loglevel settings
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<LogLevelEntity> getLogLevel();
 
@@ -825,7 +819,6 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 	 * @param entity
 	 *            loglevel settings
 	 * @return the server's current loglevel settings
-	 * @throws ArangoDBException
 	 */
 	CompletableFuture<LogLevelEntity> setLogLevel(final LogLevelEntity entity);
 }

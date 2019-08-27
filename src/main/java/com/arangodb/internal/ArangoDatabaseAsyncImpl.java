@@ -167,13 +167,12 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	}
 
 	@Override
-	public CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions)
-			throws ArangoDBException {
+	public CompletableFuture<Void> grantDefaultCollectionAccess(final String user, final Permissions permissions) {
 		return executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
 	}
 
 	@Override
-	public CompletableFuture<Permissions> getPermissions(final String user) throws ArangoDBException {
+	public CompletableFuture<Permissions> getPermissions(final String user) {
 		return executor.execute(getPermissionsRequest(user), getPermissionsResponseDeserialzer());
 	}
 
@@ -182,20 +181,18 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 		final String query,
 		final Map<String, Object> bindVars,
 		final AqlQueryOptions options,
-		final Class<T> type) throws ArangoDBException {
+		final Class<T> type) {
 		final Request request = queryRequest(query, bindVars, options);
 		final HostHandle hostHandle = new HostHandle();
 		final CompletableFuture<CursorEntity> execution = executor.execute(request, CursorEntity.class, hostHandle);
-		return execution.thenApply(result -> {
-			return createCursor(result, type, options, hostHandle);
-		});
+		return execution.thenApply(result -> createCursor(result, type, options, hostHandle));
 	}
 
 	@Override
 	public <T> CompletableFuture<ArangoCursorAsync<T>> query(
 		final String query,
 		final AqlQueryOptions options,
-		final Class<T> type) throws ArangoDBException {
+		final Class<T> type) {
 		return query(query, null, options, type);
 	}
 
@@ -203,26 +200,20 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	public <T> CompletableFuture<ArangoCursorAsync<T>> query(
 		final String query,
 		final Map<String, Object> bindVars,
-		final Class<T> type) throws ArangoDBException {
+		final Class<T> type) {
 		return query(query, bindVars, null, type);
 	}
 
 	@Override
-	public <T> CompletableFuture<ArangoCursorAsync<T>> query(final String query, final Class<T> type)
-			throws ArangoDBException {
+	public <T> CompletableFuture<ArangoCursorAsync<T>> query(final String query, final Class<T> type) {
 		return query(query, null, null, type);
 	}
 
 	@Override
-	public <T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type) throws ArangoDBException {
-		
+	public <T> CompletableFuture<ArangoCursorAsync<T>> cursor(final String cursorId, final Class<T> type) {
 		final HostHandle hostHandle = new HostHandle();
-		
 		final CompletableFuture<CursorEntity> execution = executor.execute(queryNextRequest(cursorId, null, null), CursorEntity.class, hostHandle);
-		
-		return execution.thenApply(result -> {
-			return createCursor(result, type, null, hostHandle);
-		});
+		return execution.thenApply(result -> createCursor(result, type, null, hostHandle));
 	}
 
 	private <T> ArangoCursorAsync<T> createCursor(
@@ -408,7 +399,7 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	}
 
 	@Override
-	public CompletableFuture<Collection<ViewEntity>> getViews() throws ArangoDBException {
+	public CompletableFuture<Collection<ViewEntity>> getViews() {
 		return executor.execute(getViewsRequest(), getViewsResponseDeserializer());
 	}
 
@@ -423,13 +414,12 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	}
 
 	@Override
-	public CompletableFuture<ViewEntity> createView(final String name, final ViewType type) throws ArangoDBException {
+	public CompletableFuture<ViewEntity> createView(final String name, final ViewType type){
 		return executor.execute(createViewRequest(name, type), ViewEntity.class);
 	}
 
 	@Override
-	public CompletableFuture<ViewEntity> createArangoSearch(final String name, final ArangoSearchCreateOptions options)
-			throws ArangoDBException {
+	public CompletableFuture<ViewEntity> createArangoSearch(final String name, final ArangoSearchCreateOptions options) {
 		return executor.execute(createArangoSearchRequest(name, options), ViewEntity.class);
 	}
 

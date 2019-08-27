@@ -75,7 +75,7 @@ public class ArangoExecutorAsync extends ArangoExecutor {
                                     } else if (response != null) {
                                         try {
                                             result.complete(responseDeserializer.deserialize(response));
-                                        } catch (final VPackException | ArangoDBException e) {
+                                        } catch (final VPackException e) {
                                             result.completeExceptionally(e);
                                         }
                                     }

@@ -154,9 +154,8 @@ public interface ArangoVertexCollectionAsync extends ArangoSerializationAccessor
 	 * @param type
 	 *            The type of the vertex-document (POJO class, VPackSlice or String for Json)
 	 * @return information about the vertex
-	 * @throws ArangoDBException
 	 */
-	<T> CompletableFuture<VertexUpdateEntity> updateVertex(final String key, final T value) throws ArangoDBException;
+	<T> CompletableFuture<VertexUpdateEntity> updateVertex(final String key, final T value);
 
 	/**
 	 * Partially updates the vertex identified by document-key. The value must contain a document with the attributes to
@@ -171,12 +170,11 @@ public interface ArangoVertexCollectionAsync extends ArangoSerializationAccessor
 	 * @param options
 	 *            Additional options, can be null
 	 * @return information about the vertex
-	 * @throws ArangoDBException
 	 */
 	<T> CompletableFuture<VertexUpdateEntity> updateVertex(
 		final String key,
 		final T value,
-		final VertexUpdateOptions options) throws ArangoDBException;
+		final VertexUpdateOptions options);
 
 	/**
 	 * Removes a vertex

@@ -20,15 +20,6 @@
 
 package com.arangodb.internal.velocystream;
 
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-import javax.net.ssl.SSLContext;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.arangodb.ArangoDBException;
 import com.arangodb.entity.ErrorEntity;
 import com.arangodb.internal.net.HostHandler;
@@ -39,6 +30,12 @@ import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocypack.exception.VPackParserException;
 import com.arangodb.velocystream.Request;
 import com.arangodb.velocystream.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.SSLContext;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Mark Vollmary
@@ -148,15 +145,14 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 					rfuture.cancel(true);
 				}
 			});
-		} catch (final IOException | VPackException e) {
+		} catch (final VPackException e) {
 			LOGGER.error(e.getMessage(), e);
 			rfuture.completeExceptionally(e);
 		}
 		return rfuture;
 	}
 
-	private CompletableFuture<Message> send(final Message message, final VstConnectionAsync connection)
-			throws IOException {
+	private CompletableFuture<Message> send(final Message message, final VstConnectionAsync connection) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug(String.format("Send Message (id=%s, head=%s, body=%s)", message.getId(), message.getHead(),
 				message.getBody() != null ? message.getBody() : "{}"));
@@ -166,13 +162,11 @@ public class VstCommunicationAsync extends VstCommunication<CompletableFuture<Re
 
 	@Override
 	protected void authenticate(final VstConnectionAsync connection) {
-		Response response = null;
+		Response response;
 		try {
 			response = execute(new AuthenticationRequest(user, password != null ? password : "", ENCRYPTION_PLAIN),
 				connection).get();
-		} catch (final InterruptedException e) {
-			throw new ArangoDBException(e);
-		} catch (final ExecutionException e) {
+		} catch (final InterruptedException | ExecutionException e) {
 			throw new ArangoDBException(e);
 		}
 		checkError(response);

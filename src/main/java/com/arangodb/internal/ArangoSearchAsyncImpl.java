@@ -22,7 +22,6 @@ package com.arangodb.internal;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.arangodb.ArangoDBException;
 import com.arangodb.ArangoSearchAsync;
 import com.arangodb.entity.ViewEntity;
 import com.arangodb.entity.arangosearch.ArangoSearchPropertiesEntity;
@@ -62,29 +61,28 @@ public class ArangoSearchAsyncImpl
 	}
 
 	@Override
-	public CompletableFuture<ViewEntity> create() throws ArangoDBException {
+	public CompletableFuture<ViewEntity> create() {
 		return create(new ArangoSearchCreateOptions());
 	}
 
 	@Override
-	public CompletableFuture<ViewEntity> create(final ArangoSearchCreateOptions options) throws ArangoDBException {
+	public CompletableFuture<ViewEntity> create(final ArangoSearchCreateOptions options) {
 		return db().createArangoSearch(name(), options);
 	}
 
 	@Override
-	public CompletableFuture<ArangoSearchPropertiesEntity> getProperties() throws ArangoDBException {
+	public CompletableFuture<ArangoSearchPropertiesEntity> getProperties() {
 		return executor.execute(getPropertiesRequest(), ArangoSearchPropertiesEntity.class);
 	}
 
 	@Override
-	public CompletableFuture<ArangoSearchPropertiesEntity> updateProperties(final ArangoSearchPropertiesOptions options)
-			throws ArangoDBException {
+	public CompletableFuture<ArangoSearchPropertiesEntity> updateProperties(final ArangoSearchPropertiesOptions options) {
 		return executor.execute(updatePropertiesRequest(options), ArangoSearchPropertiesEntity.class);
 	}
 
 	@Override
 	public CompletableFuture<ArangoSearchPropertiesEntity> replaceProperties(
-		final ArangoSearchPropertiesOptions options) throws ArangoDBException {
+		final ArangoSearchPropertiesOptions options) {
 		return executor.execute(replacePropertiesRequest(options), ArangoSearchPropertiesEntity.class);
 	}
 

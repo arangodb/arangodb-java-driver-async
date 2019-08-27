@@ -426,7 +426,7 @@ public class ArangoCollectionAsyncImpl
 	}
 
 	@Override
-	public CompletableFuture<Permissions> getPermissions(final String user) throws ArangoDBException {
+	public CompletableFuture<Permissions> getPermissions(final String user) {
 		return executor.execute(getPermissionsRequest(user), getPermissionsResponseDeserialzer());
 	}
 }
