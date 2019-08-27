@@ -61,7 +61,7 @@ public class ArangoCollectionTest extends BaseTest {
             assertThat(result, is(notNullValue()));
             assertThat(result.getId(), is(notNullValue()));
         } finally {
-            db.collection(COLLECTION_NAME + "_1").drop();
+            db.collection(COLLECTION_NAME + "_1").drop().get();
         }
     }
 
@@ -1866,7 +1866,7 @@ public class ArangoCollectionTest extends BaseTest {
                     })
                     .get();
         } finally {
-            db.collection(collection).drop();
+            db.collection(collection).drop().get();
         }
     }
 
