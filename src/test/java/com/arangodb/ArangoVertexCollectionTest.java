@@ -111,7 +111,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
                     .getVertex(vertex.getKey(), BaseDocument.class, options).get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -136,7 +136,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
                     .getVertex(vertex.getKey(), BaseDocument.class, options).get();
             fail();
         } catch (final ExecutionException e) {
-			assertThat(e, instanceOf(ArangoDBException.class));
+			assertThat(e.getCause(), instanceOf(ArangoDBException.class));
 		}
     }
 
@@ -203,7 +203,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
                     .get();
             fail();
         } catch (final ExecutionException e) {
-			assertThat(e, instanceOf(ArangoDBException.class));
+			assertThat(e.getCause(), instanceOf(ArangoDBException.class));
 		}
     }
 
@@ -280,7 +280,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
                     .get();
             fail();
         } catch (final ExecutionException e) {
-			assertThat(e, instanceOf(ArangoDBException.class));
+			assertThat(e.getCause(), instanceOf(ArangoDBException.class));
 		}
     }
 
@@ -340,7 +340,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
                     .getVertex(createResult.getKey(), BaseDocument.class, null).get();
             fail();
         } catch (final ExecutionException e) {
-			assertThat(e, instanceOf(ArangoDBException.class));
+			assertThat(e.getCause(), instanceOf(ArangoDBException.class));
 		}
     }
 
@@ -356,7 +356,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
                     .getVertex(createResult.getKey(), BaseDocument.class, null).get();
             fail();
         } catch (final ExecutionException e) {
-			assertThat(e, instanceOf(ArangoDBException.class));
+			assertThat(e.getCause(), instanceOf(ArangoDBException.class));
 		}
     }
 
@@ -370,7 +370,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
             db.graph(GRAPH_NAME).vertexCollection(COLLECTION_NAME).deleteVertex(createResult.getKey(), options).get();
             fail();
         } catch (final ExecutionException e) {
-			assertThat(e, instanceOf(ArangoDBException.class));
+			assertThat(e.getCause(), instanceOf(ArangoDBException.class));
 		}
     }
 }
