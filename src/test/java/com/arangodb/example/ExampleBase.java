@@ -31,34 +31,32 @@ import com.arangodb.ArangoDatabaseAsync;
 
 /**
  * @author Mark Vollmary
- *
  */
 public class ExampleBase {
 
-	protected static final String DB_NAME = "json_example_db";
-	protected static final String COLLECTION_NAME = "json_example_collection";
+    protected static final String DB_NAME = "json_example_db";
+    protected static final String COLLECTION_NAME = "json_example_collection";
 
-	protected static ArangoDBAsync arangoDB;
-	protected static ArangoDatabaseAsync db;
-	protected static ArangoCollectionAsync collection;
+    protected static ArangoDBAsync arangoDB;
+    protected static ArangoDatabaseAsync db;
+    protected static ArangoCollectionAsync collection;
 
-	@BeforeClass
-	public static void setUp() throws InterruptedException, ExecutionException {
-		arangoDB = new ArangoDBAsync.Builder().build();
-		try {
-			arangoDB.db(DB_NAME).drop().get();
-		} catch (final Exception e) {
-		}
-		arangoDB.createDatabase(DB_NAME).get();
-		db = arangoDB.db(DB_NAME);
-		db.createCollection(COLLECTION_NAME).get();
-		collection = db.collection(COLLECTION_NAME);
-	}
+    @BeforeClass
+    public static void setUp() throws InterruptedException, ExecutionException {
+        arangoDB = new ArangoDBAsync.Builder().build();
+        if (arangoDB.db(DB_NAME).exists().get()) {
+            arangoDB.db(DB_NAME).drop().get();
+        }
+        arangoDB.createDatabase(DB_NAME).get();
+        db = arangoDB.db(DB_NAME);
+        db.createCollection(COLLECTION_NAME).get();
+        collection = db.collection(COLLECTION_NAME);
+    }
 
-	@AfterClass
-	public static void tearDown() throws InterruptedException, ExecutionException {
-		db.drop().get();
-		arangoDB.shutdown();
-	}
+    @AfterClass
+    public static void tearDown() throws InterruptedException, ExecutionException {
+        db.drop().get();
+        arangoDB.shutdown();
+    }
 
 }

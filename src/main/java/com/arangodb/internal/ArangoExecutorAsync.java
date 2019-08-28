@@ -27,10 +27,7 @@ import com.arangodb.velocystream.Request;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Function;
+import java.util.concurrent.*;
 
 /**
  * @author Mark Vollmary
@@ -64,8 +61,8 @@ public class ArangoExecutorAsync extends ArangoExecutor {
             final ResponseDeserializer<T> responseDeserializer,
             final HostHandle hostHandle) {
 
-        return CompletableFuture.supplyAsync(() -> communication.execute(request, hostHandle), outgoingExecutor)
-                .thenCompose(Function.identity())
+        return CompletableFuture.completedFuture(null)
+                .thenComposeAsync((it) -> communication.execute(request, hostHandle), outgoingExecutor)
                 .thenApplyAsync(responseDeserializer::deserialize);
     }
 

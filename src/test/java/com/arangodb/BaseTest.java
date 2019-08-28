@@ -27,41 +27,41 @@ import org.junit.BeforeClass;
 
 /**
  * @author Mark Vollmary
- *
  */
 public abstract class BaseTest {
 
-	protected static final String TEST_DB = "java_driver_test_db";
-	protected static ArangoDBAsync arangoDB;
-	protected static ArangoDatabaseAsync db;
+    protected static final String TEST_DB = "java_driver_test_db";
+    protected static ArangoDBAsync arangoDB;
+    protected static ArangoDatabaseAsync db;
 
-	@BeforeClass
-	public static void init() throws InterruptedException, ExecutionException {
-		if (arangoDB == null) {
-			arangoDB = new ArangoDBAsync.Builder().build();
-		}
-		try {
-			arangoDB.db(TEST_DB).drop().get();
-		} catch (final Exception e) {
-		}
-		arangoDB.createDatabase(TEST_DB).get();
-		BaseTest.db = arangoDB.db(TEST_DB);
-	}
+    @BeforeClass
+    public static void init() throws InterruptedException, ExecutionException {
+        if (arangoDB == null) {
+            arangoDB = new ArangoDBAsync.Builder().build();
+        }
 
-	@AfterClass
-	public static void shutdown() throws InterruptedException, ExecutionException {
-		arangoDB.db(TEST_DB).drop().get();
-		arangoDB.shutdown();
-		arangoDB = null;
-	}
+        if (arangoDB.db(TEST_DB).exists().get()) {
+            arangoDB.db(TEST_DB).drop().get();
+        }
 
-	protected boolean requireVersion(final int major, final int minor) throws InterruptedException, ExecutionException {
-		return requireVersion(arangoDB, major, minor);
-	}
+        arangoDB.createDatabase(TEST_DB).get();
+        BaseTest.db = arangoDB.db(TEST_DB);
+    }
 
-	protected static boolean requireVersion(final ArangoDBAsync arangoDB, final int major, final int minor)
-			throws InterruptedException, ExecutionException {
-		final String[] split = arangoDB.getVersion().get().getVersion().split("\\.");
-		return Integer.valueOf(split[0]) >= major && Integer.valueOf(split[1]) >= minor;
-	}
+    @AfterClass
+    public static void shutdown() throws InterruptedException, ExecutionException {
+        arangoDB.db(TEST_DB).drop().get();
+        arangoDB.shutdown();
+        arangoDB = null;
+    }
+
+    protected boolean requireVersion(final int major, final int minor) throws InterruptedException, ExecutionException {
+        return requireVersion(arangoDB, major, minor);
+    }
+
+    protected static boolean requireVersion(final ArangoDBAsync arangoDB, final int major, final int minor)
+            throws InterruptedException, ExecutionException {
+        final String[] split = arangoDB.getVersion().get().getVersion().split("\\.");
+        return Integer.valueOf(split[0]) >= major && Integer.valueOf(split[1]) >= minor;
+    }
 }
