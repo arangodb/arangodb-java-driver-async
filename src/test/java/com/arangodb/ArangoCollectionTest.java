@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -1893,7 +1894,7 @@ public class ArangoCollectionTest extends BaseTest {
                 db.collection(COLLECTION_NAME).getInfo().get();
                 fail();
             } catch (final ExecutionException e) {
-                assertThat(e, instanceOf(ArangoDBException.class));
+                assertThat(e.getCause(), instanceOf(ArangoDBException.class));
             }
         } finally {
             db.collection(COLLECTION_NAME + "1").rename(COLLECTION_NAME).get();
