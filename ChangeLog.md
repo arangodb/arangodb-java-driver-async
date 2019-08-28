@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [5.0.8] - 2019-19-07
+
+### Fixed
+
+- decoupled communication ExecutorService from client threads
+- `ArangoDBException` responseCode
+- error handling in `ArangoCollectionAsyncImpl.getDocument` and `ArangoCollectionAsyncImpl.documentExists`
+- asynchronous methods never throw synchronous `ArangoDBException`
+- tests assertions
+- catch errors in negative tests
+- velocypack-module-jdk8 v1.1.0
+
 ## [5.0.7] - 2019-19-07
 
 ### Fixed
