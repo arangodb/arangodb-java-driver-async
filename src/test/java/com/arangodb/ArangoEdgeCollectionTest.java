@@ -129,7 +129,7 @@ public class ArangoEdgeCollectionTest extends BaseTest {
                     .getEdge(edge.getKey(), BaseEdgeDocument.class, options).get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -154,7 +154,7 @@ public class ArangoEdgeCollectionTest extends BaseTest {
                     .getEdge(edge.getKey(), BaseEdgeDocument.class, options).get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -221,7 +221,7 @@ public class ArangoEdgeCollectionTest extends BaseTest {
                     .get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -298,7 +298,7 @@ public class ArangoEdgeCollectionTest extends BaseTest {
                     .get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -358,7 +358,7 @@ public class ArangoEdgeCollectionTest extends BaseTest {
                     .getEdge(createResult.getKey(), BaseEdgeDocument.class, null).get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -374,7 +374,7 @@ public class ArangoEdgeCollectionTest extends BaseTest {
                     .getEdge(createResult.getKey(), BaseEdgeDocument.class, null).get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -388,7 +388,7 @@ public class ArangoEdgeCollectionTest extends BaseTest {
             db.graph(GRAPH_NAME).edgeCollection(EDGE_COLLECTION_NAME).deleteEdge(createResult.getKey(), options).get();
             fail();
         } catch (final ExecutionException e) {
-			assertThat(e, instanceOf(ArangoDBException.class));
+			assertThat(e.getCause(), instanceOf(ArangoDBException.class));
 		}
     }
 }
