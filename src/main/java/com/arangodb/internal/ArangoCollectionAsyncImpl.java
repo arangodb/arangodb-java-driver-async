@@ -34,6 +34,7 @@ import java.util.function.Function;
 
 /**
  * @author Mark Vollmary
+ * @author Michele Rastelli
  */
 public class ArangoCollectionAsyncImpl
         extends InternalArangoCollection<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync>
@@ -118,18 +119,8 @@ public class ArangoCollectionAsyncImpl
 
     private <T> Function<Throwable, T> handleGetDocumentExceptions(Boolean isCatchException) {
         return throwable -> {
-            ArangoDBException arangoDBException = null;
-
-            if (throwable instanceof ArangoDBException) {
-                arangoDBException = (ArangoDBException) throwable;
-            } else if (throwable instanceof CompletionException) {
-                CompletionException completionException = (CompletionException) throwable;
-                if (completionException.getCause() instanceof ArangoDBException) {
-                    arangoDBException = (ArangoDBException) completionException.getCause();
-                }
-            }
-
-            if (arangoDBException != null) {
+            if (throwable instanceof CompletionException && throwable.getCause() instanceof ArangoDBException) {
+                ArangoDBException arangoDBException = (ArangoDBException) throwable.getCause();
                 if ((arangoDBException.getResponseCode() != null && (arangoDBException.getResponseCode() == 404 || arangoDBException.getResponseCode() == 304
                         || arangoDBException.getResponseCode() == 412)) && isCatchException) {
                     return null;
