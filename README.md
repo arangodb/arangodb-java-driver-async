@@ -22,4 +22,4 @@ The following documentation links to the documentation of the synchronous varian
 - [ArangoDB](https://www.arangodb.com/)
 - [ChangeLog](ChangeLog.md)
 - [Examples](src/test/java/com/arangodb/example)
-- [JavaDoc](http://arangodb.github.io/arangodb-java-driver-async/javadoc-5_0)
+- [JavaDoc](http://arangodb.github.io/arangodb-java-driver-async/javadoc-5_1)
