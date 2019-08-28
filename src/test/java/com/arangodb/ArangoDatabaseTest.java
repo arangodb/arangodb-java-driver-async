@@ -35,7 +35,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -182,7 +181,7 @@ public class ArangoDatabaseTest extends BaseTest {
             db.collection(COLLECTION_NAME).getInfo().get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -198,7 +197,7 @@ public class ArangoDatabaseTest extends BaseTest {
             db.collection(name).getInfo().get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -213,14 +212,14 @@ public class ArangoDatabaseTest extends BaseTest {
             db.collection(name).drop().get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
         db.collection(name).drop(true).get();
         try {
             db.collection(name).getInfo().get();
             fail();
         } catch (final ExecutionException e) {
-            assertThat(e, instanceOf(ArangoDBException.class));
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
     }
 
@@ -940,7 +939,7 @@ public class ArangoDatabaseTest extends BaseTest {
                 db.transaction(action, VPackSlice.class, options).get();
                 fail();
             } catch (final ExecutionException e) {
-                assertThat(e, instanceOf(ArangoDBException.class));
+                assertThat(e.getCause(), instanceOf(ArangoDBException.class));
             }
         } finally {
             db.collection("someCollection").drop().get();
@@ -1052,13 +1051,13 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
-    public void shouldIncludeExceptionMessage() {
+    public void shouldIncludeExceptionMessage() throws InterruptedException {
         final String exceptionMessage = "My error context";
         final String action = "function (params) {" + "throw '" + exceptionMessage + "';" + "}";
         try {
-            db.transaction(action, VPackSlice.class, null).join();
+            db.transaction(action, VPackSlice.class, null).get();
             fail();
-        } catch (final CompletionException e) {
+        } catch (final ExecutionException e) {
             assertThat(e.getCause(), instanceOf(ArangoDBException.class));
             ArangoDBException cause = ((ArangoDBException) e.getCause());
             assertThat(cause.getErrorMessage(), is(exceptionMessage));
