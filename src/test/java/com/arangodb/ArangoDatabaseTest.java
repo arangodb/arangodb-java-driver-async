@@ -74,6 +74,13 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
+    public void getEngine() throws ExecutionException, InterruptedException {
+        final ArangoDBEngine engine = db.getEngine().get();
+        assertThat(engine, is(notNullValue()));
+        assertThat(engine.getName(), is(notNullValue()));
+    }
+
+    @Test
     public void exists() throws InterruptedException, ExecutionException {
         assertThat(db.exists().get(), is(true));
         assertThat(arangoDB.db("no").exists().get(), is(false));

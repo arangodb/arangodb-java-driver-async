@@ -24,22 +24,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import com.arangodb.entity.AqlExecutionExplainEntity;
-import com.arangodb.entity.AqlFunctionEntity;
-import com.arangodb.entity.AqlParseEntity;
-import com.arangodb.entity.ArangoDBVersion;
-import com.arangodb.entity.CollectionEntity;
-import com.arangodb.entity.DatabaseEntity;
-import com.arangodb.entity.EdgeDefinition;
-import com.arangodb.entity.GraphEntity;
-import com.arangodb.entity.IndexEntity;
-import com.arangodb.entity.Permissions;
-import com.arangodb.entity.QueryCachePropertiesEntity;
-import com.arangodb.entity.QueryEntity;
-import com.arangodb.entity.QueryTrackingPropertiesEntity;
-import com.arangodb.entity.TraversalEntity;
-import com.arangodb.entity.ViewEntity;
-import com.arangodb.entity.ViewType;
+import com.arangodb.entity.*;
 import com.arangodb.model.AqlFunctionCreateOptions;
 import com.arangodb.model.AqlFunctionDeleteOptions;
 import com.arangodb.model.AqlFunctionGetOptions;
@@ -84,6 +69,15 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 	 * @return the server version, number
 	 */
 	CompletableFuture<ArangoDBVersion> getVersion();
+
+	/**
+	 * Returns the name of the used storage engine.
+	 *
+	 * @return the storage engine name
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/MiscellaneousFunctions/index.html#return-server-database-engine-type">API
+	 * Documentation</a>
+	 */
+	CompletableFuture<ArangoDBEngine> getEngine();
 
 	/**
 	 * Checks whether the database exists

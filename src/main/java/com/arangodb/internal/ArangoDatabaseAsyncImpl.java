@@ -34,23 +34,7 @@ import com.arangodb.ArangoGraphAsync;
 import com.arangodb.ArangoRouteAsync;
 import com.arangodb.ArangoSearchAsync;
 import com.arangodb.ArangoViewAsync;
-import com.arangodb.entity.AqlExecutionExplainEntity;
-import com.arangodb.entity.AqlFunctionEntity;
-import com.arangodb.entity.AqlParseEntity;
-import com.arangodb.entity.ArangoDBVersion;
-import com.arangodb.entity.CollectionEntity;
-import com.arangodb.entity.CursorEntity;
-import com.arangodb.entity.DatabaseEntity;
-import com.arangodb.entity.EdgeDefinition;
-import com.arangodb.entity.GraphEntity;
-import com.arangodb.entity.IndexEntity;
-import com.arangodb.entity.Permissions;
-import com.arangodb.entity.QueryCachePropertiesEntity;
-import com.arangodb.entity.QueryEntity;
-import com.arangodb.entity.QueryTrackingPropertiesEntity;
-import com.arangodb.entity.TraversalEntity;
-import com.arangodb.entity.ViewEntity;
-import com.arangodb.entity.ViewType;
+import com.arangodb.entity.*;
 import com.arangodb.internal.net.HostHandle;
 import com.arangodb.internal.util.DocumentUtil;
 import com.arangodb.model.AqlFunctionCreateOptions;
@@ -82,6 +66,11 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 	@Override
 	public CompletableFuture<ArangoDBVersion> getVersion() {
 		return executor.execute(getVersionRequest(), ArangoDBVersion.class);
+	}
+
+	@Override
+	public CompletableFuture<ArangoDBEngine> getEngine() {
+		return executor.execute(getEngineRequest(), ArangoDBEngine.class);
 	}
 
 	@Override
