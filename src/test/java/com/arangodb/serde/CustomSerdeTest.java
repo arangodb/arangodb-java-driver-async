@@ -62,18 +62,18 @@ public class CustomSerdeTest {
         String TEST_DB = "custom-serde-test";
         db = arangoDB.db(TEST_DB);
         if (!db.exists().get()) {
-            db.create();
+            db.create().get();
         }
 
         collection = db.collection(COLLECTION_NAME);
         if (!collection.exists().get()) {
-            collection.create();
+            collection.create().get();
         }
     }
 
     @After
-    public void shutdown() {
-        db.drop();
+    public void shutdown() throws ExecutionException, InterruptedException {
+        db.drop().get();
     }
 
     @Test
@@ -108,7 +108,7 @@ public class CustomSerdeTest {
         doc.addAttribute("arr", Collections.singletonList("hello"));
         doc.addAttribute("int", 10);
 
-        collection.insertDocument(doc, null);
+        collection.insertDocument(doc, null).get();
 
         final BaseDocument result = db.query(
                 "RETURN DOCUMENT(@docId)",
@@ -149,7 +149,7 @@ public class CustomSerdeTest {
         doc.addAttribute("arr", Collections.singletonList("hello"));
         doc.addAttribute("int", 10);
 
-        collection.insertDocument(doc, null);
+        collection.insertDocument(doc, null).get();
 
         final BaseDocument result = db.collection(COLLECTION_NAME).getDocument(
                 key,

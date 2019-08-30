@@ -1061,20 +1061,17 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void getDocument() throws InterruptedException, ExecutionException {
-        try {
-            db.createCollection(COLLECTION_NAME).get();
-            final BaseDocument value = new BaseDocument();
-            value.setKey("123");
-            db.collection(COLLECTION_NAME).insertDocument(value).get();
-            db.getDocument(COLLECTION_NAME + "/123", BaseDocument.class)
-                    .whenComplete((document, ex) -> {
-                        assertThat(document, is(notNullValue()));
-                        assertThat(document.getKey(), is("123"));
-                    })
-                    .get();
-        } finally {
-            db.collection(COLLECTION_NAME).drop().get();
-        }
+        db.createCollection(COLLECTION_NAME).get();
+        final BaseDocument value = new BaseDocument();
+        value.setKey("123");
+        db.collection(COLLECTION_NAME).insertDocument(value).get();
+        db.getDocument(COLLECTION_NAME + "/123", BaseDocument.class)
+                .whenComplete((document, ex) -> {
+                    assertThat(document, is(notNullValue()));
+                    assertThat(document.getKey(), is("123"));
+                })
+                .get();
+        db.collection(COLLECTION_NAME).drop().get();
     }
 
     @Test
