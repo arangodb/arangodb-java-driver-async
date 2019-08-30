@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Fixed
+
+- custom serde not always used
+
+### Added
+
+- split `GraphDocumentReadOptions` from `DocumentReadOptions` (breaking change)
+- added `ArangoCollection#getResponsibleShard(Object)`
+- added support for Analyzers
+- added support for Stream Transactions
+- added support for named indices
+- added support for TTL indices
+- added minReplicationAttribute for collections and graphs
+
 ## [5.1.0] - 2019-28-08
 
 ### Fixed

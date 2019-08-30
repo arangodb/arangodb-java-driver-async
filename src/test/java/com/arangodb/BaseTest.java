@@ -22,6 +22,8 @@ package com.arangodb;
 
 import java.util.concurrent.ExecutionException;
 
+import com.arangodb.entity.ArangoDBEngine;
+import com.arangodb.entity.ServerRole;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -63,5 +65,13 @@ public abstract class BaseTest {
             throws InterruptedException, ExecutionException {
         final String[] split = arangoDB.getVersion().get().getVersion().split("\\.");
         return Integer.valueOf(split[0]) >= major && Integer.valueOf(split[1]) >= minor;
+    }
+
+    protected boolean requireStorageEngine(ArangoDBEngine.StorageEngineName name) throws ExecutionException, InterruptedException {
+        return name.equals(db.getEngine().get().getName());
+    }
+
+    protected boolean requireSingleServer() throws ExecutionException, InterruptedException {
+        return (arangoDB.getRole().get() == ServerRole.SINGLE);
     }
 }

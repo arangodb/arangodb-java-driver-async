@@ -29,7 +29,6 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -45,6 +44,13 @@ public class ArangoCollectionTest extends BaseTest {
 
     private static final String COLLECTION_NAME = "db_collection_test";
 
+    public ArangoCollectionTest() throws ExecutionException, InterruptedException {
+        ArangoCollectionAsync collection = db.collection(COLLECTION_NAME);
+        if (!collection.exists().get()) {
+            collection.create().get();
+        }
+    }
+
     @BeforeClass
     public static void setup() throws InterruptedException, ExecutionException {
         db.createCollection(COLLECTION_NAME, null).get();
@@ -52,18 +58,15 @@ public class ArangoCollectionTest extends BaseTest {
 
     @After
     public void teardown() throws InterruptedException, ExecutionException {
-        db.collection(COLLECTION_NAME).truncate().get();
+        db.collection(COLLECTION_NAME).drop().get();
     }
 
     @Test
     public void create() throws InterruptedException, ExecutionException {
-        try {
-            final CollectionEntity result = db.collection(COLLECTION_NAME + "_1").create().get();
-            assertThat(result, is(notNullValue()));
-            assertThat(result.getId(), is(notNullValue()));
-        } finally {
-            db.collection(COLLECTION_NAME + "_1").drop().get();
-        }
+        final CollectionEntity result = db.collection(COLLECTION_NAME + "_1").create().get();
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getId(), is(notNullValue()));
+        db.collection(COLLECTION_NAME + "_1").drop().get();
     }
 
     @Test
@@ -810,6 +813,35 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
+    public void createHashIndexWithOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        final HashIndexOptions options = new HashIndexOptions();
+        options.name("myHashIndex");
+
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+        fields.add("b");
+        final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, options).get();
+        assertThat(indexResult, is(notNullValue()));
+        assertThat(indexResult.getConstraint(), is(nullValue()));
+        assertThat(indexResult.getFields(), hasItem("a"));
+        assertThat(indexResult.getFields(), hasItem("b"));
+        assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+        assertThat(indexResult.getIsNewlyCreated(), is(true));
+        assertThat(indexResult.getMinLength(), is(nullValue()));
+        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+            assertThat(indexResult.getSelectivityEstimate(), is(1.));
+        }
+        assertThat(indexResult.getSparse(), is(false));
+        assertThat(indexResult.getType(), is(IndexType.hash));
+        assertThat(indexResult.getUnique(), is(false));
+        assertThat(indexResult.getName(), is("myHashIndex"));
+    }
+
+    @Test
     public void createGeoIndex() throws InterruptedException, ExecutionException {
         final Collection<String> fields = new ArrayList<>();
         fields.add("a");
@@ -827,6 +859,33 @@ public class ArangoCollectionTest extends BaseTest {
                     assertThat(indexResult.getUnique(), is(false));
                 })
                 .get();
+    }
+
+    @Test
+    public void createGeoIndexWithOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        final GeoIndexOptions options = new GeoIndexOptions();
+        options.name("myGeoIndex1");
+
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+        final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensureGeoIndex(fields, options).get();
+        assertThat(indexResult, is(notNullValue()));
+        assertThat(indexResult.getFields(), hasItem("a"));
+        assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+        assertThat(indexResult.getIsNewlyCreated(), is(true));
+        assertThat(indexResult.getMinLength(), is(nullValue()));
+        assertThat(indexResult.getSparse(), is(true));
+        assertThat(indexResult.getUnique(), is(false));
+        if (requireVersion(3, 4)) {
+            assertThat(indexResult.getType(), is(IndexType.geo));
+        } else {
+            assertThat(indexResult.getType(), is(IndexType.geo1));
+        }
+        assertThat(indexResult.getName(), is("myGeoIndex1"));
     }
 
     @Test
@@ -856,6 +915,35 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
+    public void createGeo2IndexWithOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        final GeoIndexOptions options = new GeoIndexOptions();
+        options.name("myGeoIndex2");
+
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+        fields.add("b");
+        final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensureGeoIndex(fields, options).get();
+        assertThat(indexResult, is(notNullValue()));
+        assertThat(indexResult.getFields(), hasItem("a"));
+        assertThat(indexResult.getFields(), hasItem("b"));
+        assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+        assertThat(indexResult.getIsNewlyCreated(), is(true));
+        assertThat(indexResult.getMinLength(), is(nullValue()));
+        assertThat(indexResult.getSparse(), is(true));
+        assertThat(indexResult.getUnique(), is(false));
+        if (requireVersion(3, 4)) {
+            assertThat(indexResult.getType(), is(IndexType.geo));
+        } else {
+            assertThat(indexResult.getType(), is(IndexType.geo2));
+        }
+        assertThat(indexResult.getName(), is("myGeoIndex2"));
+    }
+
+    @Test
     public void createSkiplistIndex() throws InterruptedException, ExecutionException {
         final boolean singleServer = arangoDB.getRole().get() == ServerRole.SINGLE;
         final Collection<String> fields = new ArrayList<>();
@@ -879,6 +967,32 @@ public class ArangoCollectionTest extends BaseTest {
                     assertThat(indexResult.getUnique(), is(false));
                 })
                 .get();
+    }
+
+    @Test
+    public void createSkiplistIndexWithOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        final SkiplistIndexOptions options = new SkiplistIndexOptions();
+        options.name("mySkiplistIndex");
+
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+        fields.add("b");
+        final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensureSkiplistIndex(fields, options).get();
+        assertThat(indexResult, is(notNullValue()));
+        assertThat(indexResult.getConstraint(), is(nullValue()));
+        assertThat(indexResult.getFields(), hasItem("a"));
+        assertThat(indexResult.getFields(), hasItem("b"));
+        assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+        assertThat(indexResult.getIsNewlyCreated(), is(true));
+        assertThat(indexResult.getMinLength(), is(nullValue()));
+        assertThat(indexResult.getSparse(), is(false));
+        assertThat(indexResult.getType(), is(IndexType.skiplist));
+        assertThat(indexResult.getUnique(), is(false));
+        assertThat(indexResult.getName(), is("mySkiplistIndex"));
     }
 
     @Test
@@ -908,6 +1022,32 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
+    public void createPersistentIndexWithOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        final PersistentIndexOptions options = new PersistentIndexOptions();
+        options.name("myPersistentIndex");
+
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+        fields.add("b");
+        final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensurePersistentIndex(fields, options).get();
+        assertThat(indexResult, is(notNullValue()));
+        assertThat(indexResult.getConstraint(), is(nullValue()));
+        assertThat(indexResult.getFields(), hasItem("a"));
+        assertThat(indexResult.getFields(), hasItem("b"));
+        assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+        assertThat(indexResult.getIsNewlyCreated(), is(true));
+        assertThat(indexResult.getMinLength(), is(nullValue()));
+        assertThat(indexResult.getSparse(), is(false));
+        assertThat(indexResult.getType(), is(IndexType.persistent));
+        assertThat(indexResult.getUnique(), is(false));
+        assertThat(indexResult.getName(), is("myPersistentIndex"));
+    }
+
+    @Test
     public void createFulltextIndex() throws InterruptedException, ExecutionException {
         final Collection<String> fields = new ArrayList<>();
         fields.add("a");
@@ -925,6 +1065,69 @@ public class ArangoCollectionTest extends BaseTest {
                     assertThat(indexResult.getUnique(), is(false));
                 })
                 .get();
+    }
+
+    @Test
+    public void createFulltextIndexWithOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        final FulltextIndexOptions options = new FulltextIndexOptions();
+        options.name("myFulltextIndex");
+
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+        final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensureFulltextIndex(fields, options).get();
+        assertThat(indexResult, is(notNullValue()));
+        assertThat(indexResult.getConstraint(), is(nullValue()));
+        assertThat(indexResult.getFields(), hasItem("a"));
+        assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+        assertThat(indexResult.getIsNewlyCreated(), is(true));
+        assertThat(indexResult.getSparse(), is(true));
+        assertThat(indexResult.getType(), is(IndexType.fulltext));
+        assertThat(indexResult.getUnique(), is(false));
+        assertThat(indexResult.getName(), is("myFulltextIndex"));
+    }
+
+    @Test
+    public void createTtlIndexWithoutOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+        try {
+            final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensureTtlIndex(fields, null).get();
+            fail();
+        } catch (ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
+            assertThat(e.getCause().getMessage(), containsString("expireAfter attribute must be a number"));
+            assertThat(((ArangoDBException) e.getCause()).getResponseCode(), is(400));
+            assertThat(((ArangoDBException) e.getCause()).getErrorNum(), is(10));
+        }
+    }
+
+    @Test
+    public void createTtlIndexWithOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+
+        final TtlIndexOptions options = new TtlIndexOptions();
+        options.name("myTtlIndex");
+        options.expireAfter(3600);
+
+        final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensureTtlIndex(fields, options).get();
+        assertThat(indexResult, is(notNullValue()));
+        assertThat(indexResult.getFields(), hasItem("a"));
+        assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+        assertThat(indexResult.getIsNewlyCreated(), is(true));
+        assertThat(indexResult.getType(), is(IndexType.ttl));
+        assertThat(indexResult.getExpireAfter(), is(3600));
+        assertThat(indexResult.getName(), is("myTtlIndex"));
     }
 
     @Test
@@ -1899,6 +2102,19 @@ public class ArangoCollectionTest extends BaseTest {
         } finally {
             db.collection(COLLECTION_NAME + "1").rename(COLLECTION_NAME).get();
         }
+    }
+
+    @Test
+    public void responsibleShard() throws ExecutionException, InterruptedException {
+        if (arangoDB.getRole().get() != ServerRole.COORDINATOR) {
+            return;
+        }
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+        ShardEntity shard = db.collection(COLLECTION_NAME).getResponsibleShard(new BaseDocument("testKey")).get();
+        assertThat(shard, is(notNullValue()));
+        assertThat(shard.getShardId(), is(notNullValue()));
     }
 
     @Test

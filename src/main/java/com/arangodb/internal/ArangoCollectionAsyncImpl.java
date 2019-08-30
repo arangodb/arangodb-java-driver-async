@@ -113,18 +113,22 @@ public class ArangoCollectionAsyncImpl
             final Class<T> type,
             final DocumentReadOptions options) throws ArangoDBException {
         DocumentUtil.validateDocumentKey(key);
+        boolean isCatchException = options != null ? options.isCatchException() : new DocumentReadOptions().isCatchException();
         return (CompletableFuture<T>) executor.execute(getDocumentRequest(key, options), type)
-                .exceptionally(handleGetDocumentExceptions(options != null ? options.isCatchException() : new DocumentReadOptions().isCatchException()));
+                .exceptionally(handleGetDocumentExceptions(isCatchException));
     }
 
     private <T> Function<Throwable, T> handleGetDocumentExceptions(Boolean isCatchException) {
         return throwable -> {
-            if (throwable instanceof CompletionException && throwable.getCause() instanceof ArangoDBException) {
-                ArangoDBException arangoDBException = (ArangoDBException) throwable.getCause();
-                if ((arangoDBException.getResponseCode() != null && (arangoDBException.getResponseCode() == 404 || arangoDBException.getResponseCode() == 304
-                        || arangoDBException.getResponseCode() == 412)) && isCatchException) {
-                    return null;
+            if (throwable instanceof CompletionException) {
+                if (throwable.getCause() instanceof ArangoDBException) {
+                    ArangoDBException arangoDBException = (ArangoDBException) throwable.getCause();
+                    if ((arangoDBException.getResponseCode() != null && (arangoDBException.getResponseCode() == 404 || arangoDBException.getResponseCode() == 304
+                            || arangoDBException.getResponseCode() == 412)) && isCatchException) {
+                        return null;
+                    }
                 }
+                throw (CompletionException) throwable;
             }
             throw new CompletionException(throwable);
         };
@@ -247,8 +251,9 @@ public class ArangoCollectionAsyncImpl
 
     @Override
     public CompletableFuture<Boolean> documentExists(final String key, final DocumentExistsOptions options) {
+        boolean isCatchException = options != null ? options.isCatchException() : new DocumentExistsOptions().isCatchException();
         return executor.execute(documentExistsRequest(key, options), response -> response)
-                .exceptionally(handleGetDocumentExceptions(options != null ? options.isCatchException() : new DocumentExistsOptions().isCatchException()))
+                .exceptionally(handleGetDocumentExceptions(isCatchException))
                 .thenApply(Objects::nonNull);
     }
 
@@ -296,6 +301,11 @@ public class ArangoCollectionAsyncImpl
     }
 
     @Override
+    public CompletableFuture<IndexEntity> ensureTtlIndex(Iterable<String> fields, TtlIndexOptions options) {
+        return executor.execute(createTtlIndexRequest(fields, options), IndexEntity.class);
+    }
+
+    @Override
     public CompletableFuture<Collection<IndexEntity>> getIndexes() {
         return executor.execute(getIndexesRequest(), getIndexesResponseDeserializer());
     }
@@ -307,12 +317,22 @@ public class ArangoCollectionAsyncImpl
 
     @Override
     public CompletableFuture<CollectionEntity> truncate() {
-        return executor.execute(truncateRequest(), CollectionEntity.class);
+        return truncate(null);
+    }
+
+    @Override
+    public CompletableFuture<CollectionEntity> truncate(CollectionTruncateOptions options) {
+        return executor.execute(truncateRequest(options), CollectionEntity.class);
     }
 
     @Override
     public CompletableFuture<CollectionPropertiesEntity> count() {
-        return executor.execute(countRequest(), CollectionPropertiesEntity.class);
+        return count(null);
+    }
+
+    @Override
+    public CompletableFuture<CollectionPropertiesEntity> count(CollectionCountOptions options) {
+        return executor.execute(countRequest(options), CollectionPropertiesEntity.class);
     }
 
     @Override
@@ -363,6 +383,11 @@ public class ArangoCollectionAsyncImpl
     @Override
     public CompletableFuture<CollectionEntity> rename(final String newName) {
         return executor.execute(renameRequest(newName), CollectionEntity.class);
+    }
+
+    @Override
+    public CompletableFuture<ShardEntity> getResponsibleShard(Object value) {
+        return executor.execute(responsibleShardRequest(value), ShardEntity.class);
     }
 
     @Override

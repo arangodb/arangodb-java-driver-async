@@ -74,6 +74,13 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
+    public void getEngine() throws ExecutionException, InterruptedException {
+        final ArangoDBEngine engine = db.getEngine().get();
+        assertThat(engine, is(notNullValue()));
+        assertThat(engine.getName(), is(notNullValue()));
+    }
+
+    @Test
     public void exists() throws InterruptedException, ExecutionException {
         assertThat(db.exists().get(), is(true));
         assertThat(arangoDB.db("no").exists().get(), is(false));
@@ -118,6 +125,26 @@ public class ArangoDatabaseTest extends BaseTest {
         } finally {
             db.collection(COLLECTION_NAME).drop().get();
         }
+    }
+
+    @Test
+    public void createCollectionWithMinReplicationFactor() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+            return;
+        }
+
+        final CollectionEntity result = db.createCollection(COLLECTION_NAME,
+                new CollectionCreateOptions().replicationFactor(2).minReplicationFactor(2)).get();
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getId(), is(notNullValue()));
+        assertThat(db.collection(COLLECTION_NAME).getProperties().get().getReplicationFactor(), is(2));
+        assertThat(db.collection(COLLECTION_NAME).getProperties().get().getMinReplicationFactor(), is(2));
+        assertThat(db.collection(COLLECTION_NAME).getProperties().get().getSatellite(), is(nullValue()));
+        db.collection(COLLECTION_NAME).drop();
     }
 
     @Test
@@ -1034,20 +1061,18 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void getDocument() throws InterruptedException, ExecutionException {
-        try {
-            db.createCollection(COLLECTION_NAME).get();
-            final BaseDocument value = new BaseDocument();
-            value.setKey("123");
-            db.collection(COLLECTION_NAME).insertDocument(value).get();
-            db.getDocument(COLLECTION_NAME + "/123", BaseDocument.class)
-                    .whenComplete((document, ex) -> {
-                        assertThat(document, is(notNullValue()));
-                        assertThat(document.getKey(), is("123"));
-                    })
-                    .get();
-        } finally {
-            db.collection(COLLECTION_NAME).drop().get();
-        }
+        String collectionName = COLLECTION_NAME + "getDocument";
+        db.createCollection(collectionName).get();
+        final BaseDocument value = new BaseDocument();
+        value.setKey("123");
+        db.collection(collectionName).insertDocument(value).get();
+        db.getDocument(collectionName + "/123", BaseDocument.class)
+                .whenComplete((document, ex) -> {
+                    assertThat(document, is(notNullValue()));
+                    assertThat(document.getKey(), is("123"));
+                })
+                .get();
+        db.collection(collectionName).drop().get();
     }
 
     @Test

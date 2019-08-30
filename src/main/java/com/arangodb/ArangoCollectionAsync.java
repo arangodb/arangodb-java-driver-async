@@ -23,30 +23,8 @@ package com.arangodb;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-import com.arangodb.entity.CollectionEntity;
-import com.arangodb.entity.CollectionPropertiesEntity;
-import com.arangodb.entity.CollectionRevisionEntity;
-import com.arangodb.entity.DocumentCreateEntity;
-import com.arangodb.entity.DocumentDeleteEntity;
-import com.arangodb.entity.DocumentImportEntity;
-import com.arangodb.entity.DocumentUpdateEntity;
-import com.arangodb.entity.IndexEntity;
-import com.arangodb.entity.MultiDocumentEntity;
-import com.arangodb.entity.Permissions;
-import com.arangodb.model.CollectionCreateOptions;
-import com.arangodb.model.CollectionPropertiesOptions;
-import com.arangodb.model.DocumentCreateOptions;
-import com.arangodb.model.DocumentDeleteOptions;
-import com.arangodb.model.DocumentExistsOptions;
-import com.arangodb.model.DocumentImportOptions;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.DocumentReplaceOptions;
-import com.arangodb.model.DocumentUpdateOptions;
-import com.arangodb.model.FulltextIndexOptions;
-import com.arangodb.model.GeoIndexOptions;
-import com.arangodb.model.HashIndexOptions;
-import com.arangodb.model.PersistentIndexOptions;
-import com.arangodb.model.SkiplistIndexOptions;
+import com.arangodb.entity.*;
+import com.arangodb.model.*;
 
 /**
  * Interface for operations on ArangoDB collection level.
@@ -536,6 +514,17 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 		final FulltextIndexOptions options);
 
 	/**
+	 * Creates a ttl index for the collection, if it does not already exist.
+	 *
+	 * @param fields  A list of attribute paths
+	 * @param options Additional options, can be null
+	 * @return information about the index
+	 * @see <a href="https://www.arangodb.com/docs/stable/http/indexes-ttl.html">API
+	 * Documentation</a>
+	 */
+	CompletableFuture<IndexEntity> ensureTtlIndex(Iterable<String> fields, TtlIndexOptions options);
+
+	/**
 	 * Returns all indexes of the collection
 	 * 
 	 * @see <a href=
@@ -554,7 +543,7 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 
 	/**
 	 * Removes all documents from the collection, but leaves the indexes intact
-	 * 
+	 *
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#truncate-collection">API
 	 *      Documentation</a>
 	 * @return information about the collection
@@ -562,14 +551,33 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	CompletableFuture<CollectionEntity> truncate();
 
 	/**
+	 * Removes all documents from the collection, but leaves the indexes intact
+	 *
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#truncate-collection">API
+	 *      Documentation</a>
+	 * @return information about the collection
+	 */
+	CompletableFuture<CollectionEntity> truncate(CollectionTruncateOptions options);
+
+	/**
 	 * Counts the documents in a collection
-	 * 
+	 *
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/HTTP/Collection/Getting.html#return-number-of-documents-in-a-collection">API
 	 *      Documentation</a>
 	 * @return information about the collection, including the number of documents
 	 */
 	CompletableFuture<CollectionPropertiesEntity> count();
+
+	/**
+	 * Counts the documents in a collection
+	 *
+	 * @see <a href=
+	 *      "https://docs.arangodb.com/current/HTTP/Collection/Getting.html#return-number-of-documents-in-a-collection">API
+	 *      Documentation</a>
+	 * @return information about the collection, including the number of documents
+	 */
+	CompletableFuture<CollectionPropertiesEntity> count(CollectionCountOptions options);
 
 	/**
 	 * Creates the collection
@@ -675,6 +683,19 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 * @return information about the collection
 	 */
 	CompletableFuture<CollectionEntity> rename(final String newName);
+
+	/**
+	 * Returns the responsible shard for the document.
+	 * Please note that this API is only meaningful and available on a cluster coordinator.
+	 *
+	 * @param value A projection of the document containing at least the shard key (_key or a custom attribute) for
+	 *              which the responsible shard should be determined
+	 * @return information about the responsible shard
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/collection-getting.html#return-responsible-shard-for-a-document">
+	 * API Documentation</a>
+	 * @since ArangoDB 3.5.0
+	 */
+	CompletableFuture<ShardEntity> getResponsibleShard(final Object value);
 
 	/**
 	 * Retrieve the collections revision
