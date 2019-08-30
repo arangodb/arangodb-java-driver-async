@@ -25,11 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import com.arangodb.ArangoVertexCollectionAsync;
 import com.arangodb.entity.VertexEntity;
 import com.arangodb.entity.VertexUpdateEntity;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.VertexCreateOptions;
-import com.arangodb.model.VertexDeleteOptions;
-import com.arangodb.model.VertexReplaceOptions;
-import com.arangodb.model.VertexUpdateOptions;
+import com.arangodb.model.*;
 
 /**
  * @author Mark Vollmary
@@ -61,14 +57,14 @@ public class ArangoVertexCollectionAsyncImpl extends
 
 	@Override
 	public <T> CompletableFuture<T> getVertex(final String key, final Class<T> type) {
-		return executor.execute(getVertexRequest(key, new DocumentReadOptions()), getVertexResponseDeserializer(type));
+		return executor.execute(getVertexRequest(key, new GraphDocumentReadOptions()), getVertexResponseDeserializer(type));
 	}
 
 	@Override
 	public <T> CompletableFuture<T> getVertex(
 		final String key,
 		final Class<T> type,
-		final DocumentReadOptions options) {
+		final GraphDocumentReadOptions options) {
 		return executor.execute(getVertexRequest(key, options), getVertexResponseDeserializer(type));
 	}
 

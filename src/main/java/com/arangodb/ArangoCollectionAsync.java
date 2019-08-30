@@ -33,20 +33,7 @@ import com.arangodb.entity.DocumentUpdateEntity;
 import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.MultiDocumentEntity;
 import com.arangodb.entity.Permissions;
-import com.arangodb.model.CollectionCreateOptions;
-import com.arangodb.model.CollectionPropertiesOptions;
-import com.arangodb.model.DocumentCreateOptions;
-import com.arangodb.model.DocumentDeleteOptions;
-import com.arangodb.model.DocumentExistsOptions;
-import com.arangodb.model.DocumentImportOptions;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.DocumentReplaceOptions;
-import com.arangodb.model.DocumentUpdateOptions;
-import com.arangodb.model.FulltextIndexOptions;
-import com.arangodb.model.GeoIndexOptions;
-import com.arangodb.model.HashIndexOptions;
-import com.arangodb.model.PersistentIndexOptions;
-import com.arangodb.model.SkiplistIndexOptions;
+import com.arangodb.model.*;
 
 /**
  * Interface for operations on ArangoDB collection level.
@@ -554,7 +541,7 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 
 	/**
 	 * Removes all documents from the collection, but leaves the indexes intact
-	 * 
+	 *
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#truncate-collection">API
 	 *      Documentation</a>
 	 * @return information about the collection
@@ -562,14 +549,33 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	CompletableFuture<CollectionEntity> truncate();
 
 	/**
+	 * Removes all documents from the collection, but leaves the indexes intact
+	 *
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#truncate-collection">API
+	 *      Documentation</a>
+	 * @return information about the collection
+	 */
+	CompletableFuture<CollectionEntity> truncate(CollectionTruncateOptions options);
+
+	/**
 	 * Counts the documents in a collection
-	 * 
+	 *
 	 * @see <a href=
 	 *      "https://docs.arangodb.com/current/HTTP/Collection/Getting.html#return-number-of-documents-in-a-collection">API
 	 *      Documentation</a>
 	 * @return information about the collection, including the number of documents
 	 */
 	CompletableFuture<CollectionPropertiesEntity> count();
+
+	/**
+	 * Counts the documents in a collection
+	 *
+	 * @see <a href=
+	 *      "https://docs.arangodb.com/current/HTTP/Collection/Getting.html#return-number-of-documents-in-a-collection">API
+	 *      Documentation</a>
+	 * @return information about the collection, including the number of documents
+	 */
+	CompletableFuture<CollectionPropertiesEntity> count(CollectionCountOptions options);
 
 	/**
 	 * Creates the collection

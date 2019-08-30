@@ -24,11 +24,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.arangodb.entity.VertexEntity;
 import com.arangodb.entity.VertexUpdateEntity;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.VertexCreateOptions;
-import com.arangodb.model.VertexDeleteOptions;
-import com.arangodb.model.VertexReplaceOptions;
-import com.arangodb.model.VertexUpdateOptions;
+import com.arangodb.model.*;
 
 /**
  * Interface for operations on ArangoDB vertex collection level.
@@ -108,7 +104,7 @@ public interface ArangoVertexCollectionAsync extends ArangoSerializationAccessor
 	 *            Additional options, can be null
 	 * @return the vertex identified by the key
 	 */
-	<T> CompletableFuture<T> getVertex(final String key, final Class<T> type, final DocumentReadOptions options);
+	<T> CompletableFuture<T> getVertex(final String key, final Class<T> type, final GraphDocumentReadOptions options);
 
 	/**
 	 * Replaces the vertex with key with the one in the body, provided there is such a vertex and no precondition is

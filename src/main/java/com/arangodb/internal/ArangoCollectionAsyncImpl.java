@@ -307,12 +307,22 @@ public class ArangoCollectionAsyncImpl
 
     @Override
     public CompletableFuture<CollectionEntity> truncate() {
-        return executor.execute(truncateRequest(), CollectionEntity.class);
+        return truncate(null);
+    }
+
+    @Override
+    public CompletableFuture<CollectionEntity> truncate(CollectionTruncateOptions options) {
+        return executor.execute(truncateRequest(options), CollectionEntity.class);
     }
 
     @Override
     public CompletableFuture<CollectionPropertiesEntity> count() {
-        return executor.execute(countRequest(), CollectionPropertiesEntity.class);
+        return count(null);
+    }
+
+    @Override
+    public CompletableFuture<CollectionPropertiesEntity> count(CollectionCountOptions options) {
+        return executor.execute(countRequest(options), CollectionPropertiesEntity.class);
     }
 
     @Override

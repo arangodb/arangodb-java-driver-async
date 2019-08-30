@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
+import com.arangodb.model.*;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,11 +35,6 @@ import org.junit.Test;
 import com.arangodb.entity.BaseDocument;
 import com.arangodb.entity.VertexEntity;
 import com.arangodb.entity.VertexUpdateEntity;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.GraphCreateOptions;
-import com.arangodb.model.VertexDeleteOptions;
-import com.arangodb.model.VertexReplaceOptions;
-import com.arangodb.model.VertexUpdateOptions;
 
 /**
  * @author Mark Vollmary
@@ -94,7 +90,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
     public void getVertexIfMatch() throws InterruptedException, ExecutionException {
         final VertexEntity vertex = db.graph(GRAPH_NAME).vertexCollection(COLLECTION_NAME)
                 .insertVertex(new BaseDocument(), null).get();
-        final DocumentReadOptions options = new DocumentReadOptions().ifMatch(vertex.getRev());
+        final GraphDocumentReadOptions options = new GraphDocumentReadOptions().ifMatch(vertex.getRev());
         final BaseDocument document = db.graph(GRAPH_NAME).vertexCollection(COLLECTION_NAME)
                 .getVertex(vertex.getKey(), BaseDocument.class, options).get();
         assertThat(document, is(notNullValue()));
@@ -105,7 +101,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
     public void getVertexIfMatchFail() throws InterruptedException, ExecutionException {
         final VertexEntity vertex = db.graph(GRAPH_NAME).vertexCollection(COLLECTION_NAME)
                 .insertVertex(new BaseDocument(), null).get();
-        final DocumentReadOptions options = new DocumentReadOptions().ifMatch("no");
+        final GraphDocumentReadOptions options = new GraphDocumentReadOptions().ifMatch("no");
         try {
             db.graph(GRAPH_NAME).vertexCollection(COLLECTION_NAME)
                     .getVertex(vertex.getKey(), BaseDocument.class, options).get();
@@ -119,7 +115,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
     public void getVertexIfNoneMatch() throws InterruptedException, ExecutionException {
         final VertexEntity vertex = db.graph(GRAPH_NAME).vertexCollection(COLLECTION_NAME)
                 .insertVertex(new BaseDocument(), null).get();
-        final DocumentReadOptions options = new DocumentReadOptions().ifNoneMatch("no");
+        final GraphDocumentReadOptions options = new GraphDocumentReadOptions().ifNoneMatch("no");
         final BaseDocument document = db.graph(GRAPH_NAME).vertexCollection(COLLECTION_NAME)
                 .getVertex(vertex.getKey(), BaseDocument.class, options).get();
         assertThat(document, is(notNullValue()));
@@ -130,7 +126,7 @@ public class ArangoVertexCollectionTest extends BaseTest {
     public void getVertexIfNoneMatchFail() throws InterruptedException, ExecutionException {
         final VertexEntity vertex = db.graph(GRAPH_NAME).vertexCollection(COLLECTION_NAME)
                 .insertVertex(new BaseDocument(), null).get();
-        final DocumentReadOptions options = new DocumentReadOptions().ifNoneMatch(vertex.getRev());
+        final GraphDocumentReadOptions options = new GraphDocumentReadOptions().ifNoneMatch(vertex.getRev());
         try {
             db.graph(GRAPH_NAME).vertexCollection(COLLECTION_NAME)
                     .getVertex(vertex.getKey(), BaseDocument.class, options).get();

@@ -24,11 +24,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.arangodb.entity.EdgeEntity;
 import com.arangodb.entity.EdgeUpdateEntity;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.EdgeCreateOptions;
-import com.arangodb.model.EdgeDeleteOptions;
-import com.arangodb.model.EdgeReplaceOptions;
-import com.arangodb.model.EdgeUpdateOptions;
+import com.arangodb.model.*;
 
 /**
  * Interface for operations on ArangoDB edge collection level.
@@ -98,7 +94,7 @@ public interface ArangoEdgeCollectionAsync extends ArangoSerializationAccessor {
 	 *            Additional options, can be null
 	 * @return the edge identified by the key
 	 */
-	<T> CompletableFuture<T> getEdge(final String key, final Class<T> type, final DocumentReadOptions options);
+	<T> CompletableFuture<T> getEdge(final String key, final Class<T> type, final GraphDocumentReadOptions options);
 
 	/**
 	 * Replaces the edge with key with the one in the body, provided there is such a edge and no precondition is

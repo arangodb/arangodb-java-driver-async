@@ -25,11 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import com.arangodb.ArangoEdgeCollectionAsync;
 import com.arangodb.entity.EdgeEntity;
 import com.arangodb.entity.EdgeUpdateEntity;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.EdgeCreateOptions;
-import com.arangodb.model.EdgeDeleteOptions;
-import com.arangodb.model.EdgeReplaceOptions;
-import com.arangodb.model.EdgeUpdateOptions;
+import com.arangodb.model.*;
 
 /**
  * @author Mark Vollmary
@@ -56,11 +52,11 @@ public class ArangoEdgeCollectionAsyncImpl extends
 
 	@Override
 	public <T> CompletableFuture<T> getEdge(final String key, final Class<T> type) {
-		return executor.execute(getEdgeRequest(key, new DocumentReadOptions()), getEdgeResponseDeserializer(type));
+		return executor.execute(getEdgeRequest(key, new GraphDocumentReadOptions()), getEdgeResponseDeserializer(type));
 	}
 
 	@Override
-	public <T> CompletableFuture<T> getEdge(final String key, final Class<T> type, final DocumentReadOptions options) {
+	public <T> CompletableFuture<T> getEdge(final String key, final Class<T> type, final GraphDocumentReadOptions options) {
 		return executor.execute(getEdgeRequest(key, options), getEdgeResponseDeserializer(type));
 	}
 
