@@ -113,18 +113,22 @@ public class ArangoCollectionAsyncImpl
             final Class<T> type,
             final DocumentReadOptions options) throws ArangoDBException {
         DocumentUtil.validateDocumentKey(key);
+        boolean isCatchException = options != null ? options.isCatchException() : new DocumentReadOptions().isCatchException();
         return (CompletableFuture<T>) executor.execute(getDocumentRequest(key, options), type)
-                .exceptionally(handleGetDocumentExceptions(options != null ? options.isCatchException() : new DocumentReadOptions().isCatchException()));
+                .exceptionally(handleGetDocumentExceptions(isCatchException));
     }
 
     private <T> Function<Throwable, T> handleGetDocumentExceptions(Boolean isCatchException) {
         return throwable -> {
-            if (throwable instanceof CompletionException && throwable.getCause() instanceof ArangoDBException) {
-                ArangoDBException arangoDBException = (ArangoDBException) throwable.getCause();
-                if ((arangoDBException.getResponseCode() != null && (arangoDBException.getResponseCode() == 404 || arangoDBException.getResponseCode() == 304
-                        || arangoDBException.getResponseCode() == 412)) && isCatchException) {
-                    return null;
+            if (throwable instanceof CompletionException) {
+                if (throwable.getCause() instanceof ArangoDBException) {
+                    ArangoDBException arangoDBException = (ArangoDBException) throwable.getCause();
+                    if ((arangoDBException.getResponseCode() != null && (arangoDBException.getResponseCode() == 404 || arangoDBException.getResponseCode() == 304
+                            || arangoDBException.getResponseCode() == 412)) && isCatchException) {
+                        return null;
+                    }
                 }
+                throw (CompletionException) throwable;
             }
             throw new CompletionException(throwable);
         };
@@ -247,8 +251,9 @@ public class ArangoCollectionAsyncImpl
 
     @Override
     public CompletableFuture<Boolean> documentExists(final String key, final DocumentExistsOptions options) {
+        boolean isCatchException = options != null ? options.isCatchException() : new DocumentExistsOptions().isCatchException();
         return executor.execute(documentExistsRequest(key, options), response -> response)
-                .exceptionally(handleGetDocumentExceptions(options != null ? options.isCatchException() : new DocumentExistsOptions().isCatchException()))
+                .exceptionally(handleGetDocumentExceptions(isCatchException))
                 .thenApply(Objects::nonNull);
     }
 

@@ -26,17 +26,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.arangodb.entity.*;
 import com.arangodb.entity.arangosearch.AnalyzerEntity;
-import com.arangodb.model.AqlFunctionCreateOptions;
-import com.arangodb.model.AqlFunctionDeleteOptions;
-import com.arangodb.model.AqlFunctionGetOptions;
-import com.arangodb.model.AqlQueryExplainOptions;
-import com.arangodb.model.AqlQueryOptions;
-import com.arangodb.model.CollectionCreateOptions;
-import com.arangodb.model.CollectionsReadOptions;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.GraphCreateOptions;
-import com.arangodb.model.TransactionOptions;
-import com.arangodb.model.TraversalOptions;
+import com.arangodb.model.*;
 import com.arangodb.model.arangosearch.AnalyzerDeleteOptions;
 import com.arangodb.model.arangosearch.ArangoSearchCreateOptions;
 
@@ -537,6 +527,56 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
      * Documentation</a>
      */
     <T> CompletableFuture<T> transaction(final String action, final Class<T> type, final TransactionOptions options);
+
+    /**
+     * Begins a Stream Transaction.
+     *
+     * @param options Additional options, can be null
+     * @return information about the transaction
+     * @see <a href="https://docs.arangodb.com/current/HTTP/transaction-stream-transaction.html#begin-a-transaction">API
+     * Documentation</a>
+     * @since ArangoDB 3.5.0
+     */
+    CompletableFuture<StreamTransactionEntity> beginStreamTransaction(StreamTransactionOptions options);
+
+    /**
+     * Aborts a Stream Transaction.
+     *
+     * @return information about the transaction
+     * @see <a href="https://docs.arangodb.com/current/HTTP/transaction-stream-transaction.html#abort-transaction">API
+     * Documentation</a>
+     */
+    CompletableFuture<StreamTransactionEntity> abortStreamTransaction(String id);
+
+    /**
+     * Gets information about a Stream Transaction.
+     *
+     * @return information about the transaction
+     * @see <a href="https://docs.arangodb.com/current/HTTP/transaction-stream-transaction.html#get-transaction-status">
+     * API Documentation</a>
+     * @since ArangoDB 3.5.0
+     */
+    CompletableFuture<StreamTransactionEntity> getStreamTransaction(String id);
+
+    /**
+     * Gets all the currently running Stream Transactions.
+     *
+     * @return all the currently running Stream Transactions
+     * @see <a href="https://docs.arangodb.com/current/HTTP/transaction-stream-transaction.html#list-currently-ongoing-transactions">
+     * API Documentation</a>
+     * @since ArangoDB 3.5.0
+     */
+    CompletableFuture<Collection<TransactionEntity>> getStreamTransactions();
+
+    /**
+     * Commits a Stream Transaction.
+     *
+     * @return information about the transaction
+     * @see <a href="https://docs.arangodb.com/current/HTTP/transaction-stream-transaction.html#commit-or-abort-a-transaction">
+     * API Documentation</a>
+     * @since ArangoDB 3.5.0
+     */
+    CompletableFuture<StreamTransactionEntity> commitStreamTransaction(String id);
 
     /**
      * Retrieves information about the current database

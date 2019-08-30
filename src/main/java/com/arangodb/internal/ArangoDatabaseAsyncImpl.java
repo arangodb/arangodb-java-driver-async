@@ -38,17 +38,7 @@ import com.arangodb.entity.*;
 import com.arangodb.entity.arangosearch.AnalyzerEntity;
 import com.arangodb.internal.net.HostHandle;
 import com.arangodb.internal.util.DocumentUtil;
-import com.arangodb.model.AqlFunctionCreateOptions;
-import com.arangodb.model.AqlFunctionDeleteOptions;
-import com.arangodb.model.AqlFunctionGetOptions;
-import com.arangodb.model.AqlQueryExplainOptions;
-import com.arangodb.model.AqlQueryOptions;
-import com.arangodb.model.CollectionCreateOptions;
-import com.arangodb.model.CollectionsReadOptions;
-import com.arangodb.model.DocumentReadOptions;
-import com.arangodb.model.GraphCreateOptions;
-import com.arangodb.model.TransactionOptions;
-import com.arangodb.model.TraversalOptions;
+import com.arangodb.model.*;
 import com.arangodb.model.arangosearch.AnalyzerDeleteOptions;
 import com.arangodb.model.arangosearch.ArangoSearchCreateOptions;
 import com.arangodb.velocypack.Type;
@@ -56,6 +46,7 @@ import com.arangodb.velocystream.Request;
 
 /**
  * @author Mark Vollmary
+ * @author Michele Rastelli
  */
 public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyncImpl, ArangoExecutorAsync>
         implements ArangoDatabaseAsync {
@@ -347,6 +338,31 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
             final Class<T> type,
             final TransactionOptions options) {
         return executor.execute(transactionRequest(action, options), transactionResponseDeserializer(type));
+    }
+
+    @Override
+    public CompletableFuture<StreamTransactionEntity> beginStreamTransaction(StreamTransactionOptions options) {
+        return executor.execute(beginStreamTransactionRequest(options), streamTransactionResponseDeserializer());
+    }
+
+    @Override
+    public CompletableFuture<StreamTransactionEntity> abortStreamTransaction(String id) {
+        return executor.execute(abortStreamTransactionRequest(id), streamTransactionResponseDeserializer());
+    }
+
+    @Override
+    public CompletableFuture<StreamTransactionEntity> getStreamTransaction(String id) {
+        return executor.execute(getStreamTransactionRequest(id), streamTransactionResponseDeserializer());
+    }
+
+    @Override
+    public CompletableFuture<Collection<TransactionEntity>> getStreamTransactions() {
+        return executor.execute(getStreamTransactionsRequest(), transactionsResponseDeserializer());
+    }
+
+    @Override
+    public CompletableFuture<StreamTransactionEntity> commitStreamTransaction(String id) {
+        return executor.execute(commitStreamTransactionRequest(id), streamTransactionResponseDeserializer());
     }
 
     @Override
