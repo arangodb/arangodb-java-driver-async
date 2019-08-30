@@ -386,6 +386,11 @@ public class ArangoCollectionAsyncImpl
     }
 
     @Override
+    public CompletableFuture<ShardEntity> getResponsibleShard(Object value) {
+        return executor.execute(responsibleShardRequest(value), ShardEntity.class);
+    }
+
+    @Override
     public CompletableFuture<CollectionRevisionEntity> getRevision() {
         return executor.execute(getRevisionRequest(), CollectionRevisionEntity.class);
     }

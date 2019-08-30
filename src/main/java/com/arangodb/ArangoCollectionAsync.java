@@ -23,16 +23,7 @@ package com.arangodb;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-import com.arangodb.entity.CollectionEntity;
-import com.arangodb.entity.CollectionPropertiesEntity;
-import com.arangodb.entity.CollectionRevisionEntity;
-import com.arangodb.entity.DocumentCreateEntity;
-import com.arangodb.entity.DocumentDeleteEntity;
-import com.arangodb.entity.DocumentImportEntity;
-import com.arangodb.entity.DocumentUpdateEntity;
-import com.arangodb.entity.IndexEntity;
-import com.arangodb.entity.MultiDocumentEntity;
-import com.arangodb.entity.Permissions;
+import com.arangodb.entity.*;
 import com.arangodb.model.*;
 
 /**
@@ -692,6 +683,19 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 * @return information about the collection
 	 */
 	CompletableFuture<CollectionEntity> rename(final String newName);
+
+	/**
+	 * Returns the responsible shard for the document.
+	 * Please note that this API is only meaningful and available on a cluster coordinator.
+	 *
+	 * @param value A projection of the document containing at least the shard key (_key or a custom attribute) for
+	 *              which the responsible shard should be determined
+	 * @return information about the responsible shard
+	 * @see <a href="https://docs.arangodb.com/current/HTTP/collection-getting.html#return-responsible-shard-for-a-document">
+	 * API Documentation</a>
+	 * @since ArangoDB 3.5.0
+	 */
+	CompletableFuture<ShardEntity> getResponsibleShard(final Object value);
 
 	/**
 	 * Retrieve the collections revision

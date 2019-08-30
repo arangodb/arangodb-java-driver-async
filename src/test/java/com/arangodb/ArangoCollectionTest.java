@@ -2105,6 +2105,19 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
+    public void responsibleShard() throws ExecutionException, InterruptedException {
+        if (arangoDB.getRole().get() != ServerRole.COORDINATOR) {
+            return;
+        }
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+        ShardEntity shard = db.collection(COLLECTION_NAME).getResponsibleShard(new BaseDocument("testKey")).get();
+        assertThat(shard, is(notNullValue()));
+        assertThat(shard.getShardId(), is(notNullValue()));
+    }
+
+    @Test
     public void getRevision() throws InterruptedException, ExecutionException {
         db.collection(COLLECTION_NAME).getRevision()
                 .whenComplete((result, ex) -> {
