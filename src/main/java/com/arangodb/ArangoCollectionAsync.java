@@ -523,6 +523,17 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 		final FulltextIndexOptions options);
 
 	/**
+	 * Creates a ttl index for the collection, if it does not already exist.
+	 *
+	 * @param fields  A list of attribute paths
+	 * @param options Additional options, can be null
+	 * @return information about the index
+	 * @see <a href="https://www.arangodb.com/docs/stable/http/indexes-ttl.html">API
+	 * Documentation</a>
+	 */
+	CompletableFuture<IndexEntity> ensureTtlIndex(Iterable<String> fields, TtlIndexOptions options);
+
+	/**
 	 * Returns all indexes of the collection
 	 * 
 	 * @see <a href=

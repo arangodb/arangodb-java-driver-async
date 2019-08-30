@@ -1091,6 +1091,46 @@ public class ArangoCollectionTest extends BaseTest {
     }
 
     @Test
+    public void createTtlIndexWithoutOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+        try {
+            final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensureTtlIndex(fields, null).get();
+            fail();
+        } catch (ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
+            assertThat(e.getCause().getMessage(), containsString("expireAfter attribute must be a number"));
+            assertThat(((ArangoDBException) e.getCause()).getResponseCode(), is(400));
+            assertThat(((ArangoDBException) e.getCause()).getErrorNum(), is(10));
+        }
+    }
+
+    @Test
+    public void createTtlIndexWithOptions() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+        final Collection<String> fields = new ArrayList<String>();
+        fields.add("a");
+
+        final TtlIndexOptions options = new TtlIndexOptions();
+        options.name("myTtlIndex");
+        options.expireAfter(3600);
+
+        final IndexEntity indexResult = db.collection(COLLECTION_NAME).ensureTtlIndex(fields, options).get();
+        assertThat(indexResult, is(notNullValue()));
+        assertThat(indexResult.getFields(), hasItem("a"));
+        assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
+        assertThat(indexResult.getIsNewlyCreated(), is(true));
+        assertThat(indexResult.getType(), is(IndexType.ttl));
+        assertThat(indexResult.getExpireAfter(), is(3600));
+        assertThat(indexResult.getName(), is("myTtlIndex"));
+    }
+
+    @Test
     public void getIndexes() throws InterruptedException, ExecutionException {
         final int initialIndexCount = db.collection(COLLECTION_NAME).getIndexes().get().size();
         final Collection<String> fields = new ArrayList<>();

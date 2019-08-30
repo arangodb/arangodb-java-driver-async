@@ -296,6 +296,11 @@ public class ArangoCollectionAsyncImpl
     }
 
     @Override
+    public CompletableFuture<IndexEntity> ensureTtlIndex(Iterable<String> fields, TtlIndexOptions options) {
+        return executor.execute(createTtlIndexRequest(fields, options), IndexEntity.class);
+    }
+
+    @Override
     public CompletableFuture<Collection<IndexEntity>> getIndexes() {
         return executor.execute(getIndexesRequest(), getIndexesResponseDeserializer());
     }
