@@ -99,6 +99,29 @@ public class ArangoGraphTest extends BaseTest {
     }
 
     @Test
+    public void createWithReplicationAndMinReplicationFactor() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        // if we do not have a cluster => exit
+        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+            return;
+        }
+
+        try {
+            final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<EdgeDefinition>();
+            final GraphEntity graph = db.createGraph(GRAPH_NAME + "_1", edgeDefinitions, new GraphCreateOptions().isSmart(true).replicationFactor(2).minReplicationFactor(2)).get();
+            assertThat(graph, is(notNullValue()));
+            assertThat(graph.getName(), is(GRAPH_NAME + "_1"));
+            assertThat(graph.getMinReplicationFactor(), is(2));
+            assertThat(graph.getReplicationFactor(), is(2));
+        } finally {
+            db.graph(GRAPH_NAME + "_1").drop();
+        }
+    }
+
+    @Test
     public void getGraphs() throws InterruptedException, ExecutionException {
         final Collection<GraphEntity> graphs = db.getGraphs().get();
         assertThat(graphs, is(notNullValue()));
