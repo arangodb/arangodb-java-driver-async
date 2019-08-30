@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [6.0.0] - 2019-30-08
+
 ### Fixed
 
 - custom serde not always used
