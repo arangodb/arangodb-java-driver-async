@@ -28,18 +28,13 @@ import static org.junit.Assert.assertThat;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
+import com.arangodb.entity.arangosearch.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.arangodb.entity.ServerRole;
 import com.arangodb.entity.ViewEntity;
 import com.arangodb.entity.ViewType;
-import com.arangodb.entity.arangosearch.ArangoSearchPropertiesEntity;
-import com.arangodb.entity.arangosearch.CollectionLink;
-import com.arangodb.entity.arangosearch.ConsolidationPolicy;
-import com.arangodb.entity.arangosearch.ConsolidationType;
-import com.arangodb.entity.arangosearch.FieldLink;
-import com.arangodb.entity.arangosearch.StoreValuesType;
 import com.arangodb.model.arangosearch.ArangoSearchCreateOptions;
 import com.arangodb.model.arangosearch.ArangoSearchPropertiesOptions;
 
@@ -134,6 +129,49 @@ public class ArangoSearchTest extends BaseTest {
 		assertThat(info.getName(), is(name));
 		assertThat(info.getType(), is(ViewType.ARANGO_SEARCH));
 		assertThat(db.arangoSearch(name).exists().get(), is(true));
+	}
+
+	@Test
+	public void createWithPrimarySort() throws ExecutionException, InterruptedException {
+		if (!requireVersion(3, 5)) {
+			return;
+		}
+		final String name = "createWithPrimarySort";
+		final ArangoSearchCreateOptions options = new ArangoSearchCreateOptions();
+
+		final PrimarySort primarySort = PrimarySort.on("myFieldName");
+		primarySort.ascending(true);
+		options.primarySort(primarySort);
+		options.consolidationIntervalMsec(666666L);
+
+		final ViewEntity info = db.arangoSearch(name).create(options).get();
+		assertThat(info, is(not(nullValue())));
+		assertThat(info.getId(), is(not(nullValue())));
+		assertThat(info.getName(), is(name));
+		assertThat(info.getType(), is(ViewType.ARANGO_SEARCH));
+		assertThat(db.arangoSearch(name).exists().get(), is(true));
+	}
+
+	@Test
+	public void createWithCommitIntervalMsec() throws ExecutionException, InterruptedException {
+		if (!requireVersion(3, 5)) {
+			return;
+		}
+		final String name = "createWithCommitIntervalMsec";
+		final ArangoSearchCreateOptions options = new ArangoSearchCreateOptions();
+		options.commitIntervalMsec(666666L);
+
+		final ViewEntity info = db.arangoSearch(name).create(options).get();
+		assertThat(info, is(not(nullValue())));
+		assertThat(info.getId(), is(not(nullValue())));
+		assertThat(info.getName(), is(name));
+		assertThat(info.getType(), is(ViewType.ARANGO_SEARCH));
+		assertThat(db.arangoSearch(name).exists().get(), is(true));
+
+		// check commit interval msec property
+		final ArangoSearchAsync view = db.arangoSearch(name);
+		final ArangoSearchPropertiesEntity properties = view.getProperties().get();
+		assertThat(properties.getCommitIntervalMsec(), is(666666L));
 	}
 
 	@Test
