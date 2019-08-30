@@ -128,6 +128,26 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
+    public void createCollectionWithMinReplicationFactor() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+            return;
+        }
+
+        final CollectionEntity result = db.createCollection(COLLECTION_NAME,
+                new CollectionCreateOptions().replicationFactor(2).minReplicationFactor(2)).get();
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getId(), is(notNullValue()));
+        assertThat(db.collection(COLLECTION_NAME).getProperties().get().getReplicationFactor(), is(2));
+        assertThat(db.collection(COLLECTION_NAME).getProperties().get().getMinReplicationFactor(), is(2));
+        assertThat(db.collection(COLLECTION_NAME).getProperties().get().getSatellite(), is(nullValue()));
+        db.collection(COLLECTION_NAME).drop();
+    }
+
+    @Test
     public void createCollectionWithNumberOfShards() throws InterruptedException, ExecutionException {
         if (arangoDB.getRole().get() == ServerRole.SINGLE) {
             return;
