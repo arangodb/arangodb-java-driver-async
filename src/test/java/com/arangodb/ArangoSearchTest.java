@@ -20,15 +20,15 @@
 
 package com.arangodb;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
-import java.util.Collection;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import com.arangodb.entity.arangosearch.*;
+import com.arangodb.model.arangosearch.AnalyzerDeleteOptions;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -250,5 +250,198 @@ public class ArangoSearchTest extends BaseTest {
 		assertThat(link.getFields().size(), is(1));
 		assertThat(link.getFields().iterator().next().getName(), is("value"));
 	}
+
+    private void createGetAndDeleteAnalyzer(AnalyzerEntity options) throws ExecutionException, InterruptedException {
+
+        String fullyQualifiedName = db.name() + "::" + options.getName();
+
+        // createAnalyzer
+        AnalyzerEntity createdAnalyzer = db.createAnalyzer(options).get();
+
+        assertThat(createdAnalyzer.getName(), is(fullyQualifiedName));
+        assertThat(createdAnalyzer.getType(), is(options.getType()));
+        assertThat(createdAnalyzer.getFeatures(), is(options.getFeatures()));
+        assertThat(createdAnalyzer.getProperties(), is(options.getProperties()));
+
+        // getAnalyzer
+        AnalyzerEntity gotAnalyzer = db.getAnalyzer(options.getName()).get();
+        assertThat(gotAnalyzer.getName(), is(fullyQualifiedName));
+        assertThat(gotAnalyzer.getType(), is(options.getType()));
+        assertThat(gotAnalyzer.getFeatures(), is(options.getFeatures()));
+        assertThat(gotAnalyzer.getProperties(), is(options.getProperties()));
+
+        // getAnalyzers
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        AnalyzerEntity foundAnalyzer = db.getAnalyzers().get().stream().filter(it -> it.getName().equals(fullyQualifiedName))
+                .findFirst().get();
+
+        assertThat(foundAnalyzer.getName(), is(fullyQualifiedName));
+        assertThat(foundAnalyzer.getType(), is(options.getType()));
+        assertThat(foundAnalyzer.getFeatures(), is(options.getFeatures()));
+        assertThat(foundAnalyzer.getProperties(), is(options.getProperties()));
+
+        AnalyzerDeleteOptions deleteOptions = new AnalyzerDeleteOptions();
+        deleteOptions.setForce(true);
+
+        // deleteAnalyzer
+        db.deleteAnalyzer(options.getName(), deleteOptions).get();
+
+        try {
+            db.getAnalyzer(options.getName()).get();
+            fail();
+        } catch (ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
+            assertThat(((ArangoDBException) e.getCause()).getResponseCode(), is(404));
+        }
+    }
+
+    @Test
+    public void identityAnalyzer() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        String name = "test-" + UUID.randomUUID().toString();
+
+        Set<AnalyzerFeature> features = new HashSet<>();
+        features.add(AnalyzerFeature.frequency);
+        features.add(AnalyzerFeature.norm);
+        features.add(AnalyzerFeature.position);
+
+        AnalyzerEntity options = new AnalyzerEntity();
+        options.setFeatures(features);
+        options.setName(name);
+        options.setType(AnalyzerType.identity);
+        options.setProperties(Collections.emptyMap());
+
+        createGetAndDeleteAnalyzer(options);
+    }
+
+    @Test
+    public void delimiterAnalyzer() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        String name = "test-" + UUID.randomUUID().toString();
+
+        Set<AnalyzerFeature> features = new HashSet<>();
+        features.add(AnalyzerFeature.frequency);
+        features.add(AnalyzerFeature.norm);
+        features.add(AnalyzerFeature.position);
+
+        AnalyzerEntity options = new AnalyzerEntity();
+        options.setFeatures(features);
+        options.setName(name);
+        options.setType(AnalyzerType.delimiter);
+        options.setProperties(Collections.singletonMap("delimiter", "-"));
+
+        createGetAndDeleteAnalyzer(options);
+    }
+
+    @Test
+    public void stemAnalyzer() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        String name = "test-" + UUID.randomUUID().toString();
+
+        Set<AnalyzerFeature> features = new HashSet<>();
+        features.add(AnalyzerFeature.frequency);
+        features.add(AnalyzerFeature.norm);
+        features.add(AnalyzerFeature.position);
+
+        AnalyzerEntity options = new AnalyzerEntity();
+        options.setFeatures(features);
+        options.setName(name);
+        options.setType(AnalyzerType.stem);
+        options.setProperties(Collections.singletonMap("locale", "ru.utf-8"));
+
+        createGetAndDeleteAnalyzer(options);
+    }
+
+    @Test
+    public void normAnalyzer() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        String name = "test-" + UUID.randomUUID().toString();
+
+        Set<AnalyzerFeature> features = new HashSet<>();
+        features.add(AnalyzerFeature.frequency);
+        features.add(AnalyzerFeature.norm);
+        features.add(AnalyzerFeature.position);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("locale", "ru.utf-8");
+        properties.put("case", "lower");
+        properties.put("accent", true);
+
+        AnalyzerEntity options = new AnalyzerEntity();
+        options.setFeatures(features);
+        options.setName(name);
+        options.setType(AnalyzerType.norm);
+        options.setProperties(properties);
+
+        createGetAndDeleteAnalyzer(options);
+    }
+
+    @Test
+    public void ngramAnalyzer() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        String name = "test-" + UUID.randomUUID().toString();
+
+        Set<AnalyzerFeature> features = new HashSet<>();
+        features.add(AnalyzerFeature.frequency);
+        features.add(AnalyzerFeature.norm);
+        features.add(AnalyzerFeature.position);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("max", 6L);
+        properties.put("min", 3L);
+        properties.put("preserveOriginal", true);
+
+        AnalyzerEntity options = new AnalyzerEntity();
+        options.setFeatures(features);
+        options.setName(name);
+        options.setType(AnalyzerType.ngram);
+        options.setProperties(properties);
+
+        createGetAndDeleteAnalyzer(options);
+    }
+
+    @Test
+    public void textAnalyzer() throws ExecutionException, InterruptedException {
+        if (!requireVersion(3, 5)) {
+            return;
+        }
+
+        String name = "test-" + UUID.randomUUID().toString();
+
+        Set<AnalyzerFeature> features = new HashSet<>();
+        features.add(AnalyzerFeature.frequency);
+        features.add(AnalyzerFeature.norm);
+        features.add(AnalyzerFeature.position);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("locale", "ru.utf-8");
+        properties.put("case", "lower");
+        properties.put("stopwords", Collections.emptyList());
+        properties.put("accent", true);
+        properties.put("stemming", true);
+
+        AnalyzerEntity options = new AnalyzerEntity();
+        options.setFeatures(features);
+        options.setName(name);
+        options.setType(AnalyzerType.text);
+        options.setProperties(properties);
+
+        createGetAndDeleteAnalyzer(options);
+    }
 
 }
