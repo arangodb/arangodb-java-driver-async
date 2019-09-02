@@ -40,9 +40,7 @@ public class InsertDocumentExample extends ExampleBase {
     @Test
     public void insertBean() throws ExecutionException, InterruptedException {
         collection.insertDocument(new TestEntity("bar"))
-                .whenComplete((doc, ex) -> {
-                    assertThat(doc.getKey(), is(notNullValue()));
-                })
+                .whenComplete((doc, ex) -> assertThat(doc.getKey(), is(notNullValue())))
                 .get();
     }
 
@@ -51,9 +49,7 @@ public class InsertDocumentExample extends ExampleBase {
         final BaseDocument value = new BaseDocument();
         value.addAttribute("foo", "bar");
         collection.insertDocument(value)
-                .whenComplete((doc, ex) -> {
-                    assertThat(doc.getKey(), is(notNullValue()));
-                })
+                .whenComplete((doc, ex) -> assertThat(doc.getKey(), is(notNullValue())))
                 .get();
     }
 
@@ -62,18 +58,14 @@ public class InsertDocumentExample extends ExampleBase {
         final VPackBuilder builder = new VPackBuilder();
         builder.add(ValueType.OBJECT).add("foo", "bar").close();
         collection.insertDocument(builder.slice())
-                .whenComplete((doc, ex) -> {
-                    assertThat(doc.getKey(), is(notNullValue()));
-                })
+                .whenComplete((doc, ex) -> assertThat(doc.getKey(), is(notNullValue())))
                 .get();
     }
 
     @Test
     public void insertJson() throws ExecutionException, InterruptedException {
         collection.insertDocument("{\"foo\":\"bar\"}")
-                .whenComplete((doc, ex) -> {
-                    assertThat(doc.getKey(), is(notNullValue()));
-                })
+                .whenComplete((doc, ex) -> assertThat(doc.getKey(), is(notNullValue())))
                 .get();
     }
 

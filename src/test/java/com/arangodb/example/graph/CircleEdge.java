@@ -27,6 +27,7 @@ import com.arangodb.entity.DocumentField.Type;
  * @author a-brandt
  *
  */
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class CircleEdge {
 
 	@DocumentField(Type.ID)

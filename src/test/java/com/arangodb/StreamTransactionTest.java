@@ -61,9 +61,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void beginStreamTransaction() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity tx = db.beginStreamTransaction(null).get();
         assertThat(tx.getId(), is(notNullValue()));
@@ -73,9 +73,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void beginStreamTransactionWithNonExistingCollectionsShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
             db.beginStreamTransaction(new StreamTransactionOptions().writeCollections("notExistingCollection")).get();
@@ -87,9 +87,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void abortStreamTransaction() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity begunTx = db.beginStreamTransaction(null).get();
         StreamTransactionEntity abortedTx = db.abortStreamTransaction(begunTx.getId()).get();
@@ -101,9 +101,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void abortStreamTransactionTwice() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity begunTx = db.beginStreamTransaction(null).get();
         db.abortStreamTransaction(begunTx.getId()).get();
@@ -112,9 +112,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void abortStreamTransactionWhenTransactionIdDoesNotExistsShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
             db.abortStreamTransaction("000000").get();
@@ -126,9 +126,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void abortStreamTransactionWithInvalidTransactionIdShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
             db.abortStreamTransaction("invalidTransactionId").get();
@@ -140,9 +140,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void abortCommittedStreamTransactionShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity createdTx = db.beginStreamTransaction(null).get();
         db.commitStreamTransaction(createdTx.getId()).get();
@@ -157,9 +157,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void getStreamTransaction() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity createdTx = db.beginStreamTransaction(null).get();
         StreamTransactionEntity gotTx = db.getStreamTransaction(createdTx.getId()).get();
@@ -173,9 +173,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void getStreamTransactionWhenTransactionIdDoesNotExistsShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
             db.getStreamTransaction("000000").get();
@@ -187,9 +187,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void getStreamTransactionWithInvalidTransactionIdShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
             db.getStreamTransaction("invalidTransactionId").get();
@@ -201,9 +201,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void commitStreamTransaction() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity createdTx = db.beginStreamTransaction(null).get();
         StreamTransactionEntity committedTx = db.commitStreamTransaction(createdTx.getId()).get();
@@ -215,9 +215,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void commitStreamTransactionTwice() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity createdTx = db.beginStreamTransaction(null).get();
         db.commitStreamTransaction(createdTx.getId()).get();
@@ -226,9 +226,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void commitStreamTransactionWhenTransactionIdDoesNotExistsShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
             db.commitStreamTransaction("000000").get();
@@ -240,9 +240,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void commitStreamTransactionWithInvalidTransactionIdShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
             db.commitStreamTransaction("invalidTransactionId").get();
@@ -254,9 +254,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void commitAbortedStreamTransactionShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity createdTx = db.beginStreamTransaction(null).get();
         db.abortStreamTransaction(createdTx.getId()).get();
@@ -271,9 +271,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void getDocument() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity tx = db
                 .beginStreamTransaction(new StreamTransactionOptions().readCollections(COLLECTION_NAME)).get();
@@ -291,9 +291,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void getDocumentWithNonExistingTransactionIdShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
             db.collection(COLLECTION_NAME)
@@ -307,12 +307,12 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void insertDocumentWithNonExistingTransactionIdShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
-            DocumentCreateEntity<BaseDocument> txDoc = db.collection(COLLECTION_NAME)
+            db.collection(COLLECTION_NAME)
                     .insertDocument(new BaseDocument(), new DocumentCreateOptions().streamTransactionId("123456")).get();
             fail();
         } catch (ExecutionException e) {
@@ -322,9 +322,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void getDocumentWithInvalidTransactionIdShouldThrow() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
             db.collection(COLLECTION_NAME)
@@ -338,9 +338,9 @@ public class StreamTransactionTest extends BaseTest {
 
     @Test
     public void getStreamTransactions() throws ExecutionException, InterruptedException {
-        assumeTrue(requireSingleServer());
-        assumeTrue(requireVersion(3, 5));
-        assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         StreamTransactionEntity tx1 = db.beginStreamTransaction(null).get();
         StreamTransactionEntity tx2 = db.beginStreamTransaction(null).get();

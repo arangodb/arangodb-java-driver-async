@@ -108,9 +108,7 @@ public class ArangoDBTest {
     public void createDatabase() throws InterruptedException, ExecutionException {
         final ArangoDBAsync arangoDB = new ArangoDBAsync.Builder().build();
         arangoDB.createDatabase(BaseTest.TEST_DB)
-                .whenComplete((result, ex) -> {
-                    assertThat(result, is(true));
-                })
+                .whenComplete((result, ex) -> assertThat(result, is(true)))
                 .get();
         arangoDB.db(BaseTest.TEST_DB).drop().get();
     }
@@ -121,9 +119,7 @@ public class ArangoDBTest {
         final Boolean resultCreate = arangoDB.createDatabase(BaseTest.TEST_DB).get();
         assertThat(resultCreate, is(true));
         arangoDB.db(BaseTest.TEST_DB).drop()
-                .whenComplete((resultDelete, ex) -> {
-                    assertThat(resultDelete, is(true));
-                })
+                .whenComplete((resultDelete, ex) -> assertThat(resultDelete, is(true)))
                 .get();
     }
 
@@ -210,9 +206,7 @@ public class ArangoDBTest {
         try {
             arangoDB.createUser(USER, PW, null).get();
             arangoDB.getUser(USER)
-                    .whenComplete((user, ex) -> {
-                        assertThat(user.getUser(), is(USER));
-                    })
+                    .whenComplete((user, ex) -> assertThat(user.getUser(), is(USER)))
                     .get();
         } finally {
             arangoDB.deleteUser(USER).get();

@@ -34,10 +34,10 @@ import com.arangodb.ArangoDatabaseAsync;
  */
 public class ExampleBase {
 
-    protected static final String DB_NAME = "json_example_db";
+    private static final String DB_NAME = "json_example_db";
     protected static final String COLLECTION_NAME = "json_example_collection";
 
-    protected static ArangoDBAsync arangoDB;
+    private static ArangoDBAsync arangoDB;
     protected static ArangoDatabaseAsync db;
     protected static ArangoCollectionAsync collection;
 

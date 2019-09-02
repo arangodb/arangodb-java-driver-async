@@ -20,12 +20,11 @@
 
 package com.arangodb;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import com.arangodb.entity.*;
+import com.arangodb.model.GraphCreateOptions;
+import org.junit.After;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,16 +32,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.arangodb.entity.CollectionPropertiesEntity;
-import com.arangodb.entity.EdgeDefinition;
-import com.arangodb.entity.GraphEntity;
-import com.arangodb.entity.License;
-import com.arangodb.entity.ServerRole;
-import com.arangodb.model.GraphCreateOptions;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Mark Vollmary
@@ -100,25 +93,15 @@ public class ArangoGraphTest extends BaseTest {
 
     @Test
     public void createWithReplicationAndMinReplicationFactor() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
-        // if we do not have a cluster => exit
-        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
-            return;
-        }
-
-        try {
-            final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<EdgeDefinition>();
-            final GraphEntity graph = db.createGraph(GRAPH_NAME + "_1", edgeDefinitions, new GraphCreateOptions().isSmart(true).replicationFactor(2).minReplicationFactor(2)).get();
-            assertThat(graph, is(notNullValue()));
-            assertThat(graph.getName(), is(GRAPH_NAME + "_1"));
-            assertThat(graph.getMinReplicationFactor(), is(2));
-            assertThat(graph.getReplicationFactor(), is(2));
-        } finally {
-            db.graph(GRAPH_NAME + "_1").drop();
-        }
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isCluster());
+        final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<>();
+        final GraphEntity graph = db.createGraph(GRAPH_NAME + "_1", edgeDefinitions, new GraphCreateOptions().isSmart(true).replicationFactor(2).minReplicationFactor(2)).get();
+        assertThat(graph, is(notNullValue()));
+        assertThat(graph.getName(), is(GRAPH_NAME + "_1"));
+        assertThat(graph.getMinReplicationFactor(), is(2));
+        assertThat(graph.getReplicationFactor(), is(2));
+        db.graph(GRAPH_NAME + "_1").drop();
     }
 
     @Test
@@ -145,7 +128,7 @@ public class ArangoGraphTest extends BaseTest {
         assertThat(e2.getTo(), hasItems(VERTEX_COL_1, VERTEX_COL_3));
         assertThat(info.getOrphanCollections(), is(empty()));
 
-        if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+        if (isCluster()) {
             for (final String collection : new String[]{VERTEX_COL_1, VERTEX_COL_2}) {
                 final CollectionPropertiesEntity properties = db.collection(collection).getProperties().get();
                 assertThat(properties.getReplicationFactor(), is(REPLICATION_FACTOR));
@@ -204,7 +187,7 @@ public class ArangoGraphTest extends BaseTest {
                 assertThat(e.getTo(), hasItem(VERTEX_COL_2));
             }
         }
-        if (arangoDB.getRole().get() != ServerRole.SINGLE) {
+        if (isCluster()) {
             final CollectionPropertiesEntity properties = db.collection(EDGE_COL_3).getProperties().get();
             assertThat(properties.getReplicationFactor(), is(REPLICATION_FACTOR));
             assertThat(properties.getNumberOfShards(), is(NUMBER_OF_SHARDS));

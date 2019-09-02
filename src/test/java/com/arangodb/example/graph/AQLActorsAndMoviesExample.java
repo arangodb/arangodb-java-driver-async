@@ -45,6 +45,7 @@ import com.arangodb.model.CollectionCreateOptions;
  * @see <a href="https://docs.arangodb.com/current/cookbook/Graph/ExampleActorsAndMovies.html">AQL Example Queries on an
  * Actors and Movies Database</a>
  */
+@SuppressWarnings("JavaDoc")
 public class AQLActorsAndMoviesExample {
 
     private static final String TEST_DB = "actors_movies_test_db";
@@ -80,10 +81,8 @@ public class AQLActorsAndMoviesExample {
         final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
                 "WITH actors FOR x IN ANY 'movies/TheMatrix' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN x._id",
                 null, null, String.class);
-        f.whenComplete((cursor, ex) -> {
-            assertThat(cursor.asListRemaining(),
-                    hasItems("actors/Keanu", "actors/Hugo", "actors/Emil", "actors/Carrie", "actors/Laurence"));
-        }).get();
+        f.whenComplete((cursor, ex) -> assertThat(cursor.asListRemaining(),
+                hasItems("actors/Keanu", "actors/Hugo", "actors/Emil", "actors/Carrie", "actors/Laurence"))).get();
     }
 
     /**
@@ -98,10 +97,8 @@ public class AQLActorsAndMoviesExample {
         final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
                 "WITH actors FOR x IN UNION_DISTINCT ((FOR y IN ANY 'movies/TheMatrix' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id), (FOR y IN ANY 'movies/TheDevilsAdvocate' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id)) RETURN x",
                 null, null, String.class);
-        f.whenComplete((cursor, ex) -> {
-            assertThat(cursor.asListRemaining(), hasItems("actors/Emil", "actors/Hugo", "actors/Carrie",
-                    "actors/Laurence", "actors/Keanu", "actors/Al", "actors/Charlize"));
-        }).get();
+        f.whenComplete((cursor, ex) -> assertThat(cursor.asListRemaining(), hasItems("actors/Emil", "actors/Hugo", "actors/Carrie",
+                "actors/Laurence", "actors/Keanu", "actors/Al", "actors/Charlize"))).get();
     }
 
     /**
@@ -116,9 +113,7 @@ public class AQLActorsAndMoviesExample {
         final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
                 "WITH actors FOR x IN INTERSECTION ((FOR y IN ANY 'movies/TheMatrix' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id), (FOR y IN ANY 'movies/TheDevilsAdvocate' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id)) RETURN x",
                 null, null, String.class);
-        f.whenComplete((cursor, ex) -> {
-            assertThat(cursor.asListRemaining(), hasItems("actors/Keanu"));
-        }).get();
+        f.whenComplete((cursor, ex) -> assertThat(cursor.asListRemaining(), hasItems("actors/Keanu"))).get();
     }
 
     /**
@@ -133,10 +128,8 @@ public class AQLActorsAndMoviesExample {
         final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
                 "WITH movies FOR x IN INTERSECTION ((FOR y IN ANY 'actors/Hugo' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id), (FOR y IN ANY 'actors/Keanu' actsIn OPTIONS {bfs: true, uniqueVertices: 'global'} RETURN y._id)) RETURN x",
                 null, null, String.class);
-        f.whenComplete((cursor, ex) -> {
-            assertThat(cursor.asListRemaining(),
-                    hasItems("movies/TheMatrixRevolutions", "movies/TheMatrixReloaded", "movies/TheMatrix"));
-        }).get();
+        f.whenComplete((cursor, ex) -> assertThat(cursor.asListRemaining(),
+                hasItems("movies/TheMatrixRevolutions", "movies/TheMatrixReloaded", "movies/TheMatrix"))).get();
     }
 
     /**
@@ -151,12 +144,10 @@ public class AQLActorsAndMoviesExample {
         final CompletableFuture<ArangoCursorAsync<Actor>> f = db.query(
                 "FOR x IN actsIn COLLECT actor = x._from WITH COUNT INTO counter FILTER counter >= 3 RETURN {actor: actor, movies: counter}",
                 null, null, Actor.class);
-        f.whenComplete((cursor, ex) -> {
-            assertThat(cursor.asListRemaining(),
-                    hasItems(new Actor("actors/Carrie", 3), new Actor("actors/CubaG", 4), new Actor("actors/Hugo", 3),
-                            new Actor("actors/Keanu", 4), new Actor("actors/Laurence", 3), new Actor("actors/MegR", 5),
-                            new Actor("actors/TomC", 3), new Actor("actors/TomH", 3)));
-        }).get();
+        f.whenComplete((cursor, ex) -> assertThat(cursor.asListRemaining(),
+                hasItems(new Actor("actors/Carrie", 3), new Actor("actors/CubaG", 4), new Actor("actors/Hugo", 3),
+                        new Actor("actors/Keanu", 4), new Actor("actors/Laurence", 3), new Actor("actors/MegR", 5),
+                        new Actor("actors/TomC", 3), new Actor("actors/TomH", 3)))).get();
     }
 
     /**
@@ -171,10 +162,8 @@ public class AQLActorsAndMoviesExample {
         final CompletableFuture<ArangoCursorAsync<String>> f = db.query(
                 "FOR x IN actsIn COLLECT movie = x._to WITH COUNT INTO counter FILTER counter == 6 RETURN movie", null,
                 null, String.class);
-        f.whenComplete((cursor, ex) -> {
-            assertThat(cursor.asListRemaining(),
-                    hasItems("movies/SleeplessInSeattle", "movies/TopGun", "movies/YouveGotMail"));
-        }).get();
+        f.whenComplete((cursor, ex) -> assertThat(cursor.asListRemaining(),
+                hasItems("movies/SleeplessInSeattle", "movies/TopGun", "movies/YouveGotMail"))).get();
     }
 
     /**
@@ -189,17 +178,15 @@ public class AQLActorsAndMoviesExample {
         final CompletableFuture<ArangoCursorAsync<Movie>> f = db.query(
                 "FOR x IN actsIn COLLECT movie = x._to WITH COUNT INTO counter RETURN {movie: movie, actors: counter}",
                 null, null, Movie.class);
-        f.whenComplete((cursor, ex) -> {
-            assertThat(cursor.asListRemaining(),
-                    hasItems(new Movie("movies/AFewGoodMen", 11), new Movie("movies/AsGoodAsItGets", 4),
-                            new Movie("movies/JerryMaguire", 9), new Movie("movies/JoeVersustheVolcano", 3),
-                            new Movie("movies/SleeplessInSeattle", 6), new Movie("movies/SnowFallingonCedars", 4),
-                            new Movie("movies/StandByMe", 7), new Movie("movies/TheDevilsAdvocate", 3),
-                            new Movie("movies/TheMatrix", 5), new Movie("movies/TheMatrixReloaded", 4),
-                            new Movie("movies/TheMatrixRevolutions", 4), new Movie("movies/TopGun", 6),
-                            new Movie("movies/WhatDreamsMayCome", 5), new Movie("movies/WhenHarryMetSally", 4),
-                            new Movie("movies/YouveGotMail", 6)));
-        }).get();
+        f.whenComplete((cursor, ex) -> assertThat(cursor.asListRemaining(),
+                hasItems(new Movie("movies/AFewGoodMen", 11), new Movie("movies/AsGoodAsItGets", 4),
+                        new Movie("movies/JerryMaguire", 9), new Movie("movies/JoeVersustheVolcano", 3),
+                        new Movie("movies/SleeplessInSeattle", 6), new Movie("movies/SnowFallingonCedars", 4),
+                        new Movie("movies/StandByMe", 7), new Movie("movies/TheDevilsAdvocate", 3),
+                        new Movie("movies/TheMatrix", 5), new Movie("movies/TheMatrixReloaded", 4),
+                        new Movie("movies/TheMatrixRevolutions", 4), new Movie("movies/TopGun", 6),
+                        new Movie("movies/WhatDreamsMayCome", 5), new Movie("movies/WhenHarryMetSally", 4),
+                        new Movie("movies/YouveGotMail", 6)))).get();
     }
 
     /**
@@ -214,28 +201,26 @@ public class AQLActorsAndMoviesExample {
         final CompletableFuture<ArangoCursorAsync<Actor>> f = db.query(
                 "FOR x IN actsIn COLLECT actor = x._from WITH COUNT INTO counter RETURN {actor: actor, movies: counter}",
                 null, null, Actor.class);
-        f.whenComplete((cursor, ex) -> {
-            assertThat(cursor.asListRemaining(),
-                    hasItems(new Actor("actors/Al", 1), new Actor("actors/AnnabellaS", 1), new Actor("actors/AnthonyE", 1),
-                            new Actor("actors/BillPull", 1), new Actor("actors/BillyC", 1), new Actor("actors/BonnieH", 1),
-                            new Actor("actors/BrunoK", 1), new Actor("actors/Carrie", 3), new Actor("actors/CarrieF", 1),
-                            new Actor("actors/Charlize", 1), new Actor("actors/ChristopherG", 1), new Actor("actors/CoreyF", 1),
-                            new Actor("actors/CubaG", 4), new Actor("actors/DaveC", 1), new Actor("actors/DemiM", 1),
-                            new Actor("actors/Emil", 1), new Actor("actors/EthanH", 1), new Actor("actors/GregK", 2),
-                            new Actor("actors/HelenH", 1), new Actor("actors/Hugo", 3), new Actor("actors/JackN", 2),
-                            new Actor("actors/JamesC", 1), new Actor("actors/JamesM", 1), new Actor("actors/JayM", 1),
-                            new Actor("actors/JerryO", 2), new Actor("actors/JohnC", 1), new Actor("actors/JonathanL", 1),
-                            new Actor("actors/JTW", 1), new Actor("actors/Keanu", 4), new Actor("actors/KellyM", 1),
-                            new Actor("actors/KellyP", 1), new Actor("actors/KevinB", 1), new Actor("actors/KevinP", 1),
-                            new Actor("actors/KieferS", 2), new Actor("actors/Laurence", 3), new Actor("actors/MarshallB", 1),
-                            new Actor("actors/MaxS", 2), new Actor("actors/MegR", 5), new Actor("actors/Nathan", 1),
-                            new Actor("actors/NoahW", 1), new Actor("actors/ParkerP", 1), new Actor("actors/ReginaK", 1),
-                            new Actor("actors/ReneeZ", 1), new Actor("actors/RickY", 1), new Actor("actors/RitaW", 1),
-                            new Actor("actors/RiverP", 1), new Actor("actors/Robin", 1), new Actor("actors/RosieO", 1),
-                            new Actor("actors/SteveZ", 1), new Actor("actors/TomC", 3), new Actor("actors/TomH", 3),
-                            new Actor("actors/TomS", 1), new Actor("actors/ValK", 1), new Actor("actors/VictorG", 1),
-                            new Actor("actors/WernerH", 1), new Actor("actors/WilW", 1)));
-        }).get();
+        f.whenComplete((cursor, ex) -> assertThat(cursor.asListRemaining(),
+                hasItems(new Actor("actors/Al", 1), new Actor("actors/AnnabellaS", 1), new Actor("actors/AnthonyE", 1),
+                        new Actor("actors/BillPull", 1), new Actor("actors/BillyC", 1), new Actor("actors/BonnieH", 1),
+                        new Actor("actors/BrunoK", 1), new Actor("actors/Carrie", 3), new Actor("actors/CarrieF", 1),
+                        new Actor("actors/Charlize", 1), new Actor("actors/ChristopherG", 1), new Actor("actors/CoreyF", 1),
+                        new Actor("actors/CubaG", 4), new Actor("actors/DaveC", 1), new Actor("actors/DemiM", 1),
+                        new Actor("actors/Emil", 1), new Actor("actors/EthanH", 1), new Actor("actors/GregK", 2),
+                        new Actor("actors/HelenH", 1), new Actor("actors/Hugo", 3), new Actor("actors/JackN", 2),
+                        new Actor("actors/JamesC", 1), new Actor("actors/JamesM", 1), new Actor("actors/JayM", 1),
+                        new Actor("actors/JerryO", 2), new Actor("actors/JohnC", 1), new Actor("actors/JonathanL", 1),
+                        new Actor("actors/JTW", 1), new Actor("actors/Keanu", 4), new Actor("actors/KellyM", 1),
+                        new Actor("actors/KellyP", 1), new Actor("actors/KevinB", 1), new Actor("actors/KevinP", 1),
+                        new Actor("actors/KieferS", 2), new Actor("actors/Laurence", 3), new Actor("actors/MarshallB", 1),
+                        new Actor("actors/MaxS", 2), new Actor("actors/MegR", 5), new Actor("actors/Nathan", 1),
+                        new Actor("actors/NoahW", 1), new Actor("actors/ParkerP", 1), new Actor("actors/ReginaK", 1),
+                        new Actor("actors/ReneeZ", 1), new Actor("actors/RickY", 1), new Actor("actors/RitaW", 1),
+                        new Actor("actors/RiverP", 1), new Actor("actors/Robin", 1), new Actor("actors/RosieO", 1),
+                        new Actor("actors/SteveZ", 1), new Actor("actors/TomC", 3), new Actor("actors/TomH", 3),
+                        new Actor("actors/TomS", 1), new Actor("actors/ValK", 1), new Actor("actors/VictorG", 1),
+                        new Actor("actors/WernerH", 1), new Actor("actors/WilW", 1)))).get();
     }
 
     /**
@@ -250,17 +235,16 @@ public class AQLActorsAndMoviesExample {
         final CompletableFuture<ArangoCursorAsync<Actor>> f = db.query(
                 "FOR x IN actsIn FILTER x.year >= 1990 && x.year <= 1995 COLLECT actor = x._from WITH COUNT INTO counter RETURN {actor: actor, movies: counter}",
                 null, null, Actor.class);
-        f.whenComplete((cursor, ex) -> {
-            assertThat(cursor.asListRemaining(),
-                    hasItems(new Actor("actors/BillPull", 1), new Actor("actors/ChristopherG", 1),
-                            new Actor("actors/CubaG", 1), new Actor("actors/DemiM", 1), new Actor("actors/JackN", 1),
-                            new Actor("actors/JamesM", 1), new Actor("actors/JTW", 1), new Actor("actors/KevinB", 1),
-                            new Actor("actors/KieferS", 1), new Actor("actors/MegR", 2), new Actor("actors/Nathan", 1),
-                            new Actor("actors/NoahW", 1), new Actor("actors/RitaW", 1), new Actor("actors/RosieO", 1),
-                            new Actor("actors/TomC", 1), new Actor("actors/TomH", 2), new Actor("actors/VictorG", 1)));
-        }).get();
+        f.whenComplete((cursor, ex) -> assertThat(cursor.asListRemaining(),
+                hasItems(new Actor("actors/BillPull", 1), new Actor("actors/ChristopherG", 1),
+                        new Actor("actors/CubaG", 1), new Actor("actors/DemiM", 1), new Actor("actors/JackN", 1),
+                        new Actor("actors/JamesM", 1), new Actor("actors/JTW", 1), new Actor("actors/KevinB", 1),
+                        new Actor("actors/KieferS", 1), new Actor("actors/MegR", 2), new Actor("actors/Nathan", 1),
+                        new Actor("actors/NoahW", 1), new Actor("actors/RitaW", 1), new Actor("actors/RosieO", 1),
+                        new Actor("actors/TomC", 1), new Actor("actors/TomH", 2), new Actor("actors/VictorG", 1)))).get();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class Actor {
         private String actor;
         private Integer movies;
@@ -304,17 +288,13 @@ public class AQLActorsAndMoviesExample {
                 return false;
             }
             if (movies == null) {
-                if (other.movies != null) {
-                    return false;
-                }
-            } else if (!movies.equals(other.movies)) {
-                return false;
-            }
-            return true;
+                return other.movies == null;
+            } else return movies.equals(other.movies);
         }
 
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class Movie {
         private String movie;
         private Integer actors;
@@ -358,13 +338,8 @@ public class AQLActorsAndMoviesExample {
                 return false;
             }
             if (movie == null) {
-                if (other.movie != null) {
-                    return false;
-                }
-            } else if (!movie.equals(other.movie)) {
-                return false;
-            }
-            return true;
+                return other.movie == null;
+            } else return movie.equals(other.movie);
         }
 
     }
@@ -395,7 +370,7 @@ public class AQLActorsAndMoviesExample {
         return actors.insertDocument(value).get();
     }
 
-    private static DocumentCreateEntity<BaseEdgeDocument> saveActsIn(
+    private static void saveActsIn(
             final ArangoCollectionAsync actsIn,
             final String actor,
             final String movie,
@@ -406,7 +381,7 @@ public class AQLActorsAndMoviesExample {
         value.setTo(movie);
         value.addAttribute("roles", roles);
         value.addAttribute("year", year);
-        return actsIn.insertDocument(value).get();
+        actsIn.insertDocument(value).get();
     }
 
     private static void createData() throws InterruptedException, ExecutionException {
