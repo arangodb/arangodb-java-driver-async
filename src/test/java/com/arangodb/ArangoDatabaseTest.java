@@ -29,6 +29,7 @@ import com.arangodb.model.TraversalOptions.Direction;
 import com.arangodb.velocypack.VPackBuilder;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -785,6 +786,7 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void parseQuery() throws InterruptedException, ExecutionException {
+        Assume.assumeTrue(requireVersion(3, 4));
         arangoDB.db().parseQuery("for i in _apps return i")
                 .whenComplete((parse, ex) -> {
                     assertThat(parse, is(notNullValue()));
@@ -1076,7 +1078,7 @@ public class ArangoDatabaseTest extends BaseTest {
     }
 
     @Test
-    public void shouldIncludeExceptionMessage() throws InterruptedException {
+    public void shouldIncludeExceptionMessage() throws InterruptedException, ExecutionException {
         final String exceptionMessage = "My error context";
         final String action = "function (params) {" + "throw '" + exceptionMessage + "';" + "}";
         try {
@@ -1085,7 +1087,10 @@ public class ArangoDatabaseTest extends BaseTest {
         } catch (final ExecutionException e) {
             assertThat(e.getCause(), instanceOf(ArangoDBException.class));
             ArangoDBException cause = ((ArangoDBException) e.getCause());
-            assertThat(cause.getErrorMessage(), is(exceptionMessage));
+            assertThat(cause.getErrorNum(), is(1650));
+            if (requireVersion(3, 4)) {
+                assertThat(cause.getErrorMessage(), is(exceptionMessage));
+            }
         }
     }
 
