@@ -21,7 +21,6 @@
 package com.arangodb;
 
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -31,7 +30,6 @@ import org.junit.Test;
 
 import com.arangodb.entity.BaseDocument;
 import com.arangodb.internal.ArangoRequestParam;
-import com.arangodb.velocystream.Response;
 
 /**
  * @author Mark Vollmary

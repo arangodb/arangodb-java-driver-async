@@ -30,7 +30,6 @@ import org.junit.BeforeClass;
 import com.arangodb.ArangoDBAsync;
 import com.arangodb.ArangoDatabaseAsync;
 import com.arangodb.entity.EdgeDefinition;
-import com.arangodb.entity.EdgeEntity;
 import com.arangodb.entity.VertexEntity;
 
 /**
@@ -38,12 +37,12 @@ import com.arangodb.entity.VertexEntity;
  */
 public abstract class BaseGraphTest {
 
-    protected static final String TEST_DB = "java_driver_graph_test_db";
-    protected static ArangoDBAsync arangoDB;
-    protected static ArangoDatabaseAsync db;
-    protected static final String GRAPH_NAME = "traversalGraph";
-    protected static final String EDGE_COLLECTION_NAME = "edges";
-    protected static final String VERTEXT_COLLECTION_NAME = "circles";
+    private static final String TEST_DB = "java_driver_graph_test_db";
+    private static ArangoDBAsync arangoDB;
+    static ArangoDatabaseAsync db;
+    private static final String GRAPH_NAME = "traversalGraph";
+    private static final String EDGE_COLLECTION_NAME = "edges";
+    private static final String VERTEXT_COLLECTION_NAME = "circles";
 
     @BeforeClass
     public static void init() throws InterruptedException, ExecutionException {
@@ -101,9 +100,9 @@ public abstract class BaseGraphTest {
         saveEdge(new CircleEdge(vJ.getId(), vK.getId(), false, true, "right_zup"));
     }
 
-    private static EdgeEntity saveEdge(final CircleEdge edge)
+    private static void saveEdge(final CircleEdge edge)
             throws InterruptedException, ExecutionException {
-        return db.graph(GRAPH_NAME).edgeCollection(EDGE_COLLECTION_NAME).insertEdge(edge).get();
+        db.graph(GRAPH_NAME).edgeCollection(EDGE_COLLECTION_NAME).insertEdge(edge).get();
     }
 
     private static VertexEntity createVertex(final Circle vertex)

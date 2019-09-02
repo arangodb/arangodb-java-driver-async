@@ -43,6 +43,7 @@ import com.arangodb.ArangoCursorAsync;
  */
 public class ShortestPathInAQLExample extends BaseGraphTest {
 
+	@SuppressWarnings({"WeakerAccess", "unused"})
 	public static class Pair {
 
 		private String vertex;
@@ -75,7 +76,7 @@ public class ShortestPathInAQLExample extends BaseGraphTest {
 		assertThat(collection, hasItems("A", "B", "C", "D"));
 
 		queryString = "WITH circles FOR v, e IN OUTBOUND SHORTEST_PATH 'circles/A' TO 'circles/D' edges RETURN {'vertex': v._key, 'edge': e._key}";
-		cursor = db.query(queryString, null, null, Pair.class).get();
+		db.query(queryString, null, null, Pair.class).get();
 		assertThat(collection.size(), is(4));
 		assertThat(collection, hasItems("A", "B", "C", "D"));
 	}
@@ -89,12 +90,12 @@ public class ShortestPathInAQLExample extends BaseGraphTest {
 		assertThat(collection, hasItems("A", "B", "C", "D"));
 
 		queryString = "FOR a IN circles FILTER a._key == 'A' FOR d IN circles FILTER d._key == 'D' FOR v, e IN OUTBOUND SHORTEST_PATH a TO d edges RETURN {'vertex': v._key, 'edge': e._key}";
-		cursor = db.query(queryString, null, null, Pair.class).get();
+		db.query(queryString, null, null, Pair.class).get();
 		assertThat(collection.size(), is(4));
 		assertThat(collection, hasItems("A", "B", "C", "D"));
 	}
 
-	protected Collection<String> toVertexCollection(final ArangoCursorAsync<Pair> cursor) {
+	private Collection<String> toVertexCollection(final ArangoCursorAsync<Pair> cursor) {
 		final List<String> result = new ArrayList<>();
 		for (; cursor.hasNext();) {
 			final Pair pair = cursor.next();

@@ -433,7 +433,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     .whenComplete((cursor, ex) -> {
                         assertThat(cursor, is(notNullValue()));
                         for (int i = 0; i < 10; i++, cursor.next()) {
-                            assertThat(cursor.hasNext(), is(i != 10));
+                            assertThat(cursor.hasNext(), is(true));
                         }
                     })
                     .get();
@@ -453,9 +453,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     .whenComplete((cursor, ex) -> {
                         assertThat(cursor, is(notNullValue()));
                         final AtomicInteger i = new AtomicInteger(0);
-                        cursor.forEachRemaining(e -> {
-                            i.incrementAndGet();
-                        });
+                        cursor.forEachRemaining(e -> i.incrementAndGet());
                         assertThat(i.get(), is(10));
                     })
                     .get();
@@ -475,9 +473,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     .whenComplete((cursor, ex) -> {
                         assertThat(cursor, is(notNullValue()));
                         final AtomicInteger i = new AtomicInteger(0);
-                        cursor.forEachRemaining(e -> {
-                            i.incrementAndGet();
-                        });
+                        cursor.forEachRemaining(e -> i.incrementAndGet());
                         assertThat(i.get(), is(10));
                     })
                     .get();
@@ -498,7 +494,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     .whenComplete((cursor, ex) -> {
                         assertThat(cursor, is(notNullValue()));
                         for (int i = 0; i < 6; i++, cursor.next()) {
-                            assertThat(cursor.hasNext(), is(i != 6));
+                            assertThat(cursor.hasNext(), is(true));
                         }
                         assertThat(cursor.getCount(), is(6));
                     })
@@ -520,7 +516,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     .whenComplete((cursor, ex) -> {
                         assertThat(cursor, is(notNullValue()));
                         for (int i = 0; i < 5; i++, cursor.next()) {
-                            assertThat(cursor.hasNext(), is(i != 5));
+                            assertThat(cursor.hasNext(), is(true));
                         }
                         assertThat(cursor.getStats(), is(notNullValue()));
                         assertThat(cursor.getStats().getFullCount(), is(10L));
@@ -542,7 +538,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     new AqlQueryOptions().batchSize(5).count(true), String.class).get();
             assertThat(cursor, is(notNullValue()));
             for (int i = 0; i < 10; i++, cursor.next()) {
-                assertThat(cursor.hasNext(), is(i != 10));
+                assertThat(cursor.hasNext(), is(true));
             }
         } finally {
             db.collection(COLLECTION_NAME).drop().get();
@@ -560,9 +556,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     new AqlQueryOptions().batchSize(5).count(true), String.class).get();
             assertThat(cursor, is(notNullValue()));
             final AtomicInteger i = new AtomicInteger(0);
-            cursor.streamRemaining().forEach(e -> {
-                i.incrementAndGet();
-            });
+            cursor.streamRemaining().forEach(e -> i.incrementAndGet());
             assertThat(i.get(), is(10));
         } finally {
             db.collection(COLLECTION_NAME).drop().get();
@@ -571,8 +565,6 @@ public class ArangoDatabaseTest extends BaseTest {
 
     /**
      * ignored. takes to long
-     *
-     * @throws ExecutionException
      */
     @Test
     @Ignore
@@ -589,7 +581,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     new AqlQueryOptions().batchSize(5).ttl(ttl), String.class).get();
             assertThat(cursor, is(notNullValue()));
             for (int i = 0; i < 10; i++, cursor.next()) {
-                assertThat(cursor.hasNext(), is(i != 10));
+                assertThat(cursor.hasNext(), is(true));
                 if (i == 1) {
                     Thread.sleep(wait * 1000);
                 }
@@ -685,7 +677,7 @@ public class ArangoDatabaseTest extends BaseTest {
             assertThat(cursor2.hasNext(), is(true));
 
             for (int i = 0; i < batchSize; i++, cursor.next()) {
-                assertThat(cursor.hasNext(), is(i != batchSize));
+                assertThat(cursor.hasNext(), is(true));
             }
         } finally {
             db.collection(COLLECTION_NAME).drop().get();
@@ -731,7 +723,7 @@ public class ArangoDatabaseTest extends BaseTest {
                     .whenComplete((cursor, ex) -> {
                         assertThat(cursor, is(notNullValue()));
                         for (int i = 0; i < 5; i++, cursor.next()) {
-                            assertThat(cursor.hasNext(), is(i != 5));
+                            assertThat(cursor.hasNext(), is(true));
                         }
                     })
                     .get();
@@ -921,9 +913,7 @@ public class ArangoDatabaseTest extends BaseTest {
     public void transactionString() throws InterruptedException, ExecutionException {
         final TransactionOptions options = new TransactionOptions().params("test");
         db.transaction("function (params) {return params;}", String.class, options)
-                .whenComplete((result, ex) -> {
-                    assertThat(result, is("test"));
-                })
+                .whenComplete((result, ex) -> assertThat(result, is("test")))
                 .get();
     }
 
@@ -931,9 +921,7 @@ public class ArangoDatabaseTest extends BaseTest {
     public void transactionNumber() throws InterruptedException, ExecutionException {
         final TransactionOptions options = new TransactionOptions().params(5);
         db.transaction("function (params) {return params;}", Integer.class, options)
-                .whenComplete((result, ex) -> {
-                    assertThat(result, is(5));
-                })
+                .whenComplete((result, ex) -> assertThat(result, is(5)))
                 .get();
     }
 
@@ -976,6 +964,7 @@ public class ArangoDatabaseTest extends BaseTest {
         }
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     protected static class TransactionTestEntity {
         private String value;
 
@@ -1038,7 +1027,7 @@ public class ArangoDatabaseTest extends BaseTest {
                         assertThat(vertices.size(), is(4));
 
                         final Iterator<BaseDocument> verticesIterator = vertices.iterator();
-                        final Collection<String> v = Arrays.asList(new String[]{"Alice", "Bob", "Charlie", "Dave"});
+                        final Collection<String> v = Arrays.asList("Alice", "Bob", "Charlie", "Dave");
                         for (; verticesIterator.hasNext(); ) {
                             assertThat(v.contains(verticesIterator.next().getKey()), is(true));
                         }

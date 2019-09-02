@@ -312,7 +312,7 @@ public class StreamTransactionTest extends BaseTest {
         assumeTrue(requireStorageEngine(ArangoDBEngine.StorageEngineName.rocksdb));
 
         try {
-            DocumentCreateEntity<BaseDocument> txDoc = db.collection(COLLECTION_NAME)
+            db.collection(COLLECTION_NAME)
                     .insertDocument(new BaseDocument(), new DocumentCreateOptions().streamTransactionId("123456")).get();
             fail();
         } catch (ExecutionException e) {

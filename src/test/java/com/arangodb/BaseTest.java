@@ -32,9 +32,9 @@ import org.junit.BeforeClass;
  */
 public abstract class BaseTest {
 
-    protected static final String TEST_DB = "java_driver_test_db";
-    protected static ArangoDBAsync arangoDB;
-    protected static ArangoDatabaseAsync db;
+    static final String TEST_DB = "java_driver_test_db";
+    static ArangoDBAsync arangoDB;
+    static ArangoDatabaseAsync db;
 
     @BeforeClass
     public static void init() throws InterruptedException, ExecutionException {
@@ -57,21 +57,21 @@ public abstract class BaseTest {
         arangoDB = null;
     }
 
-    protected boolean requireVersion(final int major, final int minor) throws InterruptedException, ExecutionException {
+    boolean requireVersion(final int major, final int minor) throws InterruptedException, ExecutionException {
         return requireVersion(arangoDB, major, minor);
     }
 
-    protected static boolean requireVersion(final ArangoDBAsync arangoDB, final int major, final int minor)
+    static boolean requireVersion(final ArangoDBAsync arangoDB, final int major, final int minor)
             throws InterruptedException, ExecutionException {
         final String[] split = arangoDB.getVersion().get().getVersion().split("\\.");
-        return Integer.valueOf(split[0]) >= major && Integer.valueOf(split[1]) >= minor;
+        return Integer.parseInt(split[0]) >= major && Integer.parseInt(split[1]) >= minor;
     }
 
-    protected boolean requireStorageEngine(ArangoDBEngine.StorageEngineName name) throws ExecutionException, InterruptedException {
+    boolean requireStorageEngine(ArangoDBEngine.StorageEngineName name) throws ExecutionException, InterruptedException {
         return name.equals(db.getEngine().get().getName());
     }
 
-    protected boolean requireSingleServer() throws ExecutionException, InterruptedException {
+    boolean requireSingleServer() throws ExecutionException, InterruptedException {
         return (arangoDB.getRole().get() == ServerRole.SINGLE);
     }
 }

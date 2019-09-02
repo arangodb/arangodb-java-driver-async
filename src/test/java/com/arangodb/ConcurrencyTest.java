@@ -51,7 +51,7 @@ public class ConcurrencyTest {
      */
     @Ignore
     @Test(timeout = 2000)
-    public void executorLimit() throws ExecutionException, InterruptedException {
+    public void executorLimit() {
         List<CompletableFuture<ArangoDBVersion>> futures = IntStream.range(0, 20)
                 .mapToObj(i -> arangoDB.getVersion()
                         .whenComplete((dbVersion, ex) -> {
