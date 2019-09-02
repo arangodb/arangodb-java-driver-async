@@ -123,6 +123,12 @@ public class ArangoCollectionAsyncImpl
             if (throwable instanceof CompletionException) {
                 if (throwable.getCause() instanceof ArangoDBException) {
                     ArangoDBException arangoDBException = (ArangoDBException) throwable.getCause();
+
+                    // handle Response: 404, Error: 1655 - transaction not found
+                    if (arangoDBException.getErrorNum() != null && arangoDBException.getErrorNum() == 1655) {
+                        throw (CompletionException) throwable;
+                    }
+
                     if ((arangoDBException.getResponseCode() != null && (arangoDBException.getResponseCode() == 404 || arangoDBException.getResponseCode() == 304
                             || arangoDBException.getResponseCode() == 412)) && isCatchException) {
                         return null;
