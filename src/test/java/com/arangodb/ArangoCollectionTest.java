@@ -35,6 +35,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Mark Vollmary
@@ -778,7 +779,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void createHashIndex() throws InterruptedException, ExecutionException {
-        final boolean singleServer = arangoDB.getRole().get() == ServerRole.SINGLE;
+        final boolean singleServer = isSingleServer();
         final Collection<String> fields = new ArrayList<>();
         fields.add("a");
         fields.add("b");
@@ -804,10 +805,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void createHashIndexWithOptions() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         final HashIndexOptions options = new HashIndexOptions();
         options.name("myHashIndex");
 
@@ -822,7 +820,7 @@ public class ArangoCollectionTest extends BaseTest {
         assertThat(indexResult.getId(), startsWith(COLLECTION_NAME));
         assertThat(indexResult.getIsNewlyCreated(), is(true));
         assertThat(indexResult.getMinLength(), is(nullValue()));
-        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
+        if (isSingleServer()) {
             assertThat(indexResult.getSelectivityEstimate(), is(1.));
         }
         assertThat(indexResult.getSparse(), is(false));
@@ -853,10 +851,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void createGeoIndexWithOptions() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         final GeoIndexOptions options = new GeoIndexOptions();
         options.name("myGeoIndex1");
 
@@ -870,7 +865,7 @@ public class ArangoCollectionTest extends BaseTest {
         assertThat(indexResult.getMinLength(), is(nullValue()));
         assertThat(indexResult.getSparse(), is(true));
         assertThat(indexResult.getUnique(), is(false));
-        if (requireVersion(3, 4)) {
+        if (isAtLeastVersion(3, 4)) {
             assertThat(indexResult.getType(), is(IndexType.geo));
         } else {
             assertThat(indexResult.getType(), is(IndexType.geo1));
@@ -893,7 +888,7 @@ public class ArangoCollectionTest extends BaseTest {
             assertThat(indexResult.getSparse(), is(true));
             assertThat(indexResult.getUnique(), is(false));
             try {
-                if (requireVersion(3, 4)) {
+                if (isAtLeastVersion(3, 4)) {
                     assertThat(indexResult.getType(), is(IndexType.geo));
                 } else {
                     assertThat(indexResult.getType(), is(IndexType.geo2));
@@ -906,10 +901,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void createGeo2IndexWithOptions() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         final GeoIndexOptions options = new GeoIndexOptions();
         options.name("myGeoIndex2");
 
@@ -925,7 +917,7 @@ public class ArangoCollectionTest extends BaseTest {
         assertThat(indexResult.getMinLength(), is(nullValue()));
         assertThat(indexResult.getSparse(), is(true));
         assertThat(indexResult.getUnique(), is(false));
-        if (requireVersion(3, 4)) {
+        if (isAtLeastVersion(3, 4)) {
             assertThat(indexResult.getType(), is(IndexType.geo));
         } else {
             assertThat(indexResult.getType(), is(IndexType.geo2));
@@ -957,10 +949,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void createSkiplistIndexWithOptions() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         final SkiplistIndexOptions options = new SkiplistIndexOptions();
         options.name("mySkiplistIndex");
 
@@ -1005,10 +994,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void createPersistentIndexWithOptions() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         final PersistentIndexOptions options = new PersistentIndexOptions();
         options.name("myPersistentIndex");
 
@@ -1051,10 +1037,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void createFulltextIndexWithOptions() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         final FulltextIndexOptions options = new FulltextIndexOptions();
         options.name("myFulltextIndex");
 
@@ -1074,9 +1057,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void createTtlIndexWithoutOptions() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
+        assumeTrue(isAtLeastVersion(3, 5));
         final Collection<String> fields = new ArrayList<>();
         fields.add("a");
         try {
@@ -1092,9 +1073,7 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void createTtlIndexWithOptions() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
+        assumeTrue(isAtLeastVersion(3, 5));
         final Collection<String> fields = new ArrayList<>();
         fields.add("a");
 
@@ -2043,37 +2022,28 @@ public class ArangoCollectionTest extends BaseTest {
 
     @Test
     public void rename() throws InterruptedException, ExecutionException {
-        if (arangoDB.getRole().get() != ServerRole.SINGLE) {
-            return;
-        }
+        assumeTrue(isSingleServer());
+        db.collection(COLLECTION_NAME).rename(COLLECTION_NAME + "1")
+                .whenComplete((result, ex) -> {
+                    assertThat(result, is(notNullValue()));
+                    assertThat(result.getName(), is(COLLECTION_NAME + "1"));
+                })
+                .get();
+        final CollectionEntity info = db.collection(COLLECTION_NAME + "1").getInfo().get();
+        assertThat(info.getName(), is(COLLECTION_NAME + "1"));
         try {
-            db.collection(COLLECTION_NAME).rename(COLLECTION_NAME + "1")
-                    .whenComplete((result, ex) -> {
-                        assertThat(result, is(notNullValue()));
-                        assertThat(result.getName(), is(COLLECTION_NAME + "1"));
-                    })
-                    .get();
-            final CollectionEntity info = db.collection(COLLECTION_NAME + "1").getInfo().get();
-            assertThat(info.getName(), is(COLLECTION_NAME + "1"));
-            try {
-                db.collection(COLLECTION_NAME).getInfo().get();
-                fail();
-            } catch (final ExecutionException e) {
-                assertThat(e.getCause(), instanceOf(ArangoDBException.class));
-            }
-        } finally {
-            db.collection(COLLECTION_NAME + "1").rename(COLLECTION_NAME).get();
+            db.collection(COLLECTION_NAME).getInfo().get();
+            fail();
+        } catch (final ExecutionException e) {
+            assertThat(e.getCause(), instanceOf(ArangoDBException.class));
         }
+        db.collection(COLLECTION_NAME + "1").rename(COLLECTION_NAME).get();
     }
 
     @Test
     public void responsibleShard() throws ExecutionException, InterruptedException {
-        if (arangoDB.getRole().get() != ServerRole.COORDINATOR) {
-            return;
-        }
-        if (!requireVersion(3, 5)) {
-            return;
-        }
+        assumeTrue(isCluster());
+        assumeTrue(isAtLeastVersion(3, 5));
         ShardEntity shard = db.collection(COLLECTION_NAME).getResponsibleShard(new BaseDocument("testKey")).get();
         assertThat(shard, is(notNullValue()));
         assertThat(shard.getShardId(), is(notNullValue()));

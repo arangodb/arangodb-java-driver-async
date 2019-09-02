@@ -20,23 +20,22 @@
 
 package com.arangodb;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import com.arangodb.entity.ViewEntity;
+import com.arangodb.entity.ViewType;
+import com.arangodb.entity.arangosearch.*;
+import com.arangodb.model.arangosearch.AnalyzerDeleteOptions;
+import com.arangodb.model.arangosearch.ArangoSearchCreateOptions;
+import com.arangodb.model.arangosearch.ArangoSearchPropertiesOptions;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import com.arangodb.entity.arangosearch.*;
-import com.arangodb.model.arangosearch.AnalyzerDeleteOptions;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.arangodb.entity.ServerRole;
-import com.arangodb.entity.ViewEntity;
-import com.arangodb.entity.ViewType;
-import com.arangodb.model.arangosearch.ArangoSearchCreateOptions;
-import com.arangodb.model.arangosearch.ArangoSearchPropertiesOptions;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Mark Vollmary
@@ -49,25 +48,18 @@ public class ArangoSearchTest extends BaseTest {
 
 	@BeforeClass
 	public static void setup() throws InterruptedException, ExecutionException {
-		if (!requireVersion(arangoDB, 3, 4)) {
-			return;
-		}
 		db.createArangoSearch(VIEW_NAME, new ArangoSearchCreateOptions()).get();
 	}
 
 	@Test
 	public void exists() throws InterruptedException, ExecutionException {
-		if (!requireVersion(3, 4)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 4));
 		assertThat(db.arangoSearch(VIEW_NAME).exists().get(), is(true));
 	}
 
 	@Test
 	public void getInfo() throws InterruptedException, ExecutionException {
-		if (!requireVersion(3, 4)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 4));
 		final ViewEntity info = db.arangoSearch(VIEW_NAME).getInfo().get();
 		assertThat(info, is(not(nullValue())));
 		assertThat(info.getId(), is(not(nullValue())));
@@ -77,9 +69,7 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void drop() throws InterruptedException, ExecutionException {
-		if (!requireVersion(3, 4)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 4));
 		final String name = VIEW_NAME + "_droptest";
 		db.createArangoSearch(name, new ArangoSearchCreateOptions()).get();
 		final ArangoViewAsync view = db.arangoSearch(name);
@@ -89,12 +79,8 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void rename() throws InterruptedException, ExecutionException {
-		if (arangoDB.getRole().get() != ServerRole.SINGLE) {
-			return;
-		}
-		if (!requireVersion(3, 4)) {
-			return;
-		}
+        assumeTrue(isSingleServer());
+        assumeTrue(isAtLeastVersion(3, 4));
 		final String name = VIEW_NAME + "_renametest";
 		final String newName = name + "_new";
 		db.createArangoSearch(name, new ArangoSearchCreateOptions()).get();
@@ -105,9 +91,7 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void create() throws InterruptedException, ExecutionException {
-		if (!requireVersion(3, 4)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 4));
 		final String name = VIEW_NAME + "_createtest";
 		final ViewEntity info = db.arangoSearch(name).create().get();
 		assertThat(info, is(not(nullValue())));
@@ -119,9 +103,7 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void createWithOptions() throws InterruptedException, ExecutionException {
-		if (!requireVersion(3, 4)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 4));
 		final String name = VIEW_NAME + "_createtest_withotpions";
 		final ViewEntity info = db.arangoSearch(name).create(new ArangoSearchCreateOptions()).get();
 		assertThat(info, is(not(nullValue())));
@@ -133,9 +115,7 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void createWithPrimarySort() throws ExecutionException, InterruptedException {
-		if (!requireVersion(3, 5)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 5));
 		final String name = "createWithPrimarySort";
 		final ArangoSearchCreateOptions options = new ArangoSearchCreateOptions();
 
@@ -154,9 +134,7 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void createWithCommitIntervalMsec() throws ExecutionException, InterruptedException {
-		if (!requireVersion(3, 5)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 5));
 		final String name = "createWithCommitIntervalMsec";
 		final ArangoSearchCreateOptions options = new ArangoSearchCreateOptions();
 		options.commitIntervalMsec(666666L);
@@ -176,9 +154,7 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void getProperties() throws InterruptedException, ExecutionException {
-		if (!requireVersion(3, 4)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 4));
 		final String name = VIEW_NAME + "_getpropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
 		view.create(new ArangoSearchCreateOptions()).get();
@@ -197,9 +173,7 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void updateProperties() throws InterruptedException, ExecutionException {
-		if (!requireVersion(3, 4)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 4));
 		db.createCollection("view_update_prop_test_collection").get();
 		final String name = VIEW_NAME + "_updatepropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
@@ -232,9 +206,7 @@ public class ArangoSearchTest extends BaseTest {
 
 	@Test
 	public void replaceProperties() throws InterruptedException, ExecutionException {
-		if (!requireVersion(3, 4)) {
-			return;
-		}
+        assumeTrue(isAtLeastVersion(3, 4));
 		db.createCollection("view_replace_prop_test_collection").get();
 		final String name = VIEW_NAME + "_replacepropertiestest";
 		final ArangoSearchAsync view = db.arangoSearch(name);
@@ -297,10 +269,7 @@ public class ArangoSearchTest extends BaseTest {
 
     @Test
     public void identityAnalyzer() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         String name = "test-" + UUID.randomUUID().toString();
 
         Set<AnalyzerFeature> features = new HashSet<>();
@@ -319,10 +288,7 @@ public class ArangoSearchTest extends BaseTest {
 
     @Test
     public void delimiterAnalyzer() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         String name = "test-" + UUID.randomUUID().toString();
 
         Set<AnalyzerFeature> features = new HashSet<>();
@@ -341,10 +307,7 @@ public class ArangoSearchTest extends BaseTest {
 
     @Test
     public void stemAnalyzer() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         String name = "test-" + UUID.randomUUID().toString();
 
         Set<AnalyzerFeature> features = new HashSet<>();
@@ -363,10 +326,7 @@ public class ArangoSearchTest extends BaseTest {
 
     @Test
     public void normAnalyzer() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         String name = "test-" + UUID.randomUUID().toString();
 
         Set<AnalyzerFeature> features = new HashSet<>();
@@ -390,10 +350,7 @@ public class ArangoSearchTest extends BaseTest {
 
     @Test
     public void ngramAnalyzer() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         String name = "test-" + UUID.randomUUID().toString();
 
         Set<AnalyzerFeature> features = new HashSet<>();
@@ -417,10 +374,7 @@ public class ArangoSearchTest extends BaseTest {
 
     @Test
     public void textAnalyzer() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
+        assumeTrue(isAtLeastVersion(3, 5));
         String name = "test-" + UUID.randomUUID().toString();
 
         Set<AnalyzerFeature> features = new HashSet<>();

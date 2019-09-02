@@ -20,12 +20,12 @@
 
 package com.arangodb;
 
-import java.util.concurrent.ExecutionException;
-
 import com.arangodb.entity.ArangoDBEngine;
 import com.arangodb.entity.ServerRole;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Mark Vollmary
@@ -57,21 +57,26 @@ public abstract class BaseTest {
         arangoDB = null;
     }
 
-    boolean requireVersion(final int major, final int minor) throws InterruptedException, ExecutionException {
-        return requireVersion(arangoDB, major, minor);
-    }
-
-    static boolean requireVersion(final ArangoDBAsync arangoDB, final int major, final int minor)
+    private static boolean isAtLeastVersion(final ArangoDBAsync arangoDB, final int major, final int minor)
             throws InterruptedException, ExecutionException {
         final String[] split = arangoDB.getVersion().get().getVersion().split("\\.");
         return Integer.parseInt(split[0]) >= major && Integer.parseInt(split[1]) >= minor;
     }
 
-    boolean requireStorageEngine(ArangoDBEngine.StorageEngineName name) throws ExecutionException, InterruptedException {
+    boolean isAtLeastVersion(final int major, final int minor) throws InterruptedException, ExecutionException {
+        return isAtLeastVersion(arangoDB, major, minor);
+    }
+
+    boolean isStorageEngine(ArangoDBEngine.StorageEngineName name) throws ExecutionException, InterruptedException {
         return name.equals(db.getEngine().get().getName());
     }
 
-    boolean requireSingleServer() throws ExecutionException, InterruptedException {
+    boolean isSingleServer() throws ExecutionException, InterruptedException {
         return (arangoDB.getRole().get() == ServerRole.SINGLE);
     }
+
+    boolean isCluster() throws ExecutionException, InterruptedException {
+        return arangoDB.getRole().get() == ServerRole.COORDINATOR;
+    }
+
 }

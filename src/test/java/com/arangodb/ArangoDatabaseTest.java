@@ -29,7 +29,6 @@ import com.arangodb.model.TraversalOptions.Direction;
 import com.arangodb.velocypack.VPackBuilder;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
-import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -42,7 +41,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Mark Vollmary
@@ -100,43 +101,30 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void createCollection() throws InterruptedException, ExecutionException {
-        try {
-            db.createCollection(COLLECTION_NAME, null)
-                    .whenComplete((result, ex) -> {
-                        assertThat(result, is(notNullValue()));
-                        assertThat(result.getId(), is(notNullValue()));
-                    })
-                    .get();
-        } finally {
-            db.collection(COLLECTION_NAME).drop().get();
-        }
+        db.createCollection(COLLECTION_NAME, null)
+                .whenComplete((result, ex) -> {
+                    assertThat(result, is(notNullValue()));
+                    assertThat(result.getId(), is(notNullValue()));
+                })
+                .get();
+        db.collection(COLLECTION_NAME).drop().get();
     }
 
     @Test
     public void createCollectionWithReplicationFactor() throws InterruptedException, ExecutionException {
-        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
-            return;
-        }
-        try {
-            final CollectionEntity result = db
-                    .createCollection(COLLECTION_NAME, new CollectionCreateOptions().replicationFactor(2)).get();
-            assertThat(result, is(notNullValue()));
-            assertThat(result.getId(), is(notNullValue()));
-            assertThat(db.collection(COLLECTION_NAME).getProperties().get().getReplicationFactor(), is(2));
-        } finally {
-            db.collection(COLLECTION_NAME).drop().get();
-        }
+        assumeTrue(isCluster());
+        final CollectionEntity result = db
+                .createCollection(COLLECTION_NAME, new CollectionCreateOptions().replicationFactor(2)).get();
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getId(), is(notNullValue()));
+        assertThat(db.collection(COLLECTION_NAME).getProperties().get().getReplicationFactor(), is(2));
+        db.collection(COLLECTION_NAME).drop().get();
     }
 
     @Test
     public void createCollectionWithMinReplicationFactor() throws ExecutionException, InterruptedException {
-        if (!requireVersion(3, 5)) {
-            return;
-        }
-
-        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
-            return;
-        }
+        assumeTrue(isAtLeastVersion(3, 5));
+        assumeTrue(isCluster());
 
         final CollectionEntity result = db.createCollection(COLLECTION_NAME,
                 new CollectionCreateOptions().replicationFactor(2).minReplicationFactor(2)).get();
@@ -150,55 +138,40 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void createCollectionWithNumberOfShards() throws InterruptedException, ExecutionException {
-        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
-            return;
-        }
-        try {
-            final CollectionEntity result = db
-                    .createCollection(COLLECTION_NAME, new CollectionCreateOptions().numberOfShards(2)).get();
-            assertThat(result, is(notNullValue()));
-            assertThat(result.getId(), is(notNullValue()));
-            assertThat(db.collection(COLLECTION_NAME).getProperties().get().getNumberOfShards(), is(2));
-        } finally {
-            db.collection(COLLECTION_NAME).drop().get();
-        }
+        assumeTrue(isCluster());
+        final CollectionEntity result = db
+                .createCollection(COLLECTION_NAME, new CollectionCreateOptions().numberOfShards(2)).get();
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getId(), is(notNullValue()));
+        assertThat(db.collection(COLLECTION_NAME).getProperties().get().getNumberOfShards(), is(2));
+        db.collection(COLLECTION_NAME).drop().get();
     }
 
     @Test
     public void createCollectionWithNumberOfShardsAndShardKey() throws InterruptedException, ExecutionException {
-        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
-            return;
-        }
-        try {
-            final CollectionEntity result = db
-                    .createCollection(COLLECTION_NAME, new CollectionCreateOptions().numberOfShards(2).shardKeys("a"))
-                    .get();
-            assertThat(result, is(notNullValue()));
-            assertThat(result.getId(), is(notNullValue()));
-            final CollectionPropertiesEntity properties = db.collection(COLLECTION_NAME).getProperties().get();
-            assertThat(properties.getNumberOfShards(), is(2));
-            assertThat(properties.getShardKeys().size(), is(1));
-        } finally {
-            db.collection(COLLECTION_NAME).drop().get();
-        }
+        assumeTrue(isCluster());
+        final CollectionEntity result = db
+                .createCollection(COLLECTION_NAME, new CollectionCreateOptions().numberOfShards(2).shardKeys("a"))
+                .get();
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getId(), is(notNullValue()));
+        final CollectionPropertiesEntity properties = db.collection(COLLECTION_NAME).getProperties().get();
+        assertThat(properties.getNumberOfShards(), is(2));
+        assertThat(properties.getShardKeys().size(), is(1));
+        db.collection(COLLECTION_NAME).drop().get();
     }
 
     @Test
     public void createCollectionWithNumberOfShardsAndShardKeys() throws InterruptedException, ExecutionException {
-        if (arangoDB.getRole().get() == ServerRole.SINGLE) {
-            return;
-        }
-        try {
-            final CollectionEntity result = db.createCollection(COLLECTION_NAME,
-                    new CollectionCreateOptions().numberOfShards(2).shardKeys("a", "b")).get();
-            assertThat(result, is(notNullValue()));
-            assertThat(result.getId(), is(notNullValue()));
-            final CollectionPropertiesEntity properties = db.collection(COLLECTION_NAME).getProperties().get();
-            assertThat(properties.getNumberOfShards(), is(2));
-            assertThat(properties.getShardKeys().size(), is(2));
-        } finally {
-            db.collection(COLLECTION_NAME).drop().get();
-        }
+        assumeTrue(isCluster());
+        final CollectionEntity result = db.createCollection(COLLECTION_NAME,
+                new CollectionCreateOptions().numberOfShards(2).shardKeys("a", "b")).get();
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getId(), is(notNullValue()));
+        final CollectionPropertiesEntity properties = db.collection(COLLECTION_NAME).getProperties().get();
+        assertThat(properties.getNumberOfShards(), is(2));
+        assertThat(properties.getShardKeys().size(), is(2));
+        db.collection(COLLECTION_NAME).drop().get();
     }
 
     @Test
@@ -215,9 +188,6 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void deleteSystemCollection() throws InterruptedException, ExecutionException {
-        if (arangoDB.getRole().get() != ServerRole.SINGLE) {
-            return;
-        }
         final String name = "_system_test";
         db.createCollection(name, new CollectionCreateOptions().isSystem(true)).get();
         db.collection(name).drop(true).get();
@@ -231,9 +201,6 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void deleteSystemCollectionFail() throws InterruptedException, ExecutionException {
-        if (arangoDB.getRole().get() != ServerRole.SINGLE) {
-            return;
-        }
         final String name = "_system_test";
         db.createCollection(name, new CollectionCreateOptions().isSystem(true)).get();
         try {
@@ -253,20 +220,17 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void getIndex() throws InterruptedException, ExecutionException {
-        try {
-            db.createCollection(COLLECTION_NAME, null).get();
-            final Collection<String> fields = new ArrayList<>();
-            fields.add("a");
-            final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
-            db.getIndex(createResult.getId())
-                    .whenComplete((readResult, ex) -> {
-                        assertThat(readResult.getId(), is(createResult.getId()));
-                        assertThat(readResult.getType(), is(createResult.getType()));
-                    })
-                    .get();
-        } finally {
-            db.collection(COLLECTION_NAME).drop().get();
-        }
+        db.createCollection(COLLECTION_NAME, null).get();
+        final Collection<String> fields = new ArrayList<>();
+        fields.add("a");
+        final IndexEntity createResult = db.collection(COLLECTION_NAME).ensureHashIndex(fields, null).get();
+        db.getIndex(createResult.getId())
+                .whenComplete((readResult, ex) -> {
+                    assertThat(readResult.getId(), is(createResult.getId()));
+                    assertThat(readResult.getType(), is(createResult.getType()));
+                })
+                .get();
+        db.collection(COLLECTION_NAME).drop().get();
     }
 
     @Test
@@ -619,9 +583,7 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void queryWithCache() throws InterruptedException, ExecutionException {
-        if (arangoDB.getRole().get() != ServerRole.SINGLE) {
-            return;
-        }
+        assumeTrue(isSingleServer());
         try {
             db.createCollection(COLLECTION_NAME, null).get();
             for (int i = 0; i < 10; i++) {
@@ -778,7 +740,7 @@ public class ArangoDatabaseTest extends BaseTest {
 
     @Test
     public void parseQuery() throws InterruptedException, ExecutionException {
-        Assume.assumeTrue(requireVersion(3, 4));
+        assumeTrue(isAtLeastVersion(3, 4));
         arangoDB.db().parseQuery("for i in _apps return i")
                 .whenComplete((parse, ex) -> {
                     assertThat(parse, is(notNullValue()));
@@ -851,7 +813,7 @@ public class ArangoDatabaseTest extends BaseTest {
             final Integer deleteCount = db.deleteAqlFunction("myfunctions::temperature::celsiustofahrenheit", null)
                     .get();
             // compatibility with ArangoDB < 3.4
-            if (requireVersion(3, 4)) {
+            if (isAtLeastVersion(3, 4)) {
                 assertThat(deleteCount, is(1));
             } else {
                 assertThat(deleteCount, is(nullValue()));
@@ -1077,7 +1039,7 @@ public class ArangoDatabaseTest extends BaseTest {
             assertThat(e.getCause(), instanceOf(ArangoDBException.class));
             ArangoDBException cause = ((ArangoDBException) e.getCause());
             assertThat(cause.getErrorNum(), is(1650));
-            if (requireVersion(3, 4)) {
+            if (isAtLeastVersion(3, 4)) {
                 assertThat(cause.getErrorMessage(), is(exceptionMessage));
             }
         }
