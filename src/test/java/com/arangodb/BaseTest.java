@@ -21,6 +21,7 @@
 package com.arangodb;
 
 import com.arangodb.entity.ArangoDBEngine;
+import com.arangodb.entity.License;
 import com.arangodb.entity.ServerRole;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -77,6 +78,10 @@ public abstract class BaseTest {
 
     boolean isCluster() throws ExecutionException, InterruptedException {
         return arangoDB.getRole().get() == ServerRole.COORDINATOR;
+    }
+
+    boolean isEnterprise() throws ExecutionException, InterruptedException {
+        return arangoDB.getVersion().get().getLicense() == License.ENTERPRISE;
     }
 
 }

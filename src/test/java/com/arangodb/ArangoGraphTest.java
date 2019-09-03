@@ -20,7 +20,10 @@
 
 package com.arangodb;
 
-import com.arangodb.entity.*;
+import com.arangodb.entity.CollectionPropertiesEntity;
+import com.arangodb.entity.EdgeDefinition;
+import com.arangodb.entity.GraphEntity;
+import com.arangodb.entity.ServerRole;
 import com.arangodb.model.GraphCreateOptions;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -108,7 +111,7 @@ public class ArangoGraphTest extends BaseTest {
     public void getGraphs() throws InterruptedException, ExecutionException {
         final Collection<GraphEntity> graphs = db.getGraphs().get();
         assertThat(graphs, is(notNullValue()));
-        assertThat(graphs.size(), is(1));
+        assertThat(graphs.size(), greaterThanOrEqualTo(1));
     }
 
     @Test
@@ -229,28 +232,28 @@ public class ArangoGraphTest extends BaseTest {
 
     @Test
     public void smartGraph() throws InterruptedException, ExecutionException {
-        if (arangoDB.getVersion().get().getLicense() == License.ENTERPRISE) {
-            for (final String collection : new String[]{EDGE_COL_1, EDGE_COL_2, VERTEX_COL_1, VERTEX_COL_2,
-                    VERTEX_COL_3, VERTEX_COL_4}) {
-                if (db.collection(collection).exists().get()) {
-                    db.collection(collection).drop().get();
-                }
+        assumeTrue(isCluster());
+        assumeTrue(isEnterprise());
+        for (final String collection : new String[]{EDGE_COL_1, EDGE_COL_2, VERTEX_COL_1, VERTEX_COL_2,
+                VERTEX_COL_3, VERTEX_COL_4}) {
+            if (db.collection(collection).exists().get()) {
+                db.collection(collection).drop().get();
             }
-            final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<>();
-            edgeDefinitions.add(new EdgeDefinition().collection(EDGE_COL_1).from(VERTEX_COL_1).to(VERTEX_COL_2));
-            edgeDefinitions
-                    .add(new EdgeDefinition().collection(EDGE_COL_2).from(VERTEX_COL_2).to(VERTEX_COL_1, VERTEX_COL_3));
-            final GraphEntity graph = db.createGraph(GRAPH_NAME + "_smart", edgeDefinitions,
-                    new GraphCreateOptions().isSmart(true).smartGraphAttribute("test").replicationFactor(REPLICATION_FACTOR)
-                            .numberOfShards(NUMBER_OF_SHARDS))
-                    .get();
-            assertThat(graph, is(notNullValue()));
-            assertThat(graph.getIsSmart(), is(true));
-            assertThat(graph.getSmartGraphAttribute(), is("test"));
-            assertThat(graph.getNumberOfShards(), is(2));
-            if (db.graph(GRAPH_NAME + "_smart").exists().get()) {
-                db.graph(GRAPH_NAME + "_smart").drop().get();
-            }
+        }
+        final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<>();
+        edgeDefinitions.add(new EdgeDefinition().collection(EDGE_COL_1).from(VERTEX_COL_1).to(VERTEX_COL_2));
+        edgeDefinitions
+                .add(new EdgeDefinition().collection(EDGE_COL_2).from(VERTEX_COL_2).to(VERTEX_COL_1, VERTEX_COL_3));
+        final GraphEntity graph = db.createGraph(GRAPH_NAME + "_smart", edgeDefinitions,
+                new GraphCreateOptions().isSmart(true).smartGraphAttribute("test").replicationFactor(REPLICATION_FACTOR)
+                        .numberOfShards(NUMBER_OF_SHARDS))
+                .get();
+        assertThat(graph, is(notNullValue()));
+        assertThat(graph.getIsSmart(), is(true));
+        assertThat(graph.getSmartGraphAttribute(), is("test"));
+        assertThat(graph.getNumberOfShards(), is(2));
+        if (db.graph(GRAPH_NAME + "_smart").exists().get()) {
+            db.graph(GRAPH_NAME + "_smart").drop().get();
         }
     }
 
