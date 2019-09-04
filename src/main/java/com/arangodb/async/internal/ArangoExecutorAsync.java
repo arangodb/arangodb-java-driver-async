@@ -60,7 +60,7 @@ public class ArangoExecutorAsync extends ArangoExecutor {
         return execute(request, responseDeserializer, null);
     }
 
-    public <T> CompletableFuture<T> execute(
+    private <T> CompletableFuture<T> execute(
             final Request request,
             final ResponseDeserializer<T> responseDeserializer,
             final HostHandle hostHandle) {

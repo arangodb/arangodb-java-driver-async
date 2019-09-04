@@ -41,7 +41,7 @@ public class ArangoCollectionAsyncImpl
         extends InternalArangoCollection<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync>
         implements ArangoCollectionAsync {
 
-    protected ArangoCollectionAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
+    ArangoCollectionAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
         super(db, name);
     }
 
@@ -319,7 +319,7 @@ public class ArangoCollectionAsyncImpl
 
     @Override
     public CompletableFuture<Boolean> exists() {
-        return getInfo().thenApply(info -> info != null).exceptionally(e -> e == null);
+        return getInfo().thenApply(Objects::nonNull).exceptionally(Objects::isNull);
     }
 
     @Override

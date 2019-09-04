@@ -34,6 +34,7 @@ import java.util.concurrent.CompletableFuture;
  * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/">API Documentation</a>
  * @author Mark Vollmary
  */
+@SuppressWarnings("unused")
 public interface ArangoGraphAsync extends ArangoSerializationAccessor {
 
 	/**
@@ -41,14 +42,14 @@ public interface ArangoGraphAsync extends ArangoSerializationAccessor {
 	 * 
 	 * @return database handler
 	 */
-	public ArangoDatabaseAsync db();
+	ArangoDatabaseAsync db();
 
 	/**
 	 * The name of the collection
 	 * 
 	 * @return collection name
 	 */
-	public String name();
+	String name();
 
 	/**
 	 * Checks whether the graph exists
@@ -102,7 +103,7 @@ public interface ArangoGraphAsync extends ArangoSerializationAccessor {
 	 *            graphs.
 	 * @return void
 	 */
-	CompletableFuture<Void> drop(boolean dropCollection);
+	CompletableFuture<Void> drop(boolean dropCollections);
 
 	/**
 	 * Get a graph from the graph module

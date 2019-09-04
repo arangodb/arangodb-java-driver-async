@@ -27,6 +27,7 @@ import com.arangodb.internal.InternalArangoSearch;
 import com.arangodb.model.arangosearch.ArangoSearchCreateOptions;
 import com.arangodb.model.arangosearch.ArangoSearchPropertiesOptions;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -37,13 +38,13 @@ public class ArangoSearchAsyncImpl
 		extends InternalArangoSearch<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync>
 		implements ArangoSearchAsync {
 
-	protected ArangoSearchAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
+	ArangoSearchAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
 		super(db, name);
 	}
 
 	@Override
 	public CompletableFuture<Boolean> exists() {
-		return getInfo().thenApply(info -> info != null).exceptionally(e -> e == null);
+		return getInfo().thenApply(Objects::nonNull).exceptionally(Objects::isNull);
 	}
 
 	@Override

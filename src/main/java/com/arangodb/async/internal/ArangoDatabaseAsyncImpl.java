@@ -37,6 +37,7 @@ import com.arangodb.velocystream.Request;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -47,7 +48,7 @@ import java.util.concurrent.ExecutionException;
 public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyncImpl, ArangoExecutorAsync>
         implements ArangoDatabaseAsync {
 
-    protected ArangoDatabaseAsyncImpl(final ArangoDBAsyncImpl arangoDB, final String name) {
+    ArangoDatabaseAsyncImpl(final ArangoDBAsyncImpl arangoDB, final String name) {
         super(arangoDB, name);
     }
 
@@ -63,7 +64,7 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 
     @Override
     public CompletableFuture<Boolean> exists() {
-        return getInfo().thenApply(info -> info != null).exceptionally(e -> e == null);
+        return getInfo().thenApply(Objects::nonNull).exceptionally(Objects::isNull);
     }
 
     @Override
@@ -397,7 +398,7 @@ public class ArangoDatabaseAsyncImpl extends InternalArangoDatabase<ArangoDBAsyn
 
     @Override
     public ArangoRouteAsync route(final String... path) {
-        return new ArangoRouteAsyncImpl(this, createPath(path), Collections.<String, String>emptyMap());
+        return new ArangoRouteAsyncImpl(this, createPath(path), Collections.emptyMap());
     }
 
     @Override

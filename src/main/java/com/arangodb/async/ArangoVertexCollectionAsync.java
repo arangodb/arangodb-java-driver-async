@@ -33,6 +33,7 @@ import java.util.concurrent.CompletableFuture;
  * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Vertices.html">API Documentation</a>
  * @author Mark Vollmary
  */
+@SuppressWarnings("unused")
 public interface ArangoVertexCollectionAsync extends ArangoSerializationAccessor {
 
 	/**
@@ -115,8 +116,6 @@ public interface ArangoVertexCollectionAsync extends ArangoSerializationAccessor
 	 *      Documentation</a>
 	 * @param key
 	 *            The key of the vertex
-	 * @param type
-	 *            The type of the vertex-document (POJO class, VPackSlice or String for Json)
 	 * @return information about the vertex
 	 */
 	<T> CompletableFuture<VertexUpdateEntity> replaceVertex(final String key, final T value);
@@ -129,8 +128,6 @@ public interface ArangoVertexCollectionAsync extends ArangoSerializationAccessor
 	 *      Documentation</a>
 	 * @param key
 	 *            The key of the vertex
-	 * @param type
-	 *            The type of the vertex-document (POJO class, VPackSlice or String for Json)
 	 * @param options
 	 *            Additional options, can be null
 	 * @return information about the vertex
@@ -148,8 +145,6 @@ public interface ArangoVertexCollectionAsync extends ArangoSerializationAccessor
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Vertices.html#modify-a-vertex">API Documentation</a>
 	 * @param key
 	 *            The key of the vertex
-	 * @param type
-	 *            The type of the vertex-document (POJO class, VPackSlice or String for Json)
 	 * @return information about the vertex
 	 */
 	<T> CompletableFuture<VertexUpdateEntity> updateVertex(final String key, final T value);
@@ -162,8 +157,6 @@ public interface ArangoVertexCollectionAsync extends ArangoSerializationAccessor
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Vertices.html#modify-a-vertex">API Documentation</a>
 	 * @param key
 	 *            The key of the vertex
-	 * @param type
-	 *            The type of the vertex-document (POJO class, VPackSlice or String for Json)
 	 * @param options
 	 *            Additional options, can be null
 	 * @return information about the vertex

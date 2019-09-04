@@ -36,7 +36,7 @@ public class ArangoVertexCollectionAsyncImpl extends
 		InternalArangoVertexCollection<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoGraphAsyncImpl, ArangoExecutorAsync>
 		implements ArangoVertexCollectionAsync {
 
-	protected ArangoVertexCollectionAsyncImpl(final ArangoGraphAsyncImpl graph, final String name) {
+	ArangoVertexCollectionAsyncImpl(final ArangoGraphAsyncImpl graph, final String name) {
 		super(graph, name);
 	}
 

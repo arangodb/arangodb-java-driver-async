@@ -24,6 +24,7 @@ import com.arangodb.async.ArangoViewAsync;
 import com.arangodb.entity.ViewEntity;
 import com.arangodb.internal.InternalArangoView;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -33,13 +34,13 @@ import java.util.concurrent.CompletableFuture;
 public class ArangoViewAsyncImpl extends
 		InternalArangoView<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync> implements ArangoViewAsync {
 
-	protected ArangoViewAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
+	ArangoViewAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
 		super(db, name);
 	}
 
 	@Override
 	public CompletableFuture<Boolean> exists() {
-		return getInfo().thenApply(info -> info != null).exceptionally(e -> e == null);
+		return getInfo().thenApply(Objects::nonNull).exceptionally(Objects::isNull);
 	}
 
 	@Override

@@ -39,6 +39,7 @@ import java.util.concurrent.CompletableFuture;
  * @see <a href="https://docs.arangodb.com/current/HTTP/Database/">Databases API Documentation</a>
  * @see <a href="https://docs.arangodb.com/current/HTTP/AqlQuery/">Query API Documentation</a>
  */
+@SuppressWarnings("unused")
 public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
 
     /**
@@ -102,7 +103,6 @@ public interface ArangoDatabaseAsync extends ArangoSerializationAccessor {
      * Creates a collection
      *
      * @param name    The name of the collection
-     * @param options Additional options, can be null
      * @return information about the collection
      * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#create-collection">API
      * Documentation</a>

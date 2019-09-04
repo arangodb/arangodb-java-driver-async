@@ -28,7 +28,6 @@ import com.arangodb.internal.velocystream.internal.VstConnection;
 
 import javax.net.ssl.SSLContext;
 import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.FutureTask;
 
@@ -93,16 +92,13 @@ public class VstConnectionAsync extends VstConnection {
 
 	public synchronized CompletableFuture<Message> write(final Message message, final Collection<Chunk> chunks) {
 		final CompletableFuture<Message> future = new CompletableFuture<>();
-		final FutureTask<Message> task = new FutureTask<>(new Callable<Message>() {
-			@Override
-			public Message call() throws Exception {
-				try {
-					future.complete(messageStore.get(message.getId()));
-				} catch (final Exception e) {
-					future.completeExceptionally(e);
-				}
-				return null;
-			}
+        final FutureTask<Message> task = new FutureTask<>(() -> {
+            try {
+                future.complete(messageStore.get(message.getId()));
+            } catch (final Exception e) {
+                future.completeExceptionally(e);
+            }
+            return null;
 		});
 		messageStore.storeMessage(message.getId(), task);
 		super.writeIntern(message, chunks);

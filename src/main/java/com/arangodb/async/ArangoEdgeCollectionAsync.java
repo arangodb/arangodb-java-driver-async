@@ -33,6 +33,7 @@ import java.util.concurrent.CompletableFuture;
  * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Edges.html">API Documentation</a>
  * @author Mark Vollmary
  */
+@SuppressWarnings("unused")
 public interface ArangoEdgeCollectionAsync extends ArangoSerializationAccessor {
 
 	/**
@@ -104,8 +105,6 @@ public interface ArangoEdgeCollectionAsync extends ArangoSerializationAccessor {
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Edges.html#replace-an-edge">API Documentation</a>
 	 * @param key
 	 *            The key of the edge
-	 * @param type
-	 *            The type of the edge-document (POJO class, VPackSlice or String for Json)
 	 * @return information about the edge
 	 */
 	<T> CompletableFuture<EdgeUpdateEntity> replaceEdge(final String key, final T value);
@@ -117,8 +116,6 @@ public interface ArangoEdgeCollectionAsync extends ArangoSerializationAccessor {
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Edges.html#replace-an-edge">API Documentation</a>
 	 * @param key
 	 *            The key of the edge
-	 * @param type
-	 *            The type of the edge-document (POJO class, VPackSlice or String for Json)
 	 * @param options
 	 *            Additional options, can be null
 	 * @return information about the edge
@@ -136,8 +133,6 @@ public interface ArangoEdgeCollectionAsync extends ArangoSerializationAccessor {
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Edges.html#modify-an-edge">API Documentation</a>
 	 * @param key
 	 *            The key of the edge
-	 * @param type
-	 *            The type of the edge-document (POJO class, VPackSlice or String for Json)
 	 * @return information about the edge
 	 */
 	<T> CompletableFuture<EdgeUpdateEntity> updateEdge(final String key, final T value);
@@ -150,8 +145,6 @@ public interface ArangoEdgeCollectionAsync extends ArangoSerializationAccessor {
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Gharial/Edges.html#modify-an-edge">API Documentation</a>
 	 * @param key
 	 *            The key of the edge
-	 * @param type
-	 *            The type of the edge-document (POJO class, VPackSlice or String for Json)
 	 * @param options
 	 *            Additional options, can be null
 	 * @return information about the edge

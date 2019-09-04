@@ -21,9 +21,7 @@
 package com.arangodb.async.internal;
 
 import com.arangodb.async.ArangoRouteAsync;
-import com.arangodb.internal.ArangoExecutor.ResponseDeserializer;
 import com.arangodb.internal.InternalArangoRoute;
-import com.arangodb.velocypack.exception.VPackException;
 import com.arangodb.velocystream.RequestType;
 import com.arangodb.velocystream.Response;
 
@@ -38,8 +36,8 @@ public class ArangoRouteAsyncImpl
 		extends InternalArangoRoute<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync>
 		implements ArangoRouteAsync {
 
-	protected ArangoRouteAsyncImpl(final ArangoDatabaseAsyncImpl db, final String path,
-		final Map<String, String> headerParam) {
+	ArangoRouteAsyncImpl(final ArangoDatabaseAsyncImpl db, final String path,
+						 final Map<String, String> headerParam) {
 		super(db, path, headerParam);
 	}
 
@@ -67,12 +65,7 @@ public class ArangoRouteAsyncImpl
 	}
 
 	private CompletableFuture<Response> request(final RequestType requestType) {
-		return executor.execute(createRequest(requestType), new ResponseDeserializer<Response>() {
-			@Override
-			public Response deserialize(final Response response) throws VPackException {
-				return response;
-			}
-		});
+		return executor.execute(createRequest(requestType), response -> response);
 	}
 
 	@Override

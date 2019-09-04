@@ -32,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Mark Vollmary
  * @since ArangoDB 3.4.0
  */
+@SuppressWarnings("unused")
 public interface ArangoViewAsync extends ArangoSerializationAccessor {
 
 	/**
@@ -39,14 +40,14 @@ public interface ArangoViewAsync extends ArangoSerializationAccessor {
 	 * 
 	 * @return database handler
 	 */
-	public ArangoDatabaseAsync db();
+	ArangoDatabaseAsync db();
 
 	/**
 	 * The name of the view
 	 * 
 	 * @return view name
 	 */
-	public String name();
+	String name();
 
 	/**
 	 * Checks whether the view exists.

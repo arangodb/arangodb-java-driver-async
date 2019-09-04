@@ -35,6 +35,7 @@ import java.util.concurrent.CompletableFuture;
  * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/">Documents API Documentation</a>
  * @author Mark Vollmary
  */
+@SuppressWarnings("unused")
 public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 
 	/**
@@ -42,14 +43,14 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 * 
 	 * @return database handler
 	 */
-	public ArangoDatabaseAsync db();
+	ArangoDatabaseAsync db();
 
 	/**
 	 * The name of the collection
 	 * 
 	 * @return collection name
 	 */
-	public String name();
+	String name();
 
 	/**
 	 * Creates a new document from the given document, unless there is already a document with the _key given. If no
@@ -338,9 +339,6 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 *      Documentation</a>
 	 * @param key
 	 *            The key of the document
-	 * @param type
-	 *            The type of the document (POJO class, VPackSlice or String for Json). Only necessary if
-	 *            options.returnOld is set to true, otherwise can be null.
 	 * @return information about the document
 	 */
 	CompletableFuture<DocumentDeleteEntity<Void>> deleteDocument(final String key);
@@ -372,9 +370,6 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 *      Documentation</a>
 	 * @param values
 	 *            The keys of the documents or the documents themselves
-	 * @param type
-	 *            The type of the documents (POJO class, VPackSlice or String for Json). Only necessary if
-	 *            options.returnOld is set to true, otherwise can be null.
 	 * @return information about the documents
 	 */
 	CompletableFuture<MultiDocumentEntity<DocumentDeleteEntity<Void>>> deleteDocuments(final Collection<?> values);
@@ -586,8 +581,6 @@ public interface ArangoCollectionAsync extends ArangoSerializationAccessor {
 	 * 
 	 * @see <a href="https://docs.arangodb.com/current/HTTP/Collection/Creating.html#create-collection">API
 	 *      Documentation</a>
-	 * @param options
-	 *            Additional options, can be null
 	 * @return information about the collection
 	 */
 	CompletableFuture<CollectionEntity> create();

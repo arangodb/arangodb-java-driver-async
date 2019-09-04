@@ -75,7 +75,8 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 	 * 
 	 * @author Mark Vollmary
 	 */
-	public static class Builder extends InternalArangoDBBuilder {
+	@SuppressWarnings("unused")
+	class Builder extends InternalArangoDBBuilder {
 
 		public Builder() {
 			super();
@@ -483,8 +484,8 @@ public interface ArangoDBAsync extends ArangoSerializationAccessor {
 		 *            modules to register
 		 * @return {@link ArangoDBAsync.Builder}
 		 */
-		public Builder registerJsonModules(final VPackParserModule... module) {
-			vpackParserBuilder.registerModules(module);
+		public Builder registerJsonModules(final VPackParserModule... modules) {
+			vpackParserBuilder.registerModules(modules);
 			return this;
 		}
 

@@ -29,6 +29,7 @@ import com.arangodb.internal.InternalArangoGraph;
 import com.arangodb.model.GraphCreateOptions;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -39,13 +40,13 @@ public class ArangoGraphAsyncImpl
 		extends InternalArangoGraph<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoExecutorAsync>
 		implements ArangoGraphAsync {
 
-	protected ArangoGraphAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
+	ArangoGraphAsyncImpl(final ArangoDatabaseAsyncImpl db, final String name) {
 		super(db, name);
 	}
 
 	@Override
 	public CompletableFuture<Boolean> exists() {
-		return getInfo().thenApply(info -> info != null).exceptionally(e -> e == null);
+		return getInfo().thenApply(Objects::nonNull).exceptionally(Objects::isNull);
 	}
 
 	@Override
@@ -66,8 +67,8 @@ public class ArangoGraphAsyncImpl
 	}
 
 	@Override
-	public CompletableFuture<Void> drop(boolean dropCollection) {
-		return executor.execute(dropRequest(dropCollection), Void.class);
+	public CompletableFuture<Void> drop(boolean dropCollections) {
+		return executor.execute(dropRequest(dropCollections), Void.class);
 	}
 
 	@Override

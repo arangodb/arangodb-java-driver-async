@@ -36,7 +36,7 @@ public class ArangoEdgeCollectionAsyncImpl extends
 		InternalArangoEdgeCollection<ArangoDBAsyncImpl, ArangoDatabaseAsyncImpl, ArangoGraphAsyncImpl, ArangoExecutorAsync>
 		implements ArangoEdgeCollectionAsync {
 
-	protected ArangoEdgeCollectionAsyncImpl(final ArangoGraphAsyncImpl graph, final String name) {
+	ArangoEdgeCollectionAsyncImpl(final ArangoGraphAsyncImpl graph, final String name) {
 		super(graph, name);
 	}
 
