@@ -1,3 +1,7 @@
+# [DEPRECATED]: `arangodb-java-driver-async` has been merged into [arangodb-java-driver](https://github.com/arangodb/arangodb-java-driver)
+
+
+
 ![ArangoDB-Logo](https://docs.arangodb.com/assets/arangodb_logo_2016_inverted.png)
 
 # arangodb-java-driver-async
