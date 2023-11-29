@@ -22,7 +22,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<logback-classic.version>1.2.3</logback-classic.version>
+		<logback-classic.version>1.3.12</logback-classic.version>
 		<hamcrest-all.version>1.3</hamcrest-all.version>
 		<junit.version>4.13.1</junit.version>
 		<arangodb-java-driver.version>6.1.0</arangodb-java-driver.version>
